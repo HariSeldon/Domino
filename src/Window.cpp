@@ -7,6 +7,7 @@
 #include <glm/ext.hpp>
 
 #include "Light.h"
+#include "Mirror.h"
 #include "Object.h"
 #include "SysDefines.h"
 #include "SysUtils.h"
@@ -18,16 +19,16 @@ Uint32 fpsHandler(Uint32 interval, void *);
 void checkSDLError(const std::string &message);
 void abort(const std::string &message);
 
-const glm::vec4 Window::CLEAR_COLOR = {0.0f, 0.0f, 0.0f, 1.0f};
+const glm::vec4 Window::CLEAR_COLOR = {0.2f, 0.4f, 0.6f, 1.f};
 const float Window::VIEW_ANGLE = 50.0f;
-const float Window::Z_NEAR = 0.5f;
+const float Window::Z_NEAR = 0.1f;
 const float Window::Z_FAR = 2000.0f;
 const std::string Window::FONT_FILE = "VeraMono.ttf";
 
 // -----------------------------------------------------------------------------
-Window::Window(const World *world)
+Window::Window()
     : sdlWindow(nullptr), context(nullptr), eventTimerId(0), 
-      keyboardManager(this), world(world), running(true), height(0), width(0),
+      keyboardManager(this), running(true), height(0), width(0),
       currentYRotation(0), currentXRotation(0), frameCounter(0), fps(0) {
 
   int initResult = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER);
@@ -38,10 +39,15 @@ Window::Window(const World *world)
   initGL();
 
   setupProjection();
+  world = new World();
   lightShaderProgram = new ShaderProgram("phong.vert", "phong.frag");
   drawer = new Drawer();
 
   drawer->initGPUObjects(*lightShaderProgram, *world);
+  if(Mirror *mirror = world->getMirror()) {
+    ShaderProgram *mirrorShader = mirror->getShaderProgram();
+    drawer->initMirror(*mirrorShader, mirror);
+  }
 
   keyboardManager.setLightMask((2 << (world->getLightsNumber() - 1)) - 1);
   textManager = new TextManager(FONT_PATH + FONT_FILE, FONT_HEIGHT, width, height);
@@ -53,6 +59,7 @@ Window::~Window() {
   delete lightShaderProgram;
   delete drawer;
   delete textManager;
+  delete world;
   SDL_RemoveTimer(eventTimerId);
   SDL_RemoveTimer(fpsTimerId);
   SDL_GL_DeleteContext(context);
@@ -94,7 +101,6 @@ void Window::startRendering() {
     if (!running)
       break;
 
-    updateCameraPosition();
     drawScene();
 
     ++frameCounter;
@@ -113,14 +119,43 @@ void Window::setupProjection() {
 
 // -----------------------------------------------------------------------------
 void Window::drawScene() {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
   lightShaderProgram->useProgram();
   lightShaderProgram->setUniform("projectionMatrix", projection);
 
+  if(Mirror *mirror = world->getMirror()) {
+    // Draw the scene on the mirror texture from the point of view of the
+    // mirror.
+    mirror->enableMirror();
+    // Setup a camera for the mirror.
+    Camera mirrorCamera(glm::vec4(0.f, 1.0f, 15.f, 1.0f), 0.f, 180.f);
+    modelView = mirrorCamera.applyView(); 
+
+    drawWorld();   
+    mirror->disableMirror();
+  }
+
+  updateCameraPosition();
+
+  drawWorld();
+
+  if (Mirror *mirror = world->getMirror()) {
+    // Enable mirror shader.
+    ShaderProgram *program = mirror->getShaderProgram();
+    program->useProgram();
+    program->setUniform("projectionMatrix", projection);
+    drawMirror(mirror);
+  }
+
+  // Draw text on top of the scene.
+  drawText();
+}
+
+// -----------------------------------------------------------------------------
+void Window::drawWorld() {
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
   drawObjects();
   drawLights();
-  drawText();
 }
 
 // -----------------------------------------------------------------------------
@@ -139,6 +174,12 @@ void Window::drawLights() {
   std::for_each(
       constBeginLights(world), constEndLights(world),
       [&](const Light *light) { light->draw(*lightShaderProgram, modelView); });
+}
+
+// -----------------------------------------------------------------------------
+void Window::drawMirror(Mirror *mirror) {
+  ShaderProgram *mirrorShader = mirror->getShaderProgram();
+  drawer->drawObject(mirror, *mirrorShader, modelView);
 }
 
 // -----------------------------------------------------------------------------
@@ -204,13 +245,13 @@ void Window::initGL() {
 
   glClearColor(Window::CLEAR_COLOR.x, Window::CLEAR_COLOR.y,
                Window::CLEAR_COLOR.z, Window::CLEAR_COLOR.w);
-  checkOpenGLError("Window glClearColor");
+  checkOpenGLError("Window: glClearColor");
   glEnable(GL_DEPTH_TEST);
-  checkOpenGLError("Window glEnable-GL_DEPTH_TEST");
+  checkOpenGLError("Window: glEnable-GL_DEPTH_TEST");
   glEnable(GL_BLEND);
-  checkOpenGLError("Window glEnable-GL_BLEND");
+  checkOpenGLError("Window: glEnable-GL_BLEND");
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  checkOpenGLError("Window glBlendFunc-GL_SRC_ALPHA");
+  checkOpenGLError("Window: glBlendFunc-GL_SRC_ALPHA");
 }
 
 // -----------------------------------------------------------------------------

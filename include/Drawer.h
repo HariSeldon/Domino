@@ -10,6 +10,7 @@
 
 class Box;
 class Object;
+class Mirror;
 class Plane;
 class ShaderProgram;
 class Sphere;
@@ -24,15 +25,19 @@ public:
 
 public:
   void initGPUObjects(const ShaderProgram &shaderProgram, const World &world);
+  void initMirror(const ShaderProgram &shaderProgram, const Mirror* mirror);
 
   // Drawing functions.
   void drawObject(const Object *object, ShaderProgram &shaderProgram,
-                  glm::mat4 &original) const;
+                  const glm::mat4 &original) const;
 
 private:
+  void initWorldObjects(const ShaderProgram &shaderProgram, const World &world);
+
   GLuint setupVertexVBO(const Object *object, const ShaderProgram &shaderProgram);
   GLuint setupNormalVBO(const Object *object, const ShaderProgram &shaderProgram);
-  GLuint setupIndexVBO(const Object *object, const ShaderProgram &shaderProgram);
+  GLuint setupIndexVBO(const Object *object);
+  GLuint setupTextureVBO(const Object *object, const ShaderProgram &shaderProgram);
 
 private:
   // Maps world objects (identifies by their memory locations) 

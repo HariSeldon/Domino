@@ -80,7 +80,7 @@ void CharacterAtlas::createTexture(FT_Face fontFace) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   checkOpenGLError("CharacterAtlas glTexParameteri");
 
-  // Undind the texture.
+  // Unbind the texture.
   glBindTexture(GL_TEXTURE_2D, 0);
 }
 

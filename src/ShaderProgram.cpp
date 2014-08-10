@@ -48,9 +48,9 @@ ShaderProgram::~ShaderProgram() {
   glDeleteProgram(programID);
 }
 
-GLuint ShaderProgram::getProgramId() { return programID; }
+GLuint ShaderProgram::getProgramId() const { return programID; }
 
-void ShaderProgram::useProgram() { glUseProgram(programID); }
+void ShaderProgram::useProgram() const { glUseProgram(programID); }
 
 // #############################################################################
 // Uniform management.
@@ -169,6 +169,7 @@ void ShaderProgram::setAttribute(const std::string &name, int size, GLenum type)
   try {
     location = attributeLocationsMap.at(name);
   } catch (std::out_of_range &exception) {
+    std::cout << "Cannot set attibute: " << name << "\n";
     return;
   }
 

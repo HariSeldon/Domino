@@ -37,6 +37,7 @@ protected:
   std::vector<glm::vec3> points;
   std::vector<glm::vec3> normals;
   std::vector<unsigned int> indices;
+  std::vector<glm::vec2> textureCoos;
 
   // Material colors.
   glm::vec4 ambientColor;
@@ -53,6 +54,8 @@ public:
   const float* getNormals() const;
   const unsigned int* getIndices() const;
 
+  const float* getTextureCoos() const;
+  
   int getTrigsNumber() const;
   int getIndicesNumber() const;
 

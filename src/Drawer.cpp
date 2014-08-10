@@ -3,6 +3,7 @@
 #include "Box.h"
 #include "Plane.h"
 #include "MathUtils.h"
+#include "Mirror.h"
 #include "Object.h"
 #include "ShaderProgram.h"
 #include "World.h"
@@ -22,12 +23,17 @@
 //-----------------------------------------------------------------------------
 void setColors(const Object *object, ShaderProgram &shaderProgram);
 void setOrientation(const Object *object, ShaderProgram &shaderProgram,
-                    glm::mat4 &originalModelView);
+                    const glm::mat4 &originalModelView);
 
 //-----------------------------------------------------------------------------
 void Drawer::initGPUObjects(const ShaderProgram &shaderProgram,
                             const World &world) {
 
+  initWorldObjects(shaderProgram, world);
+}
+
+//-----------------------------------------------------------------------------
+void Drawer::initWorldObjects(const ShaderProgram &shaderProgram, const World &world) {
   std::for_each(constBeginObjects(world), constEndObjects(world),
                 [&](const Object *object) {
     intptr_t objectAddress = reinterpret_cast<intptr_t>(object);
@@ -37,7 +43,7 @@ void Drawer::initGPUObjects(const ShaderProgram &shaderProgram,
     glBindVertexArray(vaoId);
 
     GLuint vertexVBOId = setupVertexVBO(object, shaderProgram);
-    GLuint indexVBOId = setupIndexVBO(object, shaderProgram);
+    GLuint indexVBOId = setupIndexVBO(object);
     GLuint normalVBOId = setupNormalVBO(object, shaderProgram);
 
     // Unbind.
@@ -46,6 +52,25 @@ void Drawer::initGPUObjects(const ShaderProgram &shaderProgram,
     vaoMap[objectAddress] = vaoId;
     vboIds.insert(vboIds.end(), { vertexVBOId, indexVBOId, normalVBOId });
   });
+}
+
+//-----------------------------------------------------------------------------
+void Drawer::initMirror(const ShaderProgram &shaderProgram, const Mirror* mirror) {
+  intptr_t objectAddress = reinterpret_cast<intptr_t>(mirror);
+  GLuint vaoId = 0;
+  // Create VAO.
+  glGenVertexArrays(1, &vaoId);
+  glBindVertexArray(vaoId);
+  
+  GLuint vertexVBOId = setupVertexVBO(mirror, shaderProgram);
+  GLuint indexVBOId = setupIndexVBO(mirror);
+  GLuint textureVBOId = setupTextureVBO(mirror, shaderProgram);
+
+  // Unbind.
+  glBindVertexArray(0);
+
+  vaoMap[objectAddress] = vaoId;
+  vboIds.insert(vboIds.end(), { vertexVBOId, indexVBOId, textureVBOId });
 }
 
 //-----------------------------------------------------------------------------
@@ -73,8 +98,7 @@ GLuint Drawer::setupNormalVBO(const Object *object,
 }
 
 //-----------------------------------------------------------------------------
-GLuint Drawer::setupIndexVBO(const Object *object,
-                             const ShaderProgram &shaderProgram) {
+GLuint Drawer::setupIndexVBO(const Object *object) {
   GLuint indexVBOId = 0;
   glGenBuffers(1, &indexVBOId);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexVBOId);
@@ -82,6 +106,18 @@ GLuint Drawer::setupIndexVBO(const Object *object,
                object->getIndicesNumber() * sizeof(unsigned int),
                object->getIndices(), GL_STATIC_DRAW);
   return indexVBOId;
+}
+
+//-----------------------------------------------------------------------------
+GLuint Drawer::setupTextureVBO(const Object *object,
+                               const ShaderProgram &shaderProgram) {
+  GLuint textureVBOId = 0;
+  glGenBuffers(1, &textureVBOId);
+  glBindBuffer(GL_ARRAY_BUFFER, textureVBOId);
+  glBufferData(GL_ARRAY_BUFFER, object->getPointsNumber() * sizeof(glm::vec2),
+               object->getTextureCoos(), GL_STATIC_DRAW);
+  shaderProgram.setAttribute("vertexTextureCoordinates", 2, GL_FLOAT);
+  return textureVBOId;
 }
 
 //-----------------------------------------------------------------------------
@@ -98,7 +134,7 @@ Drawer::~Drawer() {
 
 //-----------------------------------------------------------------------------
 void Drawer::drawObject(const Object *object, ShaderProgram &shaderProgram,
-                        glm::mat4 &originalModelView) const {
+                        const glm::mat4 &originalModelView) const {
 
   setColors(object, shaderProgram);
   setOrientation(object, shaderProgram, originalModelView);
@@ -120,7 +156,7 @@ void setColors(const Object *object, ShaderProgram &shaderProgram) {
 
 //------------------------------------------------------------------------------
 void setOrientation(const Object *object, ShaderProgram &shaderProgram,
-                    glm::mat4 &originalModelView) {
+                    const glm::mat4 &originalModelView) {
   btScalar transformMatrix[16];
   object->getOpenGLMatrix(transformMatrix);
   glm::mat4 modelViewMatrix = glm::make_mat4x4(transformMatrix);

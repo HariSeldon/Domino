@@ -10,6 +10,7 @@
 #include <vector>
 
 class Light;
+class Mirror;
 class Object;
 
 class World {
@@ -21,6 +22,7 @@ private:
   glm::vec4 ambientColor;
   std::vector<Object*> objects;
   std::vector<Light*> lights;
+  Mirror* mirror;
   Engine engine;
   static const float DEFAULT_GRAVITY_X;
   static const float DEFAULT_GRAVITY_Y;
@@ -41,10 +43,14 @@ public:
 
   int getLightsNumber() const;
 
+  Mirror *getMirror();
+  const Mirror *getMirror() const;
+
 private:
   void initWorld();
   void initLights();
   void initObjects();
+  void initMirror();
 
 //-----------------------------------------------------------------------------
 public:

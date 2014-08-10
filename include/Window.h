@@ -50,7 +50,7 @@ public:
   static const glm::vec4 CLEAR_COLOR;
 
 public:
-  Window(const World *world);
+  Window();
   ~Window();
 
 public:
@@ -62,8 +62,10 @@ private:
   void initSDL();
   void initGL();
   void drawScene();
+  void drawWorld();
   void drawLights();
   void drawObjects();
+  void drawMirror(Mirror *mirror);
   void drawText();
   void updateCameraPosition();
   void setupProjection(); 
@@ -77,7 +79,7 @@ private:
   KeyboardManager keyboardManager; 
   Camera camera;
 
-  const World* world;
+  World* world;
   bool running; 
   glm::mat4 projection;
   glm::mat4 modelView;

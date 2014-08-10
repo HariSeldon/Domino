@@ -13,13 +13,15 @@
 #include <LinearMath/btVector3.h>
 
 const float World::DEFAULT_GRAVITY_X = 0.0f;
-const float World::DEFAULT_GRAVITY_Y = -100.0f;
+const float World::DEFAULT_GRAVITY_Y = -10.0f;
 const float World::DEFAULT_GRAVITY_Z = 0.0f;
 
 // -----------------------------------------------------------------------------
-World::World() {
+World::World() : mirror(nullptr) {
+  setGravity();
   initObjects();
   initLights();
+  initMirror();
 }
 
 // -----------------------------------------------------------------------------
@@ -77,6 +79,12 @@ void World::setAmbientColor(const glm::vec4 &color) {
 int World::getLightsNumber() const { return lights.size(); }
 
 // -----------------------------------------------------------------------------
+Mirror *World::getMirror() { return mirror; }
+
+// -----------------------------------------------------------------------------
+const Mirror *World::getMirror() const { return mirror; }
+
+// -----------------------------------------------------------------------------
 void traceDominoLine(const btVector3& origin, const btVector3& destination,
                      World* world, int full, bool tilt = false) {
   // Assume the y component of the positions is not relevant.
@@ -126,7 +134,6 @@ void World::initObjects() {
   //SphereBuilder sphereBuilder;
   BoxBuilder boxBuilder;
   MeshBuilder meshBuilder;
-  MirrorBuilder mirrorBuilder;
   //WedgeBuilder wedgeBuilder;
 
   // Plane.
@@ -135,13 +142,6 @@ void World::initObjects() {
                         .setAmbientColor(glm::vec4(0.0215, 0.1745, 0.0215, 1.0))
                         .setDiffuseColor(glm::vec4(0.07568, 0.61424, 0.07568, 1.0))
                         .setSide(btScalar(2000.0)).create());
-
-  addObject(mirrorBuilder.setTransform(btTransform(btQuaternion::getIdentity(),
-                                                   btVector3(0.0, 2.5, 0.0)))
-                .setAmbientColor(glm::vec4(1.0, 1.0, 1.0, 1.0))
-                .setDiffuseColor(glm::vec4(1.0, 1.0, 1.0, 1.0))
-                .setSide(btScalar(5.0))
-                .create());
 
 //  addObject(meshBuilder.setTransform(btTransform(btQuaternion::getIdentity(),
 //                                                btVector3(20.0, 10.0, 0.0)))
@@ -285,44 +285,55 @@ void World::initLights() {
 //  lights.push_back(light);
 //
 //
-////  Light *light1 = lightBuilder.setPosition(glm::vec3(300.0f, 10.0f, 0.0f))
-////                      .setAmbientColor(glm::vec4(0.9f, 0.9f, 0.9f, 1.0f))
-////                      .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-////                      .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-////                      .createPositional();
-////  lights.push_back(light1);
-////
-//  Light *light2 = lightBuilder.setPosition(glm::vec3(-300.0f, 10.0f, 0.0f))
+//  Light *light1 = lightBuilder.setPosition(glm::vec3(30.0f, 10.0f, 0.0f))
+//                      .setAmbientColor(glm::vec4(0.9f, 0.9f, 0.9f, 1.0f))
+//                      .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+//                      .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+//                      .createPositional();
+//  lights.push_back(light1);
+
+  Light *light2 = lightBuilder.setPosition(glm::vec3(0.0f, 2.0f, 0.0f))
+              .setAmbientColor(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f))
+              .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+              .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+              .setLinearAttenuation(0.05f)
+              .createPositional();
+  lights.push_back(light2);
+
+//  Light *light3 = lightBuilder.setPosition(glm::vec3(0.0f, 10.0f, 30.0f))
 //              .setAmbientColor(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f))
 //              .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
 //              .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-//              .setLinearAttenuation(0.f)
-//              .createPositional();
-//  lights.push_back(light2);
-//
-//  Light *light3 = lightBuilder.setPosition(glm::vec3(0.0f, 10.0f, 300.0f))
-//              .setAmbientColor(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f))
-//              .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-//              .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-//              .setLinearAttenuation(0.f)
+//              .setLinearAttenuation(1.f)
 //              .createPositional();
 //  lights.push_back(light3);
 //
-//  Light *light4 = lightBuilder.setPosition(glm::vec3(0.0f, 10.0f, -300.0f))
+//  Light *light4 = lightBuilder.setPosition(glm::vec3(0.0f, 10.0f, -30.0f))
 //              .setAmbientColor(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f))
 //              .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
 //              .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-//              .setLinearAttenuation(0.f)
+//              .setLinearAttenuation(1.f)
 //              .createPositional();
 //  lights.push_back(light4);
 
-  Light *light =
-      lightBuilder.setAmbientColor(glm::vec4(0.7f, 0.7f, 0.7f, 1.0f))
-          .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-          .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-          .setDirection(glm::vec3(1.0f, -0.3f, 0.0f))
-          .createDirectional();
-  lights.push_back(light);
+//  Light *light =
+//      lightBuilder.setAmbientColor(glm::vec4(0.7f, 0.7f, 0.7f, 1.0f))
+//          .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+//          .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+//          .setDirection(glm::vec3(1.0f, -0.3f, 0.0f))
+//          .createDirectional();
+//  lights.push_back(light);
+}
+
+//-----------------------------------------------------------------------------
+void World::initMirror() {
+  MirrorBuilder mirrorBuilder;
+  mirror = mirrorBuilder.setTransform(btTransform(btQuaternion::getIdentity(),
+                                                   btVector3(0.f, 1.f, 15.f)))
+                .setAmbientColor(glm::vec4(1.f, 1.f, 1., 1.f))
+                .setDiffuseColor(glm::vec4(1.f, 1.f, 1., 1.f))
+                .setSide(btScalar(3.f))
+                .create();
 }
 
 //-----------------------------------------------------------------------------

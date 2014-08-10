@@ -17,8 +17,8 @@ public:
   ~ShaderProgram();
 
 public:
-  GLuint getProgramId();
-  void useProgram();
+  GLuint getProgramId() const;
+  void useProgram() const;
   
   // Uniform management.
   int getUniformLocation(const std::string &uniformName) const;

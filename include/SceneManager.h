@@ -1,7 +1,6 @@
 #pragma once
 
 class Window;
-class World;
 
 class SceneManager {
 public:
@@ -16,6 +15,5 @@ private:
   void initWindow();
 
 private:
-  World *world;
   Window *window;
 };
