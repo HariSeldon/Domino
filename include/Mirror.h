@@ -4,6 +4,8 @@
 #include "ShaderProgram.h"
 #include "SysUtils.h"
 
+#include <glm/fwd.hpp>
+
 #include <GL/glew.h>
 
 #include <LinearMath/btScalar.h>
@@ -22,6 +24,8 @@ public:
   GLuint getTextureId() const;
 
   ShaderProgram *getShaderProgram(); 
+
+  glm::mat4 getModelView();
 
 private:
   void computePoints(const btScalar &side);

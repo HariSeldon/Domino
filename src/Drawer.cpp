@@ -28,12 +28,12 @@ void setOrientation(const Object *object, ShaderProgram &shaderProgram,
 //-----------------------------------------------------------------------------
 void Drawer::initGPUObjects(const ShaderProgram &shaderProgram,
                             const World &world) {
-
   initWorldObjects(shaderProgram, world);
 }
 
 //-----------------------------------------------------------------------------
-void Drawer::initWorldObjects(const ShaderProgram &shaderProgram, const World &world) {
+void Drawer::initWorldObjects(const ShaderProgram &shaderProgram,
+                              const World &world) {
   std::for_each(constBeginObjects(world), constEndObjects(world),
                 [&](const Object *object) {
     intptr_t objectAddress = reinterpret_cast<intptr_t>(object);
@@ -55,13 +55,14 @@ void Drawer::initWorldObjects(const ShaderProgram &shaderProgram, const World &w
 }
 
 //-----------------------------------------------------------------------------
-void Drawer::initMirror(const ShaderProgram &shaderProgram, const Mirror* mirror) {
+void Drawer::initMirror(const ShaderProgram &shaderProgram,
+                        const Mirror *mirror) {
   intptr_t objectAddress = reinterpret_cast<intptr_t>(mirror);
   GLuint vaoId = 0;
   // Create VAO.
   glGenVertexArrays(1, &vaoId);
   glBindVertexArray(vaoId);
-  
+
   GLuint vertexVBOId = setupVertexVBO(mirror, shaderProgram);
   GLuint indexVBOId = setupIndexVBO(mirror);
   GLuint textureVBOId = setupTextureVBO(mirror, shaderProgram);
@@ -124,9 +125,8 @@ GLuint Drawer::setupTextureVBO(const Object *object,
 Drawer::~Drawer() {
   glBindVertexArray(0);
 
-  for (auto iter : vaoMap) {
+  for (auto iter : vaoMap)
     glDeleteVertexArrays(1, &iter.second);
-  }
 
   if (vboIds.size() > 0)
     glDeleteBuffers(vboIds.size(), vboIds.data());

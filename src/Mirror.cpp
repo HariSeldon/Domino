@@ -2,6 +2,12 @@
 
 #include "MathUtils.h"
 
+#include <glm/vec3.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/ext.hpp>
+
 #include <GL/glew.h>
 
 #include <iostream>
@@ -11,12 +17,12 @@ Mirror::Mirror(btTransform &transform, btScalar mass, btVector3 &inertia,
     : Object(transform, mass, inertia), fboId(0), dboId(0), mirrorTexture(0) {
   computePoints(side);
   setupBulletShape();
-  
+
   createFBO();
   createDBO();
-  createMirrorTexture(); 
+  createMirrorTexture();
   attachTexture();
-  
+
   shader = new ShaderProgram("mirror.vert", "mirror.frag");
 }
 
@@ -35,9 +41,9 @@ void Mirror::computePoints(const btScalar &side) {
 
   glm::vec3 normal = computeNormal(first, second, third);
 
-  normals = { normal, normal, normal, normal }; 
+  normals = { normal, normal, normal, normal };
 
-  textureCoos = {{0.f, 1.f}, {1.f, 1.f}, {1.f, 0.f}, {0.f, 0.f}};
+  textureCoos = { { 0.f, 1.f }, { 1.f, 1.f }, { 1.f, 0.f }, { 0.f, 0.f } };
 }
 
 //-----------------------------------------------------------------------------
@@ -45,7 +51,7 @@ void Mirror::setupBulletShape() {
   // FIXME: verify that this is correct.
   // It will matter when I enable the engine.
   collisionShape =
-      new btConvexHullShape((btScalar*)points.data(), 4, sizeof(glm::vec3));
+      new btConvexHullShape((btScalar *)points.data(), 4, sizeof(glm::vec3));
 
   motionState = new btDefaultMotionState(transform);
   constructionInfo = new btRigidBody::btRigidBodyConstructionInfo(
@@ -88,7 +94,8 @@ void Mirror::createMirrorTexture() {
   glBindTexture(GL_TEXTURE_2D, mirrorTexture);
   checkOpenGLError("Mirror: glBindTexture");
 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1280, 800, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1280, 800, 0, GL_RGB, GL_UNSIGNED_BYTE,
+               0);
   checkOpenGLError("Mirror: glTexImage2D");
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -104,10 +111,11 @@ void Mirror::attachTexture() {
   glBindTexture(GL_TEXTURE_2D, mirrorTexture);
   glBindFramebuffer(GL_FRAMEBUFFER, fboId);
   checkOpenGLError("Mirror: glBindTexture");
-  glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mirrorTexture, 0);
+  glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mirrorTexture,
+                       0);
   checkOpenGLError("Mirror: glFramebufferTexture");
- 
-  GLenum drawBuffers = {GL_COLOR_ATTACHMENT0};
+
+  GLenum drawBuffers = { GL_COLOR_ATTACHMENT0 };
   glDrawBuffers(1, &drawBuffers);
   checkOpenGLError("Mirror: glDrawBuffers");
 
@@ -121,23 +129,39 @@ void Mirror::enableMirror() const {
   glBindFramebuffer(GL_FRAMEBUFFER, fboId);
   glViewport(0, 0, 1280, 800);
   glBindTexture(GL_TEXTURE_2D, mirrorTexture);
-  shader->setUniform("texture", 0);
 }
 
 //-----------------------------------------------------------------------------
-void Mirror::disableMirror() const {
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+void Mirror::disableMirror() const { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
+
+//-----------------------------------------------------------------------------
+ShaderProgram *Mirror::getShaderProgram() { return shader; }
+
+//-----------------------------------------------------------------------------
+glm::mat4 Mirror::getModelView() {
+  // Get the mirror transformation.
+  btScalar oglTransform[16];
+  getOpenGLMatrix(oglTransform);
+  glm::mat4 currentTransform = glm::make_mat4x4(oglTransform);
+
+  // Get eye.
+  glm::vec4 eye = currentTransform * glm::vec4(0.f, 0.f, 0.f, 1.f);
+
+  // Compute center.
+  glm::mat4 centerMatrix = currentTransform;
+  centerMatrix = glm::translate(centerMatrix, glm::vec3(0.f, 0.f, 1.f));
+  glm::vec4 center = centerMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+
+  // The second column of the center matrix contains the up vector.
+  glm::vec4 up = centerMatrix[1];
+  glm::mat4 lookAtMatrix =
+      glm::lookAt(glm::vec3(eye), glm::vec3(center), glm::vec3(up));
+
+  return lookAtMatrix;
 }
 
 //-----------------------------------------------------------------------------
-ShaderProgram* Mirror::getShaderProgram() {
-  return shader;
-} 
-
-//-----------------------------------------------------------------------------
-GLuint Mirror::getTextureId() const {
-  return mirrorTexture;
-}
+GLuint Mirror::getTextureId() const { return mirrorTexture; }
 
 //-----------------------------------------------------------------------------
 MirrorBuilder::MirrorBuilder() : ObjectBuilder(), side(btScalar(0.0)) {}

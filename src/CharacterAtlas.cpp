@@ -26,7 +26,7 @@ CharacterAtlas::CharacterAtlas(const std::string &fontFileName, int fontHeight)
   // Set the size of the font.
   FT_Set_Pixel_Sizes(fontFace, 0, fontHeight);
   computeTextureSize(fontFace);
-  createTexture(fontFace);
+  createTexture();
   fillTexture(fontFace);
 }
 
@@ -53,7 +53,7 @@ void CharacterAtlas::computeTextureSize(FT_Face fontFace) {
 }
 
 // -----------------------------------------------------------------------------
-void CharacterAtlas::createTexture(FT_Face fontFace) {
+void CharacterAtlas::createTexture() {
   // Create a texture that will be used to hold all ASCII glyphs.
   glGenTextures(1, &textureId);
   checkOpenGLError("CharacterAtlas: glGenTextures");
@@ -102,7 +102,7 @@ void CharacterAtlas::fillTexture(FT_Face fontFace) {
       exit(1);
     }
 
-#ifdef DEBUG
+#ifndef NDEBUG
     // Check the size of the texture. If the size is 0 means that no texture
     // is currently bound.
     int currentWidth = -1;

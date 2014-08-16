@@ -27,7 +27,7 @@ void Light::setSpecularColor(const glm::vec4 &color) { specularColor = color; }
 const glm::vec4 &Light::getSpecularColor() const { return specularColor; }
 
 void Light::draw(ShaderProgram &shaderProgram,
-                 const glm::mat4 &modelView) const {
+                 const glm::mat4 &) const {
   shaderProgram.setUniform("lights[" + std::to_string(number) + "].ambient",
                            ambientColor);
   shaderProgram.setUniform("lights[" + std::to_string(number) + "].diffuse",
@@ -51,9 +51,6 @@ const glm::vec4 &DirectionalLight::getDirection() { return direction; }
 void DirectionalLight::draw(ShaderProgram &shaderProgram,
                             const glm::mat4 &modelView) const {
   glm::mat4 modelViewRotation(modelView);
-  //  modelViewRotation.data()[12] = 0.0f;
-  //  modelViewRotation.data()[13] = 0.0f;
-  //  modelViewRotation.data()[14] = 0.0f;
   modelViewRotation[3][0] = 0.0f;
   modelViewRotation[3][1] = 0.0f;
   modelViewRotation[3][2] = 0.0f;
@@ -138,9 +135,6 @@ float SpotLight::getExponent() { return exponent; }
 void SpotLight::draw(ShaderProgram &shaderProgram,
                      const glm::mat4 &modelView) const {
   glm::mat4 modelViewRotation(modelView);
-  //  modelViewRotation.data()[12] = 0.0f;
-  //  modelViewRotation.data()[13] = 0.0f;
-  //  modelViewRotation.data()[14] = 0.0f;
   modelViewRotation[3][0] = 0.0f;
   modelViewRotation[3][1] = 0.0f;
   modelViewRotation[3][2] = 0.0f;

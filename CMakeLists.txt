@@ -35,19 +35,9 @@ include_directories(${INCLUDE_PATH} ${CMAKE_CURRENT_BINARY_DIR} ${SRC_PATH})
 # Use system flag so to disable warnings when compiling using -Wall.
 include_directories(SYSTEM ${BULLET_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR})
 
-# Set a default build type for single-configuration.
-# CMake generators if no build type is set.
-# To set the build type from the command line use the -DCMAKE_BUILD_TYPE
-# option.
-if(CMAKE_BUILD_TYPE STREQUAL "")
-  set(CMAKE_BUILD_TYPE DEBUG)
-  add_definitions(-DDEBUG)
-endif(CMAKE_BUILD_TYPE STREQUAL "")
-message(STATUS "cmake build type: " ${CMAKE_BUILD_TYPE})
-
 # Set compilation options.
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -Wall -pedantic")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -Wall")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -Wall -Wextra -pedantic")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -Wall -Wextra -pedantic")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 # Add sources to executable.

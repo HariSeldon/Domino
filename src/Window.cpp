@@ -11,6 +11,7 @@
 #include "Object.h"
 #include "SysDefines.h"
 #include "SysUtils.h"
+#include "MathUtils.h"
 
 // Support functions.
 // -----------------------------------------------------------------------------
@@ -19,7 +20,7 @@ Uint32 fpsHandler(Uint32 interval, void *);
 void checkSDLError(const std::string &message);
 void abort(const std::string &message);
 
-const glm::vec4 Window::CLEAR_COLOR = {0.2f, 0.4f, 0.6f, 1.f};
+const glm::vec4 Window::CLEAR_COLOR = { 0.2f, 0.4f, 0.6f, 1.f };
 const float Window::VIEW_ANGLE = 50.0f;
 const float Window::Z_NEAR = 0.1f;
 const float Window::Z_FAR = 2000.0f;
@@ -27,7 +28,7 @@ const std::string Window::FONT_FILE = "VeraMono.ttf";
 
 // -----------------------------------------------------------------------------
 Window::Window()
-    : sdlWindow(nullptr), context(nullptr), eventTimerId(0), 
+    : sdlWindow(nullptr), context(nullptr), eventTimerId(0),
       keyboardManager(this), running(true), height(0), width(0),
       currentYRotation(0), currentXRotation(0), frameCounter(0), fps(0) {
 
@@ -44,13 +45,14 @@ Window::Window()
   drawer = new Drawer();
 
   drawer->initGPUObjects(*lightShaderProgram, *world);
-  if(Mirror *mirror = world->getMirror()) {
+  if (Mirror *mirror = world->getMirror()) {
     ShaderProgram *mirrorShader = mirror->getShaderProgram();
     drawer->initMirror(*mirrorShader, mirror);
   }
 
   keyboardManager.setLightMask((2 << (world->getLightsNumber() - 1)) - 1);
-  textManager = new TextManager(FONT_PATH + FONT_FILE, FONT_HEIGHT, width, height);
+  textManager =
+      new TextManager(FONT_PATH + FONT_FILE, FONT_HEIGHT, width, height);
 }
 
 // -----------------------------------------------------------------------------
@@ -69,17 +71,16 @@ Window::~Window() {
 
 // -----------------------------------------------------------------------------
 void Window::initSDLWindow() {
-  sdlWindow =
-      SDL_CreateWindow("Domino", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                       0, 0,
-                       SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN |
-                       SDL_WINDOW_FULLSCREEN | SDL_WINDOW_INPUT_GRABBED);
+  sdlWindow = SDL_CreateWindow(
+      "Domino", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 0, 0,
+      SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN |
+          SDL_WINDOW_INPUT_GRABBED);
   checkSDLError("Error creating sdlWindow");
   assert(sdlWindow != nullptr && "Error creating sdlWindow");
 
   context = SDL_GL_CreateContext(sdlWindow);
   checkSDLError("Error creating GL context");
-  assert(context != nullptr && "Error GL creating context"); 
+  assert(context != nullptr && "Error GL creating context");
 
   SDL_GL_MakeCurrent(sdlWindow, context);
   SDL_SetRelativeMouseMode(SDL_TRUE);
@@ -112,7 +113,7 @@ void Window::startRendering() {
 // -----------------------------------------------------------------------------
 void Window::setupProjection() {
   glViewport(0, 0, width, height);
-  float aspectRatio = (float) width / height;
+  float aspectRatio = (float)width / height;
   projection = glm::perspective(Window::VIEW_ANGLE, aspectRatio, Window::Z_NEAR,
                                 Window::Z_FAR);
 }
@@ -121,29 +122,29 @@ void Window::setupProjection() {
 void Window::drawScene() {
   lightShaderProgram->useProgram();
   lightShaderProgram->setUniform("projectionMatrix", projection);
-
-  if(Mirror *mirror = world->getMirror()) {
+  if (Mirror *mirror = world->getMirror()) {
     // Draw the scene on the mirror texture from the point of view of the
     // mirror.
     mirror->enableMirror();
-    // Setup a camera for the mirror.
-    Camera mirrorCamera(glm::vec4(0.f, 1.0f, 15.f, 1.0f), 0.f, 180.f);
-    modelView = mirrorCamera.applyView(); 
+     
+    glm::mat4 cameraView = mirror->getModelView();
 
-    drawWorld();   
+    drawWorld(cameraView);
     mirror->disableMirror();
   }
 
-  updateCameraPosition();
-
-  drawWorld();
+  cameraMutex.lock();
+  // FIXME
+  // domino: Camera.cpp:55:
+  // glm::mat4 Camera::applyView(): Assertion `eye == position && "Wrong
+  // transformation construction"' failed.
+  glm::mat4 modelView = camera.applyView();
+  cameraMutex.unlock();
+  drawWorld(modelView);
 
   if (Mirror *mirror = world->getMirror()) {
     // Enable mirror shader.
-    ShaderProgram *program = mirror->getShaderProgram();
-    program->useProgram();
-    program->setUniform("projectionMatrix", projection);
-    drawMirror(mirror);
+    drawMirror(mirror, modelView);
   }
 
   // Draw text on top of the scene.
@@ -151,15 +152,15 @@ void Window::drawScene() {
 }
 
 // -----------------------------------------------------------------------------
-void Window::drawWorld() {
+void Window::drawWorld(const glm::mat4 &modelView) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  drawObjects();
-  drawLights();
+  drawObjects(modelView);
+  drawLights(modelView);
 }
 
 // -----------------------------------------------------------------------------
-void Window::drawObjects() {
+void Window::drawObjects(const glm::mat4 &modelView) {
   std::for_each(constBeginObjects(world), constEndObjects(world),
                 [&](const Object *object) {
     drawer->drawObject(object, *lightShaderProgram, modelView);
@@ -167,7 +168,7 @@ void Window::drawObjects() {
 }
 
 // -----------------------------------------------------------------------------
-void Window::drawLights() {
+void Window::drawLights(const glm::mat4 &modelView) {
   lightShaderProgram->setUniform("ambientColor", world->getAmbientColor());
   lightShaderProgram->setUniform("lightsNumber", world->getLightsNumber());
   lightShaderProgram->setUniform("lightMask", keyboardManager.getLightMask());
@@ -177,22 +178,26 @@ void Window::drawLights() {
 }
 
 // -----------------------------------------------------------------------------
-void Window::drawMirror(Mirror *mirror) {
+void Window::drawMirror(Mirror *mirror, const glm::mat4 &modelView) {
   ShaderProgram *mirrorShader = mirror->getShaderProgram();
+  mirrorShader->useProgram();
+  mirrorShader->setUniform("projectionMatrix", projection);
+  mirrorShader->setUniform("texture", 0);
   drawer->drawObject(mirror, *mirrorShader, modelView);
+  lightShaderProgram->useProgram();
 }
 
 // -----------------------------------------------------------------------------
 void Window::drawText() {
   glDisable(GL_DEPTH_TEST);
-  textManager->addText("Frames per second: " + std::to_string(fps), {0, 780});
+  textManager->addText("Frames per second: " + std::to_string(fps), { 0, 780 });
   textManager->renderText();
   glEnable(GL_DEPTH_TEST);
 }
 
 // -----------------------------------------------------------------------------
 void Window::updateCameraPosition() {
-
+  cameraMutex.lock();
   if (keyboardManager.isForwardDown())
     camera.moveForward();
   if (keyboardManager.isBackwardDown())
@@ -204,10 +209,10 @@ void Window::updateCameraPosition() {
 
   // When rotating the camera the lights change intensity.
   camera.rotate(currentYRotation, currentXRotation);
+  cameraMutex.unlock();
+
   currentYRotation = 0;
   currentXRotation = 0;
-
-  modelView = camera.applyView();
 }
 
 // Support functions.
@@ -290,15 +295,15 @@ Uint32 eventHandler(Uint32 interval, void *windowPtr) {
     }
 
     case SDL_WINDOWEVENT: {
-      switch (event.window.event) { 
-        case SDL_WINDOWEVENT_RESIZED: {
-          break;
-        }
+      switch (event.window.event) {
+      case SDL_WINDOWEVENT_RESIZED: { break; }
       }
       break;
     }
     }
   }
+
+  window->updateCameraPosition();
   return interval;
 }
 

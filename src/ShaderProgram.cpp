@@ -59,7 +59,7 @@ int ShaderProgram::getUniformLocation(const std::string &uniformName) const {
 }
 
 GLint queryUniformLocation(GLuint programID, const char *uniformName) {
-  GLuint location = glGetUniformLocation(programID, uniformName);
+  GLint location = glGetUniformLocation(programID, uniformName);
   assert(location != -1 && "Error querying uniform location");
   return location;
 }
@@ -81,14 +81,13 @@ template void ShaderProgram::setUniform(const std::string &name,
 template <typename type>
 void ShaderProgram::setUniform(const std::string &name, const type &value) {
   auto iter = uniformLocationsMap.find(name);
-  if (iter == uniformLocationsMap.end()) {
+  if (iter == uniformLocationsMap.end()) 
     return;
-  }
   setUniformValue<type>(uniformLocationsMap[name], value);
 }
 
 template <typename type>
-void setUniformValue(GLint location, const type &value) {
+void setUniformValue(GLint, const type &) {
   return;
 }
 
@@ -124,7 +123,7 @@ void ShaderProgram::fillUniformMap() {
   std::vector<int> sizes = queryUniformNamesLength(programID);
   GLenum type = 0;
   GLint arraySize = 0;
-  for (int index = 0; index < sizes.size(); ++index) {
+  for (size_t index = 0; index < sizes.size(); ++index) {
     GLsizei actualSize = 0;
     std::vector<GLchar> nameRawData(sizes[index]);
     glGetActiveUniform(programID, index, nameRawData.size(), &actualSize,
@@ -202,14 +201,10 @@ int queryAttributesNumber(GLuint programID) {
 }
 
 int queryAttributeLocation(GLuint programID, const char *attributeName) {
-  GLuint location = glGetAttribLocation(programID, attributeName);
+  GLint location = glGetAttribLocation(programID, attributeName);
   assert(location != -1 && "Error querying attribute location");
   return location;
 }
-
-//void ShaderProgram::enableAttributeArray(const std::string &name) {
-//  // program.enableAttributeArray(attributeLocationsMap[name]);
-//}
 
 void checkErrors(GLuint programID) {
   if (!glIsProgram(programID)) {

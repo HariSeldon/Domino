@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <memory>
+#include <mutex>
 
 #include <GL/glew.h>
 
@@ -62,10 +63,10 @@ private:
   void initSDL();
   void initGL();
   void drawScene();
-  void drawWorld();
-  void drawLights();
-  void drawObjects();
-  void drawMirror(Mirror *mirror);
+  void drawWorld(const glm::mat4 &modelView);
+  void drawLights(const glm::mat4 &modelView);
+  void drawObjects(const glm::mat4 &modelView);
+  void drawMirror(Mirror *mirror, const glm::mat4 &modelView);
   void drawText();
   void updateCameraPosition();
   void setupProjection(); 
@@ -82,7 +83,7 @@ private:
   World* world;
   bool running; 
   glm::mat4 projection;
-  glm::mat4 modelView;
+  //glm::mat4 modelView;
   ShaderProgram *lightShaderProgram;
   Drawer *drawer;
   TextManager *textManager;
@@ -91,6 +92,7 @@ private:
   int width;
   std::atomic_int currentYRotation;
   std::atomic_int currentXRotation;
+  std::mutex cameraMutex;
 
   std::atomic_int frameCounter;
   int fps;

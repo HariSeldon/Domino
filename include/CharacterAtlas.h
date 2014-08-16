@@ -33,7 +33,7 @@ public:
 
 private:
   void computeTextureSize(FT_Face fontFace);
-  void createTexture(FT_Face fontFace);
+  void createTexture();
   void fillTexture(FT_Face fontFace);
 
 private:

@@ -23,6 +23,7 @@ void Camera::moveForward() { move(Camera::STEP); }
 
 void Camera::moveBackward() { move(-Camera::STEP); }
 
+// ----------------------------------------------------------------------------- 
 void Camera::move(float step) {
   glm::mat4 currentTransform = buildTransform();
   // Translate in the new coordinate system.
@@ -32,21 +33,24 @@ void Camera::move(float step) {
   position = currentTransform * glm::vec4(0.f, 0.f, 0.f, 1.f);
 }
 
+// ----------------------------------------------------------------------------- 
 // Change the current orientation angles.
 void Camera::rotate(float xOffset, float yOffset) {
   xRotation += Camera::ROTATION_FACTOR * xOffset;
   yRotation += Camera::ROTATION_FACTOR * -yOffset;
 }
 
+// ----------------------------------------------------------------------------- 
 void Camera::rotateLeft() {
   yRotation += Camera::ROTATION_FACTOR * FIXED_ROTATION_ANGLE;
 }
 
+// ----------------------------------------------------------------------------- 
 void Camera::rotateRight() {
   yRotation -= Camera::ROTATION_FACTOR * FIXED_ROTATION_ANGLE;
 }
 
-// void Camera::applyView(glm::mat4 &result) {
+// ----------------------------------------------------------------------------- 
 glm::mat4 Camera::applyView() {
   glm::mat4 currentTransform = buildTransform();
 
@@ -67,11 +71,13 @@ glm::mat4 Camera::applyView() {
   return lookAtMatrix;
 }
 
+// ----------------------------------------------------------------------------- 
 void Camera::dump() {
   std::cout << xRotation << " " << yRotation << " " << glm::to_string(position)
             << std::endl;
 }
 
+// ----------------------------------------------------------------------------- 
 glm::mat4 Camera::buildTransform() {
   glm::mat4 result;
   result = glm::translate(result, glm::vec3(position));

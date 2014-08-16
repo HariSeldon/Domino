@@ -328,12 +328,15 @@ void World::initLights() {
 //-----------------------------------------------------------------------------
 void World::initMirror() {
   MirrorBuilder mirrorBuilder;
-  mirror = mirrorBuilder.setTransform(btTransform(btQuaternion::getIdentity(),
-                                                   btVector3(0.f, 1.f, 15.f)))
-                .setAmbientColor(glm::vec4(1.f, 1.f, 1., 1.f))
-                .setDiffuseColor(glm::vec4(1.f, 1.f, 1., 1.f))
-                .setSide(btScalar(3.f))
-                .create();
+  float SIDE = 4.f;
+  btQuaternion rotation(M_PI, 0.0, 0.0);
+  mirror =
+      mirrorBuilder.setTransform(
+                        btTransform(rotation, btVector3(0.f, SIDE / 2, 15.f)))
+          .setAmbientColor(glm::vec4(1.f, 1.f, 1., 1.f))
+          .setDiffuseColor(glm::vec4(1.f, 1.f, 1., 1.f))
+          .setSide(btScalar(SIDE))
+          .create();
 }
 
 //-----------------------------------------------------------------------------
@@ -508,7 +511,7 @@ World::object_iterator beginObjects(const World* world) {
   return beginObjects(*world);
 }
 
-World::object_iterator endObjects(const World& world) {
+World::object_iterator endObjects(const World&) {
   return World::object_iterator::end();
 }
 World::object_iterator endObjects(const World* world) {
@@ -523,7 +526,7 @@ World::const_object_iterator constBeginObjects(const World* world) {
   return constBeginObjects(*world);
 }
 
-World::const_object_iterator constEndObjects(const World &world) {
+World::const_object_iterator constEndObjects(const World &) {
   return World::const_object_iterator::end();
 }
 
@@ -539,7 +542,7 @@ World::light_iterator beginLights(const World* world) {
   return beginLights(*world);
 }
 
-World::light_iterator endLights(const World& world) {
+World::light_iterator endLights(const World&) {
   return World::light_iterator::end();
 }
 World::light_iterator endLights(const World* world) {
@@ -554,7 +557,7 @@ World::const_light_iterator constBeginLights(const World *world) {
   return constBeginLights(*world);
 }
 
-World::const_light_iterator constEndLights(const World& world) {
+World::const_light_iterator constEndLights(const World&) {
   return World::const_light_iterator::end();
 }
 
