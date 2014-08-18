@@ -28,7 +28,8 @@ const std::string SceneManager::MAIN_FRAGMENT_SHADER = "phong.frag";
 SceneManager::SceneManager(const glm::ivec2 &screenSize)
     : world(new World), drawer(new Drawer),
       shader(new ShaderProgram(MAIN_VERTEX_SHADER, MAIN_FRAGMENT_SHADER)),
-      fps(0), lightMask((2 << (world->getLightsNumber() - 1)) - 1) {
+      fps(0), lightMask((2 << (world->getLightsNumber() - 1)) - 1),
+      currentYRotation(0), currentXRotation(0) {
   setupProjection(screenSize);
   textManager =
       new TextManager(FONT_PATH + FONT_FILE, FONT_HEIGHT, screenSize);

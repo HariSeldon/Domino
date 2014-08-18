@@ -61,10 +61,10 @@ private:
 
   Camera camera;
 
+  int fps;
+  int lightMask;
+
   std::atomic_int currentYRotation;
   std::atomic_int currentXRotation;
   std::mutex cameraMutex;
-
-  int fps;
-  int lightMask;
 };
