@@ -62,31 +62,30 @@ SceneManager::~SceneManager() {
 void SceneManager::drawScene() {
   shader->useProgram();
   shader->setUniform("projectionMatrix", projection);
-//  if (Mirror *mirror = world->getMirror()) {
-//    // Draw the scene on the mirror texture from the point of view of the
-//    // mirror.
-//    mirror->enableMirror();
-//
-//    glm::mat4 cameraView = mirror->getModelView();
-//
-//    drawWorld(cameraView);
-//    mirror->disableMirror();
-//  }
+  if (Mirror *mirror = world->getMirror()) {
+    // Draw the scene on the mirror texture from the point of view of the
+    // mirror.
+    mirror->enableMirror();
 
-// FIXME
-//  cameraMutex.lock();
+    glm::mat4 cameraView = mirror->getModelView();
+
+    drawWorld(cameraView);
+    mirror->disableMirror();
+  }
+
+  cameraMutex.lock();
   // FIXME
   // domino: Camera.cpp:55:
   // glm::mat4 Camera::applyView(): Assertion `eye == position && "Wrong
   // transformation construction"' failed.
   glm::mat4 modelView = camera.applyView();
-//  cameraMutex.unlock();
+  cameraMutex.unlock();
   drawWorld(modelView);
 
-//  if (Mirror *mirror = world->getMirror()) {
-//    // Enable mirror shader.
-//    drawMirror(mirror, modelView);
-//  }
+  if (Mirror *mirror = world->getMirror()) {
+    // Enable mirror shader.
+    drawMirror(mirror, modelView);
+  }
 
   // Draw text on top of the scene.
   drawText();
