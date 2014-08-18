@@ -33,6 +33,7 @@ SceneManager::SceneManager(const glm::ivec2 &screenSize)
   textManager =
       new TextManager(FONT_PATH + FONT_FILE, FONT_HEIGHT, screenSize);
   glClearColor(CLEAR_COLOR.x, CLEAR_COLOR.y, CLEAR_COLOR.z, CLEAR_COLOR.w);
+  checkOpenGLError("GLInitializer: glClearColor");
 
   drawer->initGPUObjects(*shader, *world);
   if (Mirror *mirror = world->getMirror()) {

@@ -43,9 +43,6 @@ void GLInitializer::initGL() {
   int glewStatus = glewInit();
   assert(glewStatus == GLEW_OK && "Error initializing glew");
 
-//  glClearColor(GLInitializer::CLEAR_COLOR.x, GLInitializer::CLEAR_COLOR.y,
-//               GLInitializer::CLEAR_COLOR.z, GLInitializer::CLEAR_COLOR.w);
-  checkOpenGLError("GLInitializer: glClearColor");
   glEnable(GL_DEPTH_TEST);
   checkOpenGLError("GLInitializer: glEnable-GL_DEPTH_TEST");
   glEnable(GL_BLEND);
