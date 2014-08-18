@@ -94,7 +94,7 @@ void traceDominoLine(const btVector3& origin, const btVector3& destination,
   btScalar slope = zDiff / xDiff;
   if (slope < 0) slope = -slope;
   btScalar angle = atan2(zDiff, xDiff);
-  const unsigned int DOMINO_NUMBER = 7;
+  const int DOMINO_NUMBER = 7;
 
   btScalar length = destination.distance(origin);
   btScalar dominoDistance = length / (DOMINO_NUMBER - 1);
@@ -103,8 +103,8 @@ void traceDominoLine(const btVector3& origin, const btVector3& destination,
   if (xDiff == 0) slope = 1;
   btVector3 direction =
       btVector3(signum(xDiff), 0.0, signum(zDiff) * slope).normalize();
-  unsigned int dominoNumber = DOMINO_NUMBER;
-  unsigned int index = 1;
+  int dominoNumber = DOMINO_NUMBER;
+  int index = 1;
   if (full == 2) dominoNumber = dominoNumber / 2 + 1;
   if (full == 3) {
     dominoNumber = dominoNumber / 2;
@@ -200,13 +200,13 @@ void World::initObjects() {
   //                                .create());
 
   // WORKING CONFIG.
-  unsigned int SIDES = 13;
+  int SIDES = 13;
   btScalar RADIUS = 9;
   btScalar angle = 2 * M_PI / SIDES;
   btScalar currentAngle = 0;
-  unsigned int halfSides = ceil(SIDES / 2.0);
+  int halfSides = ceil(SIDES / 2.0);
 
-  for (unsigned int index = 0; index < halfSides; ++index) {
+  for (int index = 0; index < halfSides; ++index) {
     btScalar currentStep = angle;
 
     btScalar x1 = RADIUS * cos(currentAngle);
@@ -228,7 +228,7 @@ void World::initObjects() {
   }
 
   currentAngle = 0;
-  for (unsigned int index = 0; index < halfSides; ++index) {
+  for (int index = 0; index < halfSides; ++index) {
     btScalar currentStep = angle;
 
     btScalar x1 = RADIUS * cos(currentAngle);

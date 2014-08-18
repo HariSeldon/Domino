@@ -69,6 +69,8 @@ template void ShaderProgram::setUniform(const std::string &name,
 template void ShaderProgram::setUniform(const std::string &name,
                                         const int &value);
 template void ShaderProgram::setUniform(const std::string &name,
+                                        const unsigned char &value);
+template void ShaderProgram::setUniform(const std::string &name,
                                         const unsigned int &value);
 template void ShaderProgram::setUniform(const std::string &name,
                                         const glm::vec4 &value);

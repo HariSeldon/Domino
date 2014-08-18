@@ -13,8 +13,8 @@
 
 class TextManager {
 public:
-  TextManager(const std::string &fileName, int fontHeight, int screenWidth,
-              int screenHeight);
+  TextManager(const std::string &fileName, int fontHeight,
+              const glm::ivec2 &screenSize);
   ~TextManager();
 
 public:

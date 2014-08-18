@@ -1,6 +1,6 @@
 #include "TextManager.h"
 
-#include <glm/ext.hpp>
+#include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
 
 #include <algorithm>
@@ -9,11 +9,11 @@
 
 // -----------------------------------------------------------------------------
 TextManager::TextManager(const std::string &fileName, int fontHeight,
-                         int screenWidth, int screenHeight)
+                         const glm::ivec2 &screenSize)
     : atlas(fileName, fontHeight),
       textShader(ShaderProgram("text.vert", "text.frag")),
-      color({ 1, 1, 1, 1 }), vScale(2 / (float)screenHeight),
-      hScale(2 / (float)screenWidth) {
+      color({ 1, 1, 1, 1 }), vScale(2 / (float)screenSize.y),
+      hScale(2 / (float)screenSize.x) {
   glGenVertexArrays(1, &vaoId);
   glGenBuffers(1, &indexVBOId);
   glGenBuffers(1, &textureVBOId);

@@ -73,8 +73,8 @@ void dumpMatrix(const btMatrix3x3& matrix, const std::string& name) {
 void dumpOpenGLMatrix(const float* matrix, const std::string& name) {
   std::stringstream ss;
   ss << getPreamble(name) << "\n";
-  for (unsigned int row = 0; row < 4; ++row) {
-    for (unsigned int column = 0; column < 4; ++column) {
+  for (int row = 0; row < 4; ++row) {
+    for (int column = 0; column < 4; ++column) {
       ss << matrix[row + column * 4] << "\t";
       if (column == 3) ss << "\n";
     }
