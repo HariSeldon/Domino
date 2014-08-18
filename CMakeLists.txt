@@ -31,7 +31,7 @@ configure_file(${CMAKE_SOURCE_DIR}/${INCLUDE_DIR}/SysDefines.h.cmake
                ${CMAKE_SOURCE_DIR}/${INCLUDE_DIR}/SysDefines.h)
 set(BULLET_INCLUDE_DIR "/usr/include/bullet")
 set(FREETYPE_INCLUDE_DIR "/usr/include/freetype2")
-include_directories(${INCLUDE_PATH} ${CMAKE_CURRENT_BINARY_DIR} ${SRC_PATH})
+include_directories(${INCLUDE_PATH} ${CMAKE_CURRENT_BINARY_DIR})
 # Use system flag so to disable warnings when compiling using -Wall.
 include_directories(SYSTEM ${BULLET_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR})
 
