@@ -13,6 +13,7 @@
 class Drawer;
 class Mirror;
 class ShaderProgram;
+class ShadowManager;
 class World;
 
 class SceneManager {
@@ -48,14 +49,18 @@ private:
   void drawWorld(const glm::mat4 &modelView);
   void drawLights(const glm::mat4 &modelView);
   void drawObjects(const glm::mat4 &modelView);
-  void drawMirror(Mirror *mirror, const glm::mat4 &modelView);
+  void drawMirror(const glm::mat4 &modelView);
   void drawText();
+  void mirrorRenderingPass();
+  void shadowRenderingPass();
+  void screenRenderingPass();
 
 private:
   World* world;
   Drawer *drawer;
   ShaderProgram* shader;
   TextManager* textManager;
+  ShadowManager* shadowManager;
 
   glm::mat4 projection;
 

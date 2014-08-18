@@ -4,6 +4,7 @@
 #include "Light.h"
 #include "Mirror.h"
 #include "ShaderProgram.h"
+#include "ShadowManager.h"
 #include "SysDefines.h"
 #include "TextManager.h"
 #include "World.h"
@@ -40,6 +41,8 @@ SceneManager::SceneManager(const glm::ivec2 &screenSize)
     ShaderProgram *mirrorShader = mirror->getShaderProgram();
     drawer->initMirror(*mirrorShader, mirror);
   }
+
+  shadowManager = new ShadowManager();
 }
 
 // -----------------------------------------------------------------------------
@@ -57,39 +60,19 @@ SceneManager::~SceneManager() {
   delete drawer;
   delete world;
   delete textManager;
+  delete shadowManager;
 }
 
 // -----------------------------------------------------------------------------
 void SceneManager::drawScene() {
+
+//  mirrorRenderingPass();
+  shadowRenderingPass();
+
   shader->useProgram();
   shader->setUniform("projectionMatrix", projection);
-  if (Mirror *mirror = world->getMirror()) {
-    // Draw the scene on the mirror texture from the point of view of the
-    // mirror.
-    mirror->enableMirror();
 
-    glm::mat4 cameraView = mirror->getModelView();
-
-    drawWorld(cameraView);
-    mirror->disableMirror();
-  }
-
-  cameraMutex.lock();
-  // FIXME
-  // domino: Camera.cpp:55:
-  // glm::mat4 Camera::applyView(): Assertion `eye == position && "Wrong
-  // transformation construction"' failed.
-  glm::mat4 modelView = camera.applyView();
-  cameraMutex.unlock();
-  drawWorld(modelView);
-
-  if (Mirror *mirror = world->getMirror()) {
-    // Enable mirror shader.
-    drawMirror(mirror, modelView);
-  }
-
-  // Draw text on top of the scene.
-  drawText();
+  screenRenderingPass();
 }
 
 // -----------------------------------------------------------------------------
@@ -119,13 +102,64 @@ void SceneManager::drawLights(const glm::mat4 &modelView) {
 }
 
 // -----------------------------------------------------------------------------
-void SceneManager::drawMirror(Mirror *mirror, const glm::mat4 &modelView) {
-  ShaderProgram *mirrorShader = mirror->getShaderProgram();
-  mirrorShader->useProgram();
-  mirrorShader->setUniform("projectionMatrix", projection);
-  mirrorShader->setUniform("texture", 0);
-  drawer->drawObject(mirror, *mirrorShader, modelView);
-  shader->useProgram();
+void SceneManager::drawMirror(const glm::mat4 &modelView) {
+  if (Mirror *mirror = world->getMirror()) {
+    ShaderProgram *mirrorShader = mirror->getShaderProgram();
+    mirrorShader->useProgram();
+    mirrorShader->setUniform("projectionMatrix", projection);
+    mirrorShader->setUniform("texture", 0);
+    drawer->drawObject(mirror, *mirrorShader, modelView);
+    shader->useProgram();
+  }
+}
+
+// -----------------------------------------------------------------------------
+void SceneManager::mirrorRenderingPass() {
+  if (Mirror *mirror = world->getMirror()) {
+    // Draw the scene on the mirror texture from the point of view of the
+    // mirror.
+    mirror->enableMirror();
+    glm::mat4 cameraView = mirror->getModelView();
+    drawWorld(cameraView);
+    mirror->disableMirror();
+  }
+}
+
+// -----------------------------------------------------------------------------
+void SceneManager::shadowRenderingPass() {
+  ShaderProgram &shadowProgram = shadowManager->getShader();
+  shadowProgram.useProgram();
+
+  // Render to depth buffer from the point of view of the camera.
+  shadowManager->enableShadow();
+
+  glm::mat4 shadowProjection =
+      glm::ortho<float>(-10, 10, -10, 10, -10, 20);
+  glm::mat4 shadowView =
+      glm::lookAt(glm::vec3(10, 1.5, 0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+  glm::mat4 shadowMVP = shadowProjection * shadowView;
+
+  shadowProgram.setUniform("mvpMatrix", shadowMVP);
+  
+  drawWorld(shadowView);
+  shadowManager->disableShadow();
+}
+
+// -----------------------------------------------------------------------------
+void SceneManager::screenRenderingPass() {
+  cameraMutex.lock();
+  // FIXME
+  // domino: Camera.cpp:55:
+  // glm::mat4 Camera::applyView(): Assertion `eye == position && "Wrong
+  // transformation construction"' failed.
+  glm::mat4 modelView = camera.applyView();
+  cameraMutex.unlock();
+  drawWorld(modelView);
+
+  //  drawMirror(modelView);
+
+  // Draw text on top of the scene.
+  drawText();
 }
 
 // -----------------------------------------------------------------------------

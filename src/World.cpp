@@ -292,13 +292,13 @@ void World::initLights() {
 //                      .createPositional();
 //  lights.push_back(light1);
 
-  Light *light2 = lightBuilder.setPosition(glm::vec3(0.0f, 2.0f, 0.0f))
-              .setAmbientColor(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f))
-              .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-              .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-              .setLinearAttenuation(0.05f)
-              .createPositional();
-  lights.push_back(light2);
+//  Light *light2 = lightBuilder.setPosition(glm::vec3(0.0f, 2.0f, 0.0f))
+//              .setAmbientColor(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f))
+//              .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+//              .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+//              .setLinearAttenuation(0.05f)
+//              .createPositional();
+//  lights.push_back(light2);
 
 //  Light *light3 = lightBuilder.setPosition(glm::vec3(0.0f, 10.0f, 30.0f))
 //              .setAmbientColor(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f))
@@ -316,27 +316,27 @@ void World::initLights() {
 //              .createPositional();
 //  lights.push_back(light4);
 
-//  Light *light =
-//      lightBuilder.setAmbientColor(glm::vec4(0.7f, 0.7f, 0.7f, 1.0f))
-//          .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-//          .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-//          .setDirection(glm::vec3(1.0f, -0.3f, 0.0f))
-//          .createDirectional();
-//  lights.push_back(light);
+  Light *light =
+      lightBuilder.setAmbientColor(glm::vec4(0.7f, 0.7f, 0.7f, 1.0f))
+          .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+          .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+          .setDirection(glm::vec3(2.0f, -0.3f, 0.0f))
+          .createDirectional();
+  lights.push_back(light);
 }
 
 //-----------------------------------------------------------------------------
 void World::initMirror() {
-  MirrorBuilder mirrorBuilder;
-  float SIDE = 4.f;
-  btQuaternion rotation(M_PI, 0.0, 0.0);
-  mirror =
-      mirrorBuilder.setTransform(
-                        btTransform(rotation, btVector3(0.f, SIDE / 2, 15.f)))
-          .setAmbientColor(glm::vec4(1.f, 1.f, 1., 1.f))
-          .setDiffuseColor(glm::vec4(1.f, 1.f, 1., 1.f))
-          .setSide(btScalar(SIDE))
-          .create();
+//  MirrorBuilder mirrorBuilder;
+//  float SIDE = 4.f;
+//  btQuaternion rotation(M_PI, 0.0, 0.0);
+//  mirror =
+//      mirrorBuilder.setTransform(
+//                        btTransform(rotation, btVector3(0.f, SIDE / 2, 15.f)))
+//          .setAmbientColor(glm::vec4(1.f, 1.f, 1., 1.f))
+//          .setDiffuseColor(glm::vec4(1.f, 1.f, 1., 1.f))
+//          .setSide(btScalar(SIDE))
+//          .create();
 }
 
 //-----------------------------------------------------------------------------

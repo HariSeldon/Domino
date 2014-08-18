@@ -41,7 +41,6 @@ private:
   GLuint mirrorTexture;
   ShaderProgram *shader;
     
-
   friend class MirrorBuilder;
 };
 

@@ -109,8 +109,9 @@ void Mirror::createMirrorTexture() {
 //-----------------------------------------------------------------------------
 void Mirror::attachTexture() {
   glBindTexture(GL_TEXTURE_2D, mirrorTexture);
-  glBindFramebuffer(GL_FRAMEBUFFER, fboId);
   checkOpenGLError("Mirror: glBindTexture");
+  glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+  checkOpenGLError("Mirror: glBindFramebuffer");
   glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mirrorTexture,
                        0);
   checkOpenGLError("Mirror: glFramebufferTexture");
