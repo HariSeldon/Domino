@@ -18,7 +18,10 @@ ShadowManager::ShadowManager()
   attachTexture();
 }
 
-ShadowManager::~ShadowManager() {}
+ShadowManager::~ShadowManager() {
+  glGenTextures(1, &shadowTexture);
+  glDeleteFramebuffers(1, &fboId);
+}
 
 //-----------------------------------------------------------------------------
 void ShadowManager::createFBO() {
@@ -58,11 +61,11 @@ void ShadowManager::createShadowTexture() {
 //-----------------------------------------------------------------------------
 void ShadowManager::attachTexture() {
   glBindTexture(GL_TEXTURE_2D, shadowTexture);
-  checkOpenGLError("Shadow: glBindTexture");
+  checkOpenGLError("Shadow: attachTexture-glBindTexture");
   glBindFramebuffer(GL_FRAMEBUFFER, fboId);
-  checkOpenGLError("Shadow: glBindFrameBuffer");
+  checkOpenGLError("ShadowManager: attachTexture-glBindBuffer");
   glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadowTexture, 0);
-  checkOpenGLError("Shadow: glFramebufferTexture");
+  checkOpenGLError("Shadow: attachTexture-glFramebufferTexture");
 
   glDrawBuffer(GL_NONE);
   checkOpenGLError("Shadow: glDrawBuffer");
@@ -74,9 +77,11 @@ void ShadowManager::attachTexture() {
 
 //-----------------------------------------------------------------------------
 void ShadowManager::enableShadow() const {
-  glBindBuffer(GL_FRAMEBUFFER, fboId);
+  glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+  checkOpenGLError("ShadowManager: enableShadow-glBindBuffer");
   glViewport(0, 0, 1280, 800);
   glBindTexture(GL_TEXTURE_2D, shadowTexture);
+  checkOpenGLError("ShadowManager: enableShadow-glBindTexture");
 }
 
 //-----------------------------------------------------------------------------

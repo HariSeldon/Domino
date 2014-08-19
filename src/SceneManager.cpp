@@ -92,6 +92,23 @@ void SceneManager::drawObjects(const glm::mat4 &modelView) {
 }
 
 // -----------------------------------------------------------------------------
+void SceneManager::drawShadowWorld(const glm::mat4 &modelView,
+                                   const glm::mat4 &projection) {
+  glClear(GL_DEPTH_BUFFER_BIT);
+
+  drawObjectsForShadow(modelView, projection);
+}
+
+// -----------------------------------------------------------------------------
+void SceneManager::drawObjectsForShadow(const glm::mat4 &modelView,
+                                        const glm::mat4 &projection) {
+  std::for_each(constBeginObjects(world), constEndObjects(world),
+                [&](const Object *object) {
+    drawer->drawObjectForShadow(object, *shader, modelView, projection);
+  });
+}
+
+// -----------------------------------------------------------------------------
 void SceneManager::drawLights(const glm::mat4 &modelView) {
   shader->setUniform("ambientColor", world->getAmbientColor());
   shader->setUniform("lightsNumber", world->getLightsNumber());
@@ -136,12 +153,9 @@ void SceneManager::shadowRenderingPass() {
   glm::mat4 shadowProjection =
       glm::ortho<float>(-10, 10, -10, 10, -10, 20);
   glm::mat4 shadowView =
-      glm::lookAt(glm::vec3(10, 1.5, 0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-  glm::mat4 shadowMVP = shadowProjection * shadowView;
+      glm::lookAt(glm::vec3(0, 8, 0), glm::vec3(0, 7, 0), glm::vec3(0, 0, 1));
 
-  shadowProgram.setUniform("mvpMatrix", shadowMVP);
-  
-  drawWorld(shadowView);
+  drawShadowWorld(shadowView, shadowProjection);
   shadowManager->disableShadow();
 }
 

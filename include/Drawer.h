@@ -24,20 +24,23 @@ public:
   ~Drawer();
 
 public:
-  void initGPUObjects(const ShaderProgram &shaderProgram, const World &world);
-  void initMirror(const ShaderProgram &shaderProgram, const Mirror* mirror);
+  void initGPUObjects(const ShaderProgram &shader, const World &world);
+  void initMirror(const ShaderProgram &shader, const Mirror* mirror);
 
   // Drawing functions.
-  void drawObject(const Object *object, ShaderProgram &shaderProgram,
+  void drawObject(const Object *object, ShaderProgram &shader,
                   const glm::mat4 &original) const;
+  void drawObjectForShadow(const Object *object, ShaderProgram &shader,
+                           const glm::mat4 &modelView,
+                           const glm::mat4 &projection) const;
 
 private:
-  void initWorldObjects(const ShaderProgram &shaderProgram, const World &world);
+  void initWorldObjects(const ShaderProgram &shader, const World &world);
 
-  GLuint setupVertexVBO(const Object *object, const ShaderProgram &shaderProgram);
-  GLuint setupNormalVBO(const Object *object, const ShaderProgram &shaderProgram);
+  GLuint setupVertexVBO(const Object *object, const ShaderProgram &shader);
+  GLuint setupNormalVBO(const Object *object, const ShaderProgram &shader);
   GLuint setupIndexVBO(const Object *object);
-  GLuint setupTextureVBO(const Object *object, const ShaderProgram &shaderProgram);
+  GLuint setupTextureVBO(const Object *object, const ShaderProgram &shader);
 
 private:
   // Maps world objects (identifies by their memory locations) 

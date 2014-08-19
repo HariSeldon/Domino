@@ -47,8 +47,11 @@ public:
 private:
   void setupProjection(const glm::ivec2 &screenSize);
   void drawWorld(const glm::mat4 &modelView);
+  void drawShadowWorld(const glm::mat4 &modelView, const glm::mat4 &projection);
   void drawLights(const glm::mat4 &modelView);
   void drawObjects(const glm::mat4 &modelView);
+  void drawObjectsForShadow(const glm::mat4 &modelView,
+                            const glm::mat4 &projection);
   void drawMirror(const glm::mat4 &modelView);
   void drawText();
   void mirrorRenderingPass();
