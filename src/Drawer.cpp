@@ -23,7 +23,10 @@
 //-----------------------------------------------------------------------------
 void setColors(const Object *object, ShaderProgram &shader);
 void setOrientation(const Object *object, ShaderProgram &shader,
-                    const glm::mat4 &originalModelView);
+                    const glm::mat4 &originalModelView, 
+                    const glm::mat4 &projection,
+                    const glm::mat4 &originalShadowModelView,
+                    const glm::mat4 &shadowProjection);
 void setOrientationForShadow(const Object *object, ShaderProgram &shader,
                              const glm::mat4 &originalModelView,
                              const glm::mat4 &projection);
@@ -153,10 +156,14 @@ Drawer::~Drawer() {
 
 //-----------------------------------------------------------------------------
 void Drawer::drawObject(const Object *object, ShaderProgram &shader,
-                        const glm::mat4 &originalModelView) const {
+                        const glm::mat4 &originalModelView,
+                        const glm::mat4 &projection,
+                        const glm::mat4 &originalShadowModelView,
+                        const glm::mat4 &shadowProjection) const {
 
   setColors(object, shader);
-  setOrientation(object, shader, originalModelView);
+  setOrientation(object, shader, originalModelView, projection,
+                 originalShadowModelView, shadowProjection);
 
   GLuint vao = vaoWorldMap.at(reinterpret_cast<intptr_t>(object));
   glBindVertexArray(vao);
@@ -188,15 +195,27 @@ void setColors(const Object *object, ShaderProgram &shader) {
 
 //------------------------------------------------------------------------------
 void setOrientation(const Object *object, ShaderProgram &shader,
-                    const glm::mat4 &originalModelView) {
-  btScalar transformMatrix[16];
-  object->getOpenGLMatrix(transformMatrix);
-  glm::mat4 modelViewMatrix = glm::make_mat4x4(transformMatrix);
+                    const glm::mat4 &originalModelView, 
+                    const glm::mat4 &projection,
+                    const glm::mat4 &originalShadowModelView,
+                    const glm::mat4 &shadowProjection) {
+  btScalar transform[16];
+  object->getOpenGLMatrix(transform);
+  glm::mat4 modelView = glm::make_mat4x4(transform);
 
-  modelViewMatrix = originalModelView * modelViewMatrix;
-  shader.setUniform("modelViewMatrix", modelViewMatrix);
+  glm::mat4 biasMatrix(0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5,
+                       0.0, 0.5, 0.5, 0.5, 1.0);
+  glm::mat4 shadowMVP =
+      biasMatrix * shadowProjection * originalShadowModelView * modelView;
+  modelView = originalModelView * modelView;
+
+  // FIXME I can avoid setting the projection uniform every time.
+  // If I cannot integrate projection and model view hoist this out.
+  shader.setUniform("projectionMatrix", projection);
+  shader.setUniform("modelViewMatrix", modelView);
   shader.setUniform("normalMatrix",
-                           glm::inverseTranspose(glm::mat3(modelViewMatrix)));
+                           glm::inverseTranspose(glm::mat3(modelView)));
+  shader.setUniform("mvpShadowMatrix", shadowMVP);
 }
 
 //------------------------------------------------------------------------------

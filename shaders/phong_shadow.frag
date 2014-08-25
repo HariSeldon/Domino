@@ -1,9 +1,10 @@
 #version 330
 
-uniform sampler2D texture;
+uniform sampler2D shadowTexture;
 
 in vec3 position;
 in vec3 normal;
+in vec3 shadowPosition;
 
 out vec4 outputColor;
 
@@ -70,7 +71,6 @@ vec4 shadeDirectionalLight(vec3 position, vec3 normal, vec3 cameraDirection,
   vec4 specularLightColor = light.specular;
 
   vec4 fragmentAmbientColor = ambientMaterialColor * ambientLightColor;
-  vec4 finalColor = fragmentAmbientColor;
 
   vec3 lightDirection = -1.0f * normalize(light.position.xyz);
   vec3 halfDirection = normalize(lightDirection + cameraDirection);
@@ -84,7 +84,12 @@ vec4 shadeDirectionalLight(vec3 position, vec3 normal, vec3 cameraDirection,
           ? specularMaterialColor * specularLightColor * pow(cosH, shininess)
           : vec4(0.0, 0.0, 0.0, 1.0);
 
-  finalColor = diffuseColor + specularColor;
+  vec4 finalColor = fragmentAmbientColor;
+  if (texture2D(shadowTexture, shadowPosition.xy).r < shadowPosition.z) {
+    return finalColor;
+  }
+  finalColor += diffuseColor + specularColor;
+
   return finalColor;
 }
 
@@ -182,5 +187,10 @@ void main() {
     }
   }
 
-  outputColor = finalFragmentColor;
+  // Decide if the fragment is in the shadow.
+  if (texture2D(shadowTexture, shadowPosition.xy).r < shadowPosition.z) {
+    outputColor = finalFragmentColor * 0.5;
+  } else {
+    outputColor = finalFragmentColor;
+  }
 }

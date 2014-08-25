@@ -23,8 +23,8 @@ const float SceneManager::Z_FAR = 2000.0f;
 const glm::vec4 SceneManager::CLEAR_COLOR = { 0.2f, 0.4f, 0.6f, 1.f };
 
 const std::string SceneManager::FONT_FILE = "VeraMono.ttf";
-const std::string SceneManager::MAIN_VERTEX_SHADER = "phong.vert";
-const std::string SceneManager::MAIN_FRAGMENT_SHADER = "phong.frag";
+const std::string SceneManager::MAIN_VERTEX_SHADER = "phong_shadow.vert";
+const std::string SceneManager::MAIN_FRAGMENT_SHADER = "phong_shadow.frag";
 
 // -----------------------------------------------------------------------------
 SceneManager::SceneManager(const glm::ivec2 &screenSize)
@@ -65,11 +65,12 @@ void SceneManager::drawScene() {
 
 //  mirrorRenderingPass();
   shadowRenderingPass();
-//  screenRenderingPass();
+  screenRenderingPass();
 }
 
 // -----------------------------------------------------------------------------
-void SceneManager::drawWorld(const glm::mat4 &modelView, ShaderProgram &shader) {
+void SceneManager::drawWorld(const glm::mat4 &modelView,
+                             ShaderProgram &shader) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   drawObjects(modelView, shader);
@@ -77,10 +78,18 @@ void SceneManager::drawWorld(const glm::mat4 &modelView, ShaderProgram &shader) 
 }
 
 // -----------------------------------------------------------------------------
-void SceneManager::drawObjects(const glm::mat4 &modelView, ShaderProgram &shader) {
+void SceneManager::drawObjects(const glm::mat4 &modelView,
+                               ShaderProgram &shader) {
+  glm::mat4 shadowView =
+      glm::lookAt(glm::vec3(0, 2, 0), glm::vec3(0, 1, 0), glm::vec3(1, 0, 0));
+  float side = 8;
+  glm::mat4 shadowProjection =
+      glm::ortho<float>(-side, side, -side, side, 0, side);
+
   std::for_each(constBeginObjects(world), constEndObjects(world),
                 [&](const Object *object) {
-    drawer.drawObject(object, shader, modelView);
+    drawer.drawObject(object, shader, modelView, projection, shadowView,
+                      shadowProjection);
   });
 }
 
@@ -102,7 +111,7 @@ void SceneManager::drawMirror(const glm::mat4 &modelView) {
     mirrorShader.useProgram();
     mirrorShader.setUniform("projectionMatrix", projection);
     mirrorShader.setUniform("texture", 0);
-    drawer.drawObject(mirror, mirrorShader, modelView);
+    //drawer.drawObject(mirror, mirrorShader, modelView, projection);
   }
 }
 
@@ -121,16 +130,16 @@ void SceneManager::mirrorRenderingPass() {
 // -----------------------------------------------------------------------------
 void SceneManager::shadowRenderingPass() {
   glm::mat4 shadowView =
-      glm::lookAt(glm::vec3(1, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+      glm::lookAt(glm::vec3(0, 2, 0), glm::vec3(0, 1, 0), glm::vec3(1, 0, 0));
 
-  float side = 4;
-  glm::mat4 depthProjectionMatrix =
-      glm::ortho<float>(-side, side, 0, side, 0, side);
+  float side = 8;
+  glm::mat4 shadowProjection =
+      glm::ortho<float>(-side, side, -side, side, 0, side);
 
   ShaderProgram &shadowShader = shadowManager.getShader();
   shadowShader.useProgram();
   shadowManager.enableShadow();
-  drawShadowWorld(shadowView, depthProjectionMatrix, shadowShader);
+  drawShadowWorld(shadowView, shadowProjection, shadowShader);
   shadowManager.disableShadow();
 }
 
@@ -151,12 +160,14 @@ void SceneManager::drawShadowWorld(const glm::mat4 &modelView,
 // -----------------------------------------------------------------------------
 void SceneManager::screenRenderingPass() {
   worldShader.useProgram();
-  worldShader.setUniform("projectionMatrix", projection);
   cameraMutex.lock();
   // FIXME
   // domino: Camera.cpp:55:
   // glm::mat4 Camera::applyView(): Assertion `eye == position && "Wrong
   // transformation construction"' failed.
+
+  worldShader.setUniform("shadowTexture", 0);
+
   glm::mat4 modelView = camera.applyView();
   cameraMutex.unlock();
   drawWorld(modelView, worldShader);

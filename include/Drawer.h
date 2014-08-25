@@ -31,9 +31,12 @@ public:
 
   // Drawing functions.
   void drawObject(const Object *object, ShaderProgram &shader,
-                  const glm::mat4 &original) const;
+                  const glm::mat4 &originalModelView,
+                  const glm::mat4 &projection,
+                  const glm::mat4 &originalShadowModelView,
+                  const glm::mat4 &shadowProjection) const; 
   void drawObjectForShadow(const Object *object, ShaderProgram &shader,
-                           const glm::mat4 &modelView,
+                           const glm::mat4 &originalModelView,
                            const glm::mat4 &projection) const;
 
 private:
