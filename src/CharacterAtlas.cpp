@@ -61,7 +61,7 @@ void CharacterAtlas::createTexture() {
   checkOpenGLError("CharacterAtlas: glBindTexture");
 
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED,
-               GL_UNSIGNED_BYTE, 0);
+               GL_UNSIGNED_BYTE, nullptr);
   checkOpenGLError("CharacterAtlas glTexImage2D");
 
   // 1 Byte alignment.

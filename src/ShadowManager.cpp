@@ -24,6 +24,11 @@ ShadowManager::~ShadowManager() {
 }
 
 //-----------------------------------------------------------------------------
+GLuint ShadowManager::getTexture() const {
+  return shadowTexture;
+}
+
+//-----------------------------------------------------------------------------
 void ShadowManager::createFBO() {
   glGenFramebuffers(1, &fboId);
   checkOpenGLError("Shadow: glGenRenderbuffers");
@@ -38,7 +43,7 @@ void ShadowManager::createShadowTexture() {
   checkOpenGLError("Shadow: glBindTexture");
 
   glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 1280, 800, 0,
-               GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+               GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
   checkOpenGLError("Shadow: glTexImage2D");
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -64,11 +69,13 @@ void ShadowManager::attachTexture() {
   checkOpenGLError("Shadow: attachTexture-glBindTexture");
   glBindFramebuffer(GL_FRAMEBUFFER, fboId);
   checkOpenGLError("ShadowManager: attachTexture-glBindBuffer");
-  glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadowTexture, 0);
+  glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowTexture, 0);
   checkOpenGLError("Shadow: attachTexture-glFramebufferTexture");
 
   glDrawBuffer(GL_NONE);
   checkOpenGLError("Shadow: glDrawBuffer");
+  glReadBuffer(GL_NONE);
+  checkOpenGLError("Shadow: glReadBuffer");
 
   assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE &&
          "Error setting frame buffer");
@@ -78,7 +85,7 @@ void ShadowManager::attachTexture() {
 //-----------------------------------------------------------------------------
 void ShadowManager::enableShadow() const {
   glBindFramebuffer(GL_FRAMEBUFFER, fboId);
-  checkOpenGLError("ShadowManager: enableShadow-glBindBuffer");
+  checkOpenGLError("ShadowManager: enableShadow-glBindFrameBuffer");
   glViewport(0, 0, 1280, 800);
   glBindTexture(GL_TEXTURE_2D, shadowTexture);
   checkOpenGLError("ShadowManager: enableShadow-glBindTexture");

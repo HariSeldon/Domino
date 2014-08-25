@@ -1,6 +1,5 @@
 #version 330
 
-// FIXME: replace the projectionMatrix with mvpMatrix -> this saves a MM.
 uniform mat4 projectionMatrix;
 uniform mat4 modelViewMatrix;
 uniform mat3 normalMatrix;

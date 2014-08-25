@@ -39,6 +39,7 @@ include_directories(SYSTEM ${BULLET_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR})
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -Wall -Wextra -pedantic")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -Wall -Wextra -pedantic")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+add_definitions("-g")
 
 # Add sources to executable.
 add_executable(${EXE_NAME} ${SRC_FILES_LIST})

@@ -2,6 +2,7 @@
 
 #include "Shader.h"
 #include "SysDefines.h"
+#include "SysUtils.h"
 
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
@@ -50,7 +51,10 @@ ShaderProgram::~ShaderProgram() {
 
 GLuint ShaderProgram::getProgramId() const { return programID; }
 
-void ShaderProgram::useProgram() const { glUseProgram(programID); }
+void ShaderProgram::useProgram() const {
+  glUseProgram(programID);
+  checkOpenGLError("ShaderProgram: useProgram-glUseProgram");
+}
 
 // #############################################################################
 // Uniform management.
@@ -83,15 +87,14 @@ template void ShaderProgram::setUniform(const std::string &name,
 template <typename type>
 void ShaderProgram::setUniform(const std::string &name, const type &value) {
   auto iter = uniformLocationsMap.find(name);
-  if (iter == uniformLocationsMap.end()) 
+  if (iter == uniformLocationsMap.end()) {
+    std::cout << "Error setting: " << name << "\n";
     return;
+  }
   setUniformValue<type>(uniformLocationsMap[name], value);
 }
 
-template <typename type>
-void setUniformValue(GLint, const type &) {
-  return;
-}
+template <typename type> void setUniformValue(GLint, const type &) { return; }
 
 template <> void setUniformValue(GLint location, const unsigned int &value) {
   glUniform1i(location, value);
@@ -121,6 +124,7 @@ template <> void setUniformValue(GLint location, const glm::mat3 &matrix) {
   glUniformMatrix3fv(location, 1, GL_FALSE, &matrix[0][0]);
 }
 
+// -----------------------------------------------------------------------------
 void ShaderProgram::fillUniformMap() {
   std::vector<int> sizes = queryUniformNamesLength(programID);
   GLenum type = 0;
@@ -136,6 +140,7 @@ void ShaderProgram::fillUniformMap() {
   }
 }
 
+// -----------------------------------------------------------------------------
 int queryUniformsNumber(GLuint programID) {
   GLint uniformsNumber = -1;
   glGetProgramiv(programID, GL_ACTIVE_UNIFORMS, &uniformsNumber);
@@ -144,6 +149,7 @@ int queryUniformsNumber(GLuint programID) {
   return static_cast<int>(uniformsNumber);
 }
 
+// -----------------------------------------------------------------------------
 std::vector<int> queryUniformNamesLength(GLuint programID) {
   int uniformsNumber = queryUniformsNumber(programID);
   // Uniform indices to be queries.
@@ -165,11 +171,14 @@ int ShaderProgram::getAttributeLocation(const std::string &name) const {
   return attributeLocationsMap.at(name);
 }
 
-void ShaderProgram::setAttribute(const std::string &name, int size, GLenum type) const {
+// -----------------------------------------------------------------------------
+void ShaderProgram::setAttribute(const std::string &name, int size,
+                                 GLenum type) const {
   int location = 0;
   try {
     location = attributeLocationsMap.at(name);
-  } catch (std::out_of_range &exception) {
+  }
+  catch (std::out_of_range &exception) {
     std::cout << "Cannot set attibute: " << name << "\n";
     return;
   }
@@ -178,6 +187,7 @@ void ShaderProgram::setAttribute(const std::string &name, int size, GLenum type)
   glEnableVertexAttribArray(location);
 }
 
+// -----------------------------------------------------------------------------
 void ShaderProgram::fillAttributeMap() {
   int attributesNumber = queryAttributesNumber(programID);
   const int ATTRIBUTE_NAME_MAX_SIZE = 256;
@@ -194,6 +204,7 @@ void ShaderProgram::fillAttributeMap() {
   }
 }
 
+// -----------------------------------------------------------------------------
 int queryAttributesNumber(GLuint programID) {
   GLint attributesNumber = -1;
   glGetProgramiv(programID, GL_ACTIVE_ATTRIBUTES, &attributesNumber);
@@ -202,12 +213,14 @@ int queryAttributesNumber(GLuint programID) {
   return static_cast<int>(attributesNumber);
 }
 
+// -----------------------------------------------------------------------------
 int queryAttributeLocation(GLuint programID, const char *attributeName) {
   GLint location = glGetAttribLocation(programID, attributeName);
   assert(location != -1 && "Error querying attribute location");
   return location;
 }
 
+// -----------------------------------------------------------------------------
 void checkErrors(GLuint programID) {
   if (!glIsProgram(programID)) {
     throw std::runtime_error("Error in creating shader program");

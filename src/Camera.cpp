@@ -10,11 +10,10 @@
 
 #include <iostream>
 
-const glm::vec4 Camera::DEFAULT_POSITION = { 0.f, 1.f, 0.f, 1.f };
+const glm::vec4 Camera::DEFAULT_POSITION = { 1.f, 1.f, 0.f, 1.f };
 
 Camera::Camera()
-    : Camera(Camera::DEFAULT_POSITION, Camera::DEFAULT_X_ROTATION,
-             Camera::DEFAULT_Y_ROTATION) {}
+    : Camera(Camera::DEFAULT_POSITION, Camera::DEFAULT_X_ROTATION, -M_PI_2) {}
 
 Camera::Camera(const glm::vec4 &position, float xRotation, float yRotation)
     : position(position), xRotation(xRotation), yRotation(yRotation) {}

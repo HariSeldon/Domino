@@ -10,6 +10,7 @@
 #include "World.h"
 
 #include <algorithm>
+#include <iostream>
 
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
@@ -27,22 +28,13 @@ const std::string SceneManager::MAIN_FRAGMENT_SHADER = "phong.frag";
 
 // -----------------------------------------------------------------------------
 SceneManager::SceneManager(const glm::ivec2 &screenSize)
-    : world(new World), drawer(new Drawer),
-      shader(new ShaderProgram(MAIN_VERTEX_SHADER, MAIN_FRAGMENT_SHADER)),
-      fps(0), lightMask((2 << (world->getLightsNumber() - 1)) - 1) {
+    : worldShader(MAIN_VERTEX_SHADER, MAIN_FRAGMENT_SHADER),
+      textManager(TextManager(FONT_PATH + FONT_FILE, FONT_HEIGHT, screenSize)),
+      fps(0), lightMask((2 << (world.getLightsNumber() - 1)) - 1) {
   setupProjection(screenSize);
-  textManager =
-      new TextManager(FONT_PATH + FONT_FILE, FONT_HEIGHT, screenSize);
+  initGPU();
   glClearColor(CLEAR_COLOR.x, CLEAR_COLOR.y, CLEAR_COLOR.z, CLEAR_COLOR.w);
   checkOpenGLError("GLInitializer: glClearColor");
-
-  drawer->initGPUObjects(*shader, *world);
-  if (Mirror *mirror = world->getMirror()) {
-    ShaderProgram *mirrorShader = mirror->getShaderProgram();
-    drawer->initMirror(*mirrorShader, mirror);
-  }
-
-  shadowManager = new ShadowManager();
 }
 
 // -----------------------------------------------------------------------------
@@ -54,13 +46,18 @@ void SceneManager::setupProjection(const glm::ivec2& screenSize) {
 }
 
 // -----------------------------------------------------------------------------
+void SceneManager::initGPU() {
+  drawer.initGPUObjects(worldShader, world);
+  drawer.initGPUShadowObjects(shadowManager.getShader(), world);
+  if (Mirror *mirror = world.getMirror()) {
+    ShaderProgram &mirrorShader = mirror->getShaderProgram();
+    drawer.initMirror(mirrorShader, mirror);
+  }
+}
+
+// -----------------------------------------------------------------------------
 SceneManager::~SceneManager() {
   glUseProgram(0);
-  delete shader;
-  delete drawer;
-  delete world;
-  delete textManager;
-  delete shadowManager;
 }
 
 // -----------------------------------------------------------------------------
@@ -68,99 +65,93 @@ void SceneManager::drawScene() {
 
 //  mirrorRenderingPass();
   shadowRenderingPass();
-
-  shader->useProgram();
-  shader->setUniform("projectionMatrix", projection);
-
-  screenRenderingPass();
+//  screenRenderingPass();
 }
 
 // -----------------------------------------------------------------------------
-void SceneManager::drawWorld(const glm::mat4 &modelView) {
+void SceneManager::drawWorld(const glm::mat4 &modelView, ShaderProgram &shader) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  drawObjects(modelView);
-  drawLights(modelView);
+  drawObjects(modelView, shader);
+  drawLights(modelView, shader);
 }
 
 // -----------------------------------------------------------------------------
-void SceneManager::drawObjects(const glm::mat4 &modelView) {
+void SceneManager::drawObjects(const glm::mat4 &modelView, ShaderProgram &shader) {
   std::for_each(constBeginObjects(world), constEndObjects(world),
                 [&](const Object *object) {
-    drawer->drawObject(object, *shader, modelView);
+    drawer.drawObject(object, shader, modelView);
   });
 }
 
 // -----------------------------------------------------------------------------
-void SceneManager::drawShadowWorld(const glm::mat4 &modelView,
-                                   const glm::mat4 &projection) {
-  glClear(GL_DEPTH_BUFFER_BIT);
-
-  drawObjectsForShadow(modelView, projection);
-}
-
-// -----------------------------------------------------------------------------
-void SceneManager::drawObjectsForShadow(const glm::mat4 &modelView,
-                                        const glm::mat4 &projection) {
-  std::for_each(constBeginObjects(world), constEndObjects(world),
-                [&](const Object *object) {
-    drawer->drawObjectForShadow(object, *shader, modelView, projection);
-  });
-}
-
-// -----------------------------------------------------------------------------
-void SceneManager::drawLights(const glm::mat4 &modelView) {
-  shader->setUniform("ambientColor", world->getAmbientColor());
-  shader->setUniform("lightsNumber", world->getLightsNumber());
-  shader->setUniform("lightMask", lightMask);
+void SceneManager::drawLights(const glm::mat4 &modelView,
+                              ShaderProgram &shader) {
+  shader.setUniform("ambientColor", world.getAmbientColor());
+  shader.setUniform("lightsNumber", world.getLightsNumber());
+  shader.setUniform("lightMask", lightMask);
   std::for_each(
       constBeginLights(world), constEndLights(world),
-      [&](const Light *light) { light->draw(*shader, modelView); });
+      [&](const Light *light) { light->draw(shader, modelView); });
 }
 
 // -----------------------------------------------------------------------------
 void SceneManager::drawMirror(const glm::mat4 &modelView) {
-  if (Mirror *mirror = world->getMirror()) {
-    ShaderProgram *mirrorShader = mirror->getShaderProgram();
-    mirrorShader->useProgram();
-    mirrorShader->setUniform("projectionMatrix", projection);
-    mirrorShader->setUniform("texture", 0);
-    drawer->drawObject(mirror, *mirrorShader, modelView);
-    shader->useProgram();
+  if (Mirror *mirror = world.getMirror()) {
+    ShaderProgram &mirrorShader = mirror->getShaderProgram();
+    mirrorShader.useProgram();
+    mirrorShader.setUniform("projectionMatrix", projection);
+    mirrorShader.setUniform("texture", 0);
+    drawer.drawObject(mirror, mirrorShader, modelView);
   }
 }
 
 // -----------------------------------------------------------------------------
 void SceneManager::mirrorRenderingPass() {
-  if (Mirror *mirror = world->getMirror()) {
+  if (Mirror *mirror = world.getMirror()) {
     // Draw the scene on the mirror texture from the point of view of the
     // mirror.
     mirror->enableMirror();
     glm::mat4 cameraView = mirror->getModelView();
-    drawWorld(cameraView);
+    drawWorld(cameraView, worldShader);
     mirror->disableMirror();
   }
 }
 
 // -----------------------------------------------------------------------------
 void SceneManager::shadowRenderingPass() {
-  ShaderProgram &shadowProgram = shadowManager->getShader();
-  shadowProgram.useProgram();
-
-  // Render to depth buffer from the point of view of the camera.
-  shadowManager->enableShadow();
-
-  glm::mat4 shadowProjection =
-      glm::ortho<float>(-10, 10, -10, 10, -10, 20);
   glm::mat4 shadowView =
-      glm::lookAt(glm::vec3(0, 8, 0), glm::vec3(0, 7, 0), glm::vec3(0, 0, 1));
+      glm::lookAt(glm::vec3(1, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
-  drawShadowWorld(shadowView, shadowProjection);
-  shadowManager->disableShadow();
+  float side = 4;
+  glm::mat4 depthProjectionMatrix =
+      glm::ortho<float>(-side, side, 0, side, 0, side);
+
+  ShaderProgram &shadowShader = shadowManager.getShader();
+  shadowShader.useProgram();
+  shadowManager.enableShadow();
+  drawShadowWorld(shadowView, depthProjectionMatrix, shadowShader);
+  shadowManager.disableShadow();
+}
+
+// -----------------------------------------------------------------------------
+void SceneManager::drawShadowWorld(const glm::mat4 &modelView,
+                                   const glm::mat4 &projection, 
+                                   ShaderProgram &shader) {
+  // FIXME I think I should need to clear just the depth buffer.
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  checkOpenGLError("drawShadowWorld: glClear");
+
+  std::for_each(constBeginObjects(world), constEndObjects(world),
+                [&](const Object *object) {
+    drawer.drawObjectForShadow(object, shader, modelView, projection);
+  });
 }
 
 // -----------------------------------------------------------------------------
 void SceneManager::screenRenderingPass() {
+  worldShader.useProgram();
+  worldShader.setUniform("projectionMatrix", projection);
   cameraMutex.lock();
   // FIXME
   // domino: Camera.cpp:55:
@@ -168,7 +159,7 @@ void SceneManager::screenRenderingPass() {
   // transformation construction"' failed.
   glm::mat4 modelView = camera.applyView();
   cameraMutex.unlock();
-  drawWorld(modelView);
+  drawWorld(modelView, worldShader);
 
   //  drawMirror(modelView);
 
@@ -179,8 +170,8 @@ void SceneManager::screenRenderingPass() {
 // -----------------------------------------------------------------------------
 void SceneManager::drawText() {
   glDisable(GL_DEPTH_TEST);
-  textManager->addText("Frames per second: " + std::to_string(fps), { 0, 780 });
-  textManager->renderText();
+  textManager.addText("Frames per second: " + std::to_string(fps), { 0, 780 });
+  textManager.renderText();
   glEnable(GL_DEPTH_TEST);
 }
 

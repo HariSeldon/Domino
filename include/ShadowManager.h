@@ -15,6 +15,7 @@ public:
   void enableShadow() const;
   void disableShadow() const;
   ShaderProgram &getShader();
+  GLuint getTexture() const;
 
 private:
   void createFBO();

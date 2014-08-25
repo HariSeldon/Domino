@@ -139,9 +139,59 @@ void World::initObjects() {
   // Plane.
   addObject(planeBuilder.setTransform(btTransform::getIdentity())
                         .setMass(btScalar(0.0))
-                        .setAmbientColor(glm::vec4(0.0215, 0.1745, 0.0215, 1.0))
+                        .setAmbientColor(glm::vec4(0.8215, 0.7745, 0.4215, 1.0))
                         .setDiffuseColor(glm::vec4(0.07568, 0.61424, 0.07568, 1.0))
                         .setSide(btScalar(2000.0)).create());
+
+  addObject(boxBuilder.setTransform(btTransform::getIdentity())
+                .setMass(btScalar(20.0))
+                .setAmbientColor(glm::vec4(0.1745, 0.01175, 0.01175, 1.0))
+                .setDiffuseColor(glm::vec4(0.61424, 0.04136, 0.04136, 1.0))
+                .setSpecularColor(glm::vec4(0.727811, 0.626959, 0.626959, 0.6))
+                .setShininess(51.2f)
+                .setSides(btVector3(0.25, 2.0, 0.5))
+                .create());
+
+//  btQuaternion yRotation(0.0, 0.0, 0.0);
+//  addObject(boxBuilder.setTransform(btTransform(yRotation,
+//                                                btVector3(0, 1.0, 1.0)))
+//                .setMass(btScalar(20.0))
+//                .setAmbientColor(glm::vec4(0.1745, 0.01175, 0.01175, 1.0))
+//                .setDiffuseColor(glm::vec4(0.61424, 0.04136, 0.04136, 1.0))
+//                .setSpecularColor(glm::vec4(0.727811, 0.626959, 0.626959, 0.6))
+//                .setShininess(51.2f)
+//                .setSides(btVector3(0.25, 2.0, 0.5))
+//                .create());
+//
+//  addObject(boxBuilder.setTransform(btTransform(yRotation,
+//                                                btVector3(-3, 1.0, 0.0)))
+//                .setMass(btScalar(20.0))
+//                .setAmbientColor(glm::vec4(0.1745, 0.01175, 0.01175, 1.0))
+//                .setDiffuseColor(glm::vec4(0.61424, 0.04136, 0.04136, 1.0))
+//                .setSpecularColor(glm::vec4(0.727811, 0.626959, 0.626959, 0.6))
+//                .setShininess(51.2f)
+//                .setSides(btVector3(0.25, 2.0, 0.5))
+//                .create());
+//
+//  addObject(boxBuilder.setTransform(btTransform(yRotation,
+//                                                btVector3(-2, 1.0, -3.75)))
+//                .setMass(btScalar(20.0))
+//                .setAmbientColor(glm::vec4(0.1745, 0.01175, 0.01175, 1.0))
+//                .setDiffuseColor(glm::vec4(0.61424, 0.04136, 0.04136, 1.0))
+//                .setSpecularColor(glm::vec4(0.727811, 0.626959, 0.626959, 0.6))
+//                .setShininess(51.2f)
+//                .setSides(btVector3(0.25, 2.0, 0.5))
+//                .create());
+//
+//  addObject(boxBuilder.setTransform(btTransform(yRotation,
+//                                                btVector3(-2, 1.0, 3.75)))
+//                .setMass(btScalar(20.0))
+//                .setAmbientColor(glm::vec4(0.1745, 0.01175, 0.01175, 1.0))
+//                .setDiffuseColor(glm::vec4(0.61424, 0.04136, 0.04136, 1.0))
+//                .setSpecularColor(glm::vec4(0.727811, 0.626959, 0.626959, 0.6))
+//                .setShininess(51.2f)
+//                .setSides(btVector3(0.25, 2.0, 0.5))
+//                .create());
 
 //  addObject(meshBuilder.setTransform(btTransform(btQuaternion::getIdentity(),
 //                                                btVector3(20.0, 10.0, 0.0)))
@@ -170,84 +220,55 @@ void World::initObjects() {
 //                .setSides(btVector3(5, 40.0, 10.0))
 //                .create());
 
-  //  // Sphere.
-  //  world->addObject(sphereBuilder.setTransform(btTransform(btQuaternion::getIdentity(),
-  //                                                          btVector3(-50.0,
-  // 10.0, 0.0)))
-  //                                .setMass(btScalar(20.0))
-  //                                .setAmbientColor(btVector4(0.1745, 0.01175,
-  // 0.01175, 1.0))
-  //                                .setDiffuseColor(btVector4(0.61424, 0.04136,
-  // 0.04136, 1.0))
-  //                                .setSpecularColor(btVector4(0.727811,
-  // 0.626959, 0.626959, 0.6))
-  //                                .setShininess(76.8f)
-  //                                .setRadius(btScalar(20.0))
-  //                                .create());
-  //  // Sphere.
-  //  world->addObject(sphereBuilder.setTransform(btTransform(btQuaternion::getIdentity(),
-  //                                                          btVector3(50.0,
-  // 10.0, 0.0)))
-  //                                .setMass(btScalar(20.0))
-  //                                .setAmbientColor(btVector4(0.1745, 0.01175,
-  // 0.01175, 1.0))
-  //                                .setDiffuseColor(btVector4(0.61424, 0.04136,
-  // 0.04136, 1.0))
-  //                                .setSpecularColor(btVector4(0.727811,
-  // 0.626959, 0.626959, 0.6))
-  //                                .setShininess(76.8f)
-  //                                .setRadius(btScalar(20.0))
-  //                                .create());
-
-  // WORKING CONFIG.
-  int SIDES = 13;
-  btScalar RADIUS = 9;
-  btScalar angle = 2 * M_PI / SIDES;
-  btScalar currentAngle = 0;
-  int halfSides = ceil(SIDES / 2.0);
-
-  for (int index = 0; index < halfSides; ++index) {
-    btScalar currentStep = angle;
-
-    btScalar x1 = RADIUS * cos(currentAngle);
-    btScalar z1 = RADIUS * sin(currentAngle);
-    currentAngle += currentStep;
-
-    btScalar x2 = RADIUS * cos(currentAngle);
-    btScalar z2 = RADIUS * sin(currentAngle);
-
-    btVector3 destination(x2, 0, z2);
-    btVector3 origin(x1, 0, z1);
-
-    int full = 1;
-    if (index == (halfSides - 1)) {
-      full = 2;
-    }
-
-    traceDominoLine(origin, destination, this, full, index == 0);
-  }
-
-  currentAngle = 0;
-  for (int index = 0; index < halfSides; ++index) {
-    btScalar currentStep = angle;
-
-    btScalar x1 = RADIUS * cos(currentAngle);
-    btScalar z1 = RADIUS * sin(currentAngle);
-    currentAngle -= currentStep;
-
-    btScalar x2 = RADIUS * cos(currentAngle);
-    btScalar z2 = RADIUS * sin(currentAngle);
-
-    btVector3 destination(x2, 0, z2);
-    btVector3 origin(x1, 0, z1);
-
-    int full = 1;
-    if (index == (halfSides - 1)) {
-      full = 3;
-    }
-    traceDominoLine(origin, destination, this, full, index == 0);
-
-  }
+//  // WORKING CONFIG.
+//  int SIDES = 13;
+//  btScalar RADIUS = 9;
+//  btScalar angle = 2 * M_PI / SIDES;
+//  btScalar currentAngle = 0;
+//  int halfSides = ceil(SIDES / 2.0);
+//
+//  for (int index = 0; index < halfSides; ++index) {
+//    btScalar currentStep = angle;
+//
+//    btScalar x1 = RADIUS * cos(currentAngle);
+//    btScalar z1 = RADIUS * sin(currentAngle);
+//    currentAngle += currentStep;
+//
+//    btScalar x2 = RADIUS * cos(currentAngle);
+//    btScalar z2 = RADIUS * sin(currentAngle);
+//
+//    btVector3 destination(x2, 0, z2);
+//    btVector3 origin(x1, 0, z1);
+//
+//    int full = 1;
+//    if (index == (halfSides - 1)) {
+//      full = 2;
+//    }
+//
+//    traceDominoLine(origin, destination, this, full, index == 0);
+//  }
+//
+//  currentAngle = 0;
+//  for (int index = 0; index < halfSides; ++index) {
+//    btScalar currentStep = angle;
+//
+//    btScalar x1 = RADIUS * cos(currentAngle);
+//    btScalar z1 = RADIUS * sin(currentAngle);
+//    currentAngle -= currentStep;
+//
+//    btScalar x2 = RADIUS * cos(currentAngle);
+//    btScalar z2 = RADIUS * sin(currentAngle);
+//
+//    btVector3 destination(x2, 0, z2);
+//    btVector3 origin(x1, 0, z1);
+//
+//    int full = 1;
+//    if (index == (halfSides - 1)) {
+//      full = 3;
+//    }
+//    traceDominoLine(origin, destination, this, full, index == 0);
+//
+//  }
 
 //  // Wedge.
 //  btQuaternion yRotation(0.0, 0.0, 0.0);
@@ -320,7 +341,7 @@ void World::initLights() {
       lightBuilder.setAmbientColor(glm::vec4(0.7f, 0.7f, 0.7f, 1.0f))
           .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
           .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-          .setDirection(glm::vec3(2.0f, -0.3f, 0.0f))
+          .setDirection(glm::vec3(-1.0f, 0.f, 0.0f))
           .createDirectional();
   lights.push_back(light);
 }

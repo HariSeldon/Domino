@@ -1,7 +1,11 @@
 #pragma once
 
 #include "Camera.h"
+#include "Drawer.h"
+#include "ShaderProgram.h"
+#include "ShadowManager.h"
 #include "TextManager.h"
+#include "World.h"
 
 #include <glm/fwd.hpp>
 #include <glm/mat4x4.hpp>
@@ -10,11 +14,8 @@
 #include <mutex>
 #include <string>
 
-class Drawer;
 class Mirror;
-class ShaderProgram;
 class ShadowManager;
-class World;
 
 class SceneManager {
 public:
@@ -45,13 +46,13 @@ public:
   void updateLightMask(int lightMask);
 
 private:
+  void initGPU();
   void setupProjection(const glm::ivec2 &screenSize);
-  void drawWorld(const glm::mat4 &modelView);
-  void drawShadowWorld(const glm::mat4 &modelView, const glm::mat4 &projection);
-  void drawLights(const glm::mat4 &modelView);
-  void drawObjects(const glm::mat4 &modelView);
-  void drawObjectsForShadow(const glm::mat4 &modelView,
-                            const glm::mat4 &projection);
+  void drawWorld(const glm::mat4 &modelView, ShaderProgram &shader);
+  void drawShadowWorld(const glm::mat4 &modelView, const glm::mat4 &projection,
+                       ShaderProgram &shader);
+  void drawLights(const glm::mat4 &modelView, ShaderProgram &shader);
+  void drawObjects(const glm::mat4 &modelView, ShaderProgram &shader);
   void drawMirror(const glm::mat4 &modelView);
   void drawText();
   void mirrorRenderingPass();
@@ -59,11 +60,11 @@ private:
   void screenRenderingPass();
 
 private:
-  World* world;
-  Drawer *drawer;
-  ShaderProgram* shader;
-  TextManager* textManager;
-  ShadowManager* shadowManager;
+  World world;
+  Drawer drawer;
+  ShaderProgram worldShader;
+  TextManager textManager;
+  ShadowManager shadowManager;
 
   glm::mat4 projection;
 

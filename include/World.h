@@ -182,7 +182,7 @@ World::light_iterator beginLights(const World* world);
 World::light_iterator endLights(const World& world);
 World::light_iterator endLights(const World* world);
 
-World::const_light_iterator constEndLights(const World &world);
+World::const_light_iterator constBeginLights(const World &world);
 World::const_light_iterator constBeginLights(const World *world);
 World::const_light_iterator constEndLights(const World &world);
 World::const_light_iterator constEndLights(const World *world);

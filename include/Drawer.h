@@ -24,8 +24,10 @@ public:
   ~Drawer();
 
 public:
-  void initGPUObjects(const ShaderProgram &shader, const World &world);
-  void initMirror(const ShaderProgram &shader, const Mirror* mirror);
+  void initGPUObjects(const ShaderProgram &worldShader, const World &world);
+  void initGPUShadowObjects(const ShaderProgram &shadowShader,
+                            const World &world);
+  void initMirror(const ShaderProgram &mirrorShader, const Mirror *mirror);
 
   // Drawing functions.
   void drawObject(const Object *object, ShaderProgram &shader,
@@ -35,17 +37,22 @@ public:
                            const glm::mat4 &projection) const;
 
 private:
-  void initWorldObjects(const ShaderProgram &shader, const World &world);
-
   GLuint setupVertexVBO(const Object *object, const ShaderProgram &shader);
   GLuint setupNormalVBO(const Object *object, const ShaderProgram &shader);
   GLuint setupIndexVBO(const Object *object);
   GLuint setupTextureVBO(const Object *object, const ShaderProgram &shader);
 
 private:
-  // Maps world objects (identifies by their memory locations) 
+  // Mapping between world objects (identified by their memory locations) 
   // to VAOs. 
-  std::unordered_map<intptr_t, GLuint> vaoMap;
+  std::unordered_map<intptr_t, GLuint> vaoWorldMap;
+  // Mapping between world objects shadows (identified by their memory locations) 
+  // to VAOs.
+  std::unordered_map<intptr_t, GLuint> vaoShadowMap;
+  // Mapping between world objects (identified by their memory locations)
+  // to their vertex VBO.
+  std::unordered_map<intptr_t, GLuint> vboWorldMap; 
+
   // Ids of VBOs associated with the VAOs. These are kept so I know what to delete
   // to free the memory.
   std::vector<GLuint> vboIds;
