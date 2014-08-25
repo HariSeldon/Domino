@@ -85,6 +85,7 @@ void Window::renderingLoop() {
       break;
 
     scene->drawScene();
+    scene->stepSimulation(); 
 
     ++frameCounter;
     SDL_GL_SwapWindow(sdlWindow);
@@ -179,5 +180,3 @@ void checkSDLError(const std::string &message) {
     SDL_ClearError();
   }
 }
-
-// FIXME: I have to add the stepping of the simulation.

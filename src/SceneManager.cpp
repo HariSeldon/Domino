@@ -38,7 +38,7 @@ SceneManager::SceneManager(const glm::ivec2 &screenSize)
 }
 
 // -----------------------------------------------------------------------------
-void SceneManager::setupProjection(const glm::ivec2& screenSize) {
+void SceneManager::setupProjection(const glm::ivec2 &screenSize) {
   glViewport(0, 0, screenSize.x, screenSize.y);
   float aspectRatio = (float)screenSize.x / (float)screenSize.y;
   projection = glm::perspective(SceneManager::VIEW_ANGLE, aspectRatio,
@@ -56,14 +56,12 @@ void SceneManager::initGPU() {
 }
 
 // -----------------------------------------------------------------------------
-SceneManager::~SceneManager() {
-  glUseProgram(0);
-}
+SceneManager::~SceneManager() { glUseProgram(0); }
 
 // -----------------------------------------------------------------------------
 void SceneManager::drawScene() {
 
-//  mirrorRenderingPass();
+  //  mirrorRenderingPass();
   shadowRenderingPass();
   screenRenderingPass();
 }
@@ -81,10 +79,11 @@ void SceneManager::drawWorld(const glm::mat4 &modelView,
 void SceneManager::drawObjects(const glm::mat4 &modelView,
                                ShaderProgram &shader) {
   glm::mat4 shadowView =
-      glm::lookAt(glm::vec3(0, 2, 0), glm::vec3(0, 1, 0), glm::vec3(1, 0, 0));
-  float side = 8;
+      glm::lookAt(glm::vec3(-11, 4, 0), glm::vec3(-9.29, 3.29, 0),
+                  glm::vec3(10.29, 4.71, 0));
+  float side = 10;
   glm::mat4 shadowProjection =
-      glm::ortho<float>(-side, side, -side, side, 0, side);
+      glm::ortho<float>(-side, side, -side, side, 0, 2.5 * side);
 
   std::for_each(constBeginObjects(world), constEndObjects(world),
                 [&](const Object *object) {
@@ -99,9 +98,8 @@ void SceneManager::drawLights(const glm::mat4 &modelView,
   shader.setUniform("ambientColor", world.getAmbientColor());
   shader.setUniform("lightsNumber", world.getLightsNumber());
   shader.setUniform("lightMask", lightMask);
-  std::for_each(
-      constBeginLights(world), constEndLights(world),
-      [&](const Light *light) { light->draw(shader, modelView); });
+  std::for_each(constBeginLights(world), constEndLights(world),
+                [&](const Light *light) { light->draw(shader, modelView); });
 }
 
 // -----------------------------------------------------------------------------
@@ -111,7 +109,7 @@ void SceneManager::drawMirror(const glm::mat4 &modelView) {
     mirrorShader.useProgram();
     mirrorShader.setUniform("projectionMatrix", projection);
     mirrorShader.setUniform("texture", 0);
-    //drawer.drawObject(mirror, mirrorShader, modelView, projection);
+    // drawer.drawObject(mirror, mirrorShader, modelView, projection);
   }
 }
 
@@ -130,11 +128,12 @@ void SceneManager::mirrorRenderingPass() {
 // -----------------------------------------------------------------------------
 void SceneManager::shadowRenderingPass() {
   glm::mat4 shadowView =
-      glm::lookAt(glm::vec3(0, 2, 0), glm::vec3(0, 1, 0), glm::vec3(1, 0, 0));
+      glm::lookAt(glm::vec3(-11, 4, 0), glm::vec3(-9.29, 3.29, 0),
+                  glm::vec3(10.29, 4.71, 0));
 
-  float side = 8;
+  float side = 10;
   glm::mat4 shadowProjection =
-      glm::ortho<float>(-side, side, -side, side, 0, side);
+      glm::ortho<float>(-side, side, -side, side, 0, 2.5 * side);
 
   ShaderProgram &shadowShader = shadowManager.getShader();
   shadowShader.useProgram();
@@ -145,7 +144,7 @@ void SceneManager::shadowRenderingPass() {
 
 // -----------------------------------------------------------------------------
 void SceneManager::drawShadowWorld(const glm::mat4 &modelView,
-                                   const glm::mat4 &projection, 
+                                   const glm::mat4 &projection,
                                    ShaderProgram &shader) {
   // FIXME I think I should need to clear just the depth buffer.
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -187,12 +186,10 @@ void SceneManager::drawText() {
 }
 
 // -----------------------------------------------------------------------------
-void SceneManager::setFps(int fps) {
-  this->fps = fps;
-} 
+void SceneManager::setFps(int fps) { this->fps = fps; }
 
 // -----------------------------------------------------------------------------
-void SceneManager::updateCameraRotation(glm::ivec2 diff) {  
+void SceneManager::updateCameraRotation(glm::ivec2 diff) {
   currentXRotation += diff.x;
   currentYRotation += diff.y;
 }
@@ -219,11 +216,12 @@ void SceneManager::updateCameraPosition(unsigned char mask) {
 }
 
 // -----------------------------------------------------------------------------
-int SceneManager::getLightMask() const {
-  return lightMask; 
-}
+int SceneManager::getLightMask() const { return lightMask; }
 
 // -----------------------------------------------------------------------------
 void SceneManager::updateLightMask(int lightMask) {
   this->lightMask = lightMask;
 }
+
+// -----------------------------------------------------------------------------
+void SceneManager::stepSimulation() { world.stepSimulation(); }

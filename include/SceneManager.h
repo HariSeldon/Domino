@@ -45,6 +45,8 @@ public:
   int getLightMask() const;
   void updateLightMask(int lightMask);
 
+  void stepSimulation();
+
 private:
   void initGPU();
   void setupProjection(const glm::ivec2 &screenSize);

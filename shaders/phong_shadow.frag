@@ -187,10 +187,5 @@ void main() {
     }
   }
 
-  // Decide if the fragment is in the shadow.
-  if (texture2D(shadowTexture, shadowPosition.xy).r < shadowPosition.z) {
-    outputColor = finalFragmentColor * 0.5;
-  } else {
-    outputColor = finalFragmentColor;
-  }
+  outputColor = finalFragmentColor;
 }
