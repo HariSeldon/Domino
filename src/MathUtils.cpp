@@ -11,9 +11,6 @@
 #include <sstream>
 
 //------------------------------------------------------------------------------
-btScalar degreesToRadiants(btScalar degrees) { return M_PI * degrees / 180.0f; }
-
-//------------------------------------------------------------------------------
 btScalar clampToDegrees(btScalar value) {
   if (value >= btScalar(360.0))
     return value - btScalar(360.0);

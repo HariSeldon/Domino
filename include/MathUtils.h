@@ -17,8 +17,11 @@ inline glm::vec3 computeNormal(const glm::vec3 &first, const glm::vec3 &second,
   return glm::normalize(glm::cross(first - second, second - third));
 }
 
+inline btScalar degreesToRadiants(btScalar degrees) {
+  return M_PI * degrees / 180.0f;
+}
+
 btScalar clampToDegrees(btScalar value);
-btScalar degreesToRadiants(btScalar degrees);
 int signum(btScalar x);
 
 // Dump functions.
