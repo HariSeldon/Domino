@@ -25,11 +25,12 @@ private:
 
 private:
   glm::vec4 position;
+  // In radians.
   float xRotation;
   float yRotation;
 
-  static constexpr float ROTATION_FACTOR = 0.02f;
-  static constexpr float FIXED_ROTATION_ANGLE = 30.f;
+  static constexpr float ROTATION_FACTOR = 0.0004f;
+  static constexpr float FIXED_ROTATION_ANGLE = 0.02f;
   static constexpr float STEP = 0.3f;
   static constexpr float DEFAULT_X_ROTATION = 0.f;
   static constexpr float DEFAULT_Y_ROTATION = 0.f;

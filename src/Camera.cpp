@@ -36,26 +36,22 @@ void Camera::move(float step) {
 // Change the current orientation angles.
 void Camera::rotate(float xOffset, float yOffset) {
   xRotation += Camera::ROTATION_FACTOR * xOffset;
-  yRotation += Camera::ROTATION_FACTOR * -yOffset;
+  yRotation -= Camera::ROTATION_FACTOR * yOffset;
 }
 
 // ----------------------------------------------------------------------------- 
 void Camera::rotateLeft() {
-  yRotation += Camera::ROTATION_FACTOR * FIXED_ROTATION_ANGLE;
+  yRotation += Camera::FIXED_ROTATION_ANGLE;
 }
 
 // ----------------------------------------------------------------------------- 
 void Camera::rotateRight() {
-  yRotation -= Camera::ROTATION_FACTOR * FIXED_ROTATION_ANGLE;
+  yRotation -= Camera::FIXED_ROTATION_ANGLE;
 }
 
 // ----------------------------------------------------------------------------- 
 glm::mat4 Camera::applyView() {
   glm::mat4 currentTransform = buildTransform();
-
-  // Get eye.
-  glm::vec4 eye = currentTransform * glm::vec4(0.f, 0.f, 0.f, 1.f);
-  assert(eye == position && "Wrong transformation construction");
 
   // Compute center.
   glm::mat4 centerMatrix = currentTransform;
@@ -65,7 +61,7 @@ glm::mat4 Camera::applyView() {
   // The second column of the center matrix contains the up vector.
   glm::vec4 up = centerMatrix[1];
   glm::mat4 lookAtMatrix =
-      glm::lookAt(glm::vec3(eye), glm::vec3(center), glm::vec3(up));
+      glm::lookAt(glm::vec3(position), glm::vec3(center), glm::vec3(up));
 
   return lookAtMatrix;
 }
@@ -78,11 +74,11 @@ void Camera::dump() {
 
 // ----------------------------------------------------------------------------- 
 glm::mat4 Camera::buildTransform() {
-  glm::mat4 result;
-  result = glm::translate(result, glm::vec3(position));
+  float cy = cos(yRotation);
+  float sy = sin(yRotation);
+  float cx = cos(xRotation);
+  float sx = sin(xRotation);
 
-  result = glm::rotate(result, yRotation, glm::vec3(0, 1, 0));
-  result = glm::rotate(result, xRotation, glm::vec3(1, 0, 0));
-
-  return result;
+  return { cy,      0,   -sy,     0, sx * sy,    cx,         sx * cy,    0,
+           cx * sy, -sx, cx * cy, 0, position.x, position.y, position.z, 1 };
 }
