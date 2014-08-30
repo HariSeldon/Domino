@@ -142,7 +142,7 @@ void World::initObjects() {
                 .setMass(btScalar(0.0))
                 .setAmbientColor(glm::vec4(0.0215, 0.1745, 0.0215, 1.0))
                 .setDiffuseColor(glm::vec4(0.07568, 0.61424, 0.07568, 1.0))
-                .setSide(btScalar(20.0))
+                .setSide(btScalar(50.0))
                 .create());
 
 //  btQuaternion rotation(0.0, 0.0, M_PI_2);
@@ -311,13 +311,13 @@ void World::initLights() {
   //                      .createPositional();
   //  lights.push_back(light1);
 
-  Light *light2 = lightBuilder.setPosition(glm::vec3(0.0f, 2.0f, 0.0f))
-              .setAmbientColor(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f))
-              .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-              .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-              .setLinearAttenuation(0.05f)
-              .createPositional();
-  lights.push_back(light2);
+//  Light *light2 = lightBuilder.setPosition(glm::vec3(0.0f, 2.0f, 0.0f))
+//              .setAmbientColor(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f))
+//              .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+//              .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+//              .setLinearAttenuation(0.05f)
+//              .createPositional();
+//  lights.push_back(light2);
 
   //  Light *light3 = lightBuilder.setPosition(glm::vec3(0.0f, 10.0f, 30.0f))
   //              .setAmbientColor(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f))
@@ -335,12 +335,12 @@ void World::initLights() {
   //              .createPositional();
   //  lights.push_back(light4);
 
-//  Light *light = lightBuilder.setAmbientColor(glm::vec4(0.7f, 0.7f, 0.7f, 1.0f))
-//                     .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-//                     .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-//                     .setDirection(glm::vec3(1.0f, -1.f, 0.0f))
-//                     .createDirectional();
-//  lights.push_back(light);
+  Light *light = lightBuilder.setAmbientColor(glm::vec4(0.7f, 0.7f, 0.7f, 1.0f))
+                     .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+                     .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+                     .setDirection(glm::vec3(1.0f, -1.f, 0.0f))
+                     .createDirectional();
+  lights.push_back(light);
 }
 
 //-----------------------------------------------------------------------------

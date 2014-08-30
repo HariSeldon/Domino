@@ -85,7 +85,7 @@ vec4 shadeDirectionalLight(vec3 position, vec3 normal, vec3 cameraDirection,
           : vec4(0.0, 0.0, 0.0, 1.0);
 
   vec4 finalColor = fragmentAmbientColor;
-  if (texture2D(shadowTexture, shadowPosition.xy).r < shadowPosition.z) {
+  if ((texture2D(shadowTexture, shadowPosition.xy).r - shadowPosition.z) < 0.01) {
     return finalColor;
   }
   finalColor += diffuseColor + specularColor;

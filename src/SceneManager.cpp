@@ -16,7 +16,7 @@
 #include <glm/vec4.hpp>
 #include <glm/ext.hpp>
 
-const float SceneManager::VIEW_ANGLE = 50.0f;
+const float SceneManager::VIEW_ANGLE = 70.0f;
 const float SceneManager::Z_NEAR = 0.1f;
 const float SceneManager::Z_FAR = 2000.0f;
 
@@ -65,7 +65,7 @@ SceneManager::~SceneManager() {
 // -----------------------------------------------------------------------------
 void SceneManager::drawScene() {
   //mirrorRenderingPass();
-  //shadowRenderingPass();
+  shadowRenderingPass();
   screenRenderingPass();
 }
 
@@ -81,15 +81,15 @@ void SceneManager::drawWorld(const glm::mat4 &modelView,
 // -----------------------------------------------------------------------------
 void SceneManager::drawObjects(const glm::mat4 &modelView,
                                ShaderProgram &shader) {
-//  glm::mat4 shadowView =
-//      glm::lookAt(glm::vec3(-11, 4, 0), glm::vec3(-9.29, 3.29, 0),
-//                  glm::vec3(10.29, 4.71, 0));
-//  float side = 10;
-//  glm::mat4 shadowProjection =
-//      glm::ortho<float>(-side, side, -5, side / 1.6, 0, 2.5 * side);
   glm::mat4 shadowView =
-      glm::lookAt(glm::vec3(0, 5, 0), glm::vec3(0, 4, 0), glm::vec3(1, 0, 0));
-  glm::mat4 shadowProjection = glm::perspective(60.f, (1280.0f / 800.0f), 0.01f, 100.f);
+      glm::lookAt(glm::vec3(-11, 4, 0), glm::vec3(-9.29, 3.29, 0),
+                  glm::vec3(10.29, 4.71, 0));
+  float side = 11;
+  glm::mat4 shadowProjection =
+      glm::ortho<float>(-side, side, -5, side / 1.6, 0, 2.5 * side);
+//  glm::mat4 shadowView =
+//      glm::lookAt(glm::vec3(0, 5, 0), glm::vec3(0, 4, 0), glm::vec3(1, 0, 0));
+//  glm::mat4 shadowProjection = glm::perspective(60.f, (1280.0f / 800.0f), 0.01f, 100.f);
 
   std::for_each(constBeginObjects(world), constEndObjects(world),
                 [&](const Object *object) {
@@ -133,18 +133,18 @@ void SceneManager::mirrorRenderingPass() {
 
 // -----------------------------------------------------------------------------
 void SceneManager::shadowRenderingPass() {
-//  glm::mat4 shadowView =
-//      glm::lookAt(glm::vec3(-11, 4, 0), glm::vec3(-9.29, 3.29, 0),
-//                  glm::vec3(10.29, 4.71, 0));
-//
-//  // The projection matrix is completelly arbitrary.
-//  float side = 10;
-//  glm::mat4 shadowProjection =
-//      glm::ortho<float>(-side, side, -5, side / 1.6, 0, 2.5 * side);
-
   glm::mat4 shadowView =
-      glm::lookAt(glm::vec3(0, 5, 0), glm::vec3(0, 4, 0), glm::vec3(1, 0, 0));
-  glm::mat4 shadowProjection = glm::perspective(60.f, (1280.0f / 800.0f), 0.01f, 100.f);
+      glm::lookAt(glm::vec3(-11, 4, 0), glm::vec3(-9.29, 3.29, 0),
+                  glm::vec3(10.29, 4.71, 0));
+
+  // The projection matrix is completelly arbitrary.
+  float side = 11;
+  glm::mat4 shadowProjection =
+      glm::ortho<float>(-side, side, -5, side / 1.6, 0, 2.5 * side);
+
+//  glm::mat4 shadowView =
+//      glm::lookAt(glm::vec3(0, 5, 0), glm::vec3(0, 4, 0), glm::vec3(1, 0, 0));
+//  glm::mat4 shadowProjection = glm::perspective(60.f, (1280.0f / 800.0f), 0.01f, 100.f);
 
   ShaderProgram &shadowShader = shadowManager.getShader();
   shadowShader.useProgram();
@@ -157,8 +157,7 @@ void SceneManager::shadowRenderingPass() {
 void SceneManager::drawShadowWorld(const glm::mat4 &modelView,
                                    const glm::mat4 &projection,
                                    ShaderProgram &shader) {
-  // FIXME I think I should need to clear just the depth buffer.
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClear(GL_DEPTH_BUFFER_BIT);
   checkOpenGLError("drawShadowWorld: glClear");
 
   std::for_each(constBeginObjects(world), constEndObjects(world),

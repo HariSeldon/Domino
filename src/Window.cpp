@@ -85,7 +85,6 @@ void Window::renderingLoop() {
       break;
 
     scene->drawScene();
-    scene->stepSimulation(); 
 
     ++frameCounter;
     SDL_GL_SwapWindow(sdlWindow);
@@ -161,6 +160,9 @@ Uint32 eventHandler(Uint32 interval, void *windowPtr) {
   }
 
   window->updateCameraPosition();
+  // This makes the update of the scene independent of the frame-rate.
+  // It also causes a race condidtion. 
+  scene->stepSimulation(); 
   return interval;
 }
 

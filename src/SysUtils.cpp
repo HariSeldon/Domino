@@ -53,6 +53,7 @@ void dumpGLInfo() {
 
 // -----------------------------------------------------------------------------
 void checkOpenGLError(const std::string &description) {
+  #ifndef NDEBUG
   GLenum error = glGetError();
   if (error == GL_NO_ERROR)
     return;
@@ -93,6 +94,7 @@ void checkOpenGLError(const std::string &description) {
   }
   }
   std::cerr << description << " Error: " << errorString << "\n";
+  #endif
 }
 
 // -----------------------------------------------------------------------------

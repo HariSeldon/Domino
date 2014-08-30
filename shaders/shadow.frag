@@ -1,7 +1,6 @@
 #version 330
 
 out float depth;
-//out vec4 outputColor;
 
 void main() {
   depth = 0;
