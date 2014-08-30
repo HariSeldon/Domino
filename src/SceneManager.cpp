@@ -30,6 +30,7 @@ const std::string SceneManager::MAIN_FRAGMENT_SHADER = "phong_shadow.frag";
 SceneManager::SceneManager(const glm::ivec2 &screenSize)
     : worldShader(MAIN_VERTEX_SHADER, MAIN_FRAGMENT_SHADER),
       textManager(TextManager(FONT_PATH + FONT_FILE, FONT_HEIGHT, screenSize)),
+      currentYRotation(0), currentXRotation(0), cameraMutex(SDL_CreateMutex()),
       fps(0), lightMask((2 << (world.getLightsNumber() - 1)) - 1) {
   setupProjection(screenSize);
   initGPU();
@@ -56,13 +57,15 @@ void SceneManager::initGPU() {
 }
 
 // -----------------------------------------------------------------------------
-SceneManager::~SceneManager() { glUseProgram(0); }
+SceneManager::~SceneManager() {
+  glUseProgram(0);
+  SDL_DestroyMutex(cameraMutex);
+}
 
 // -----------------------------------------------------------------------------
 void SceneManager::drawScene() {
-
-  //  mirrorRenderingPass();
-  shadowRenderingPass();
+  //mirrorRenderingPass();
+  //shadowRenderingPass();
   screenRenderingPass();
 }
 
@@ -78,12 +81,15 @@ void SceneManager::drawWorld(const glm::mat4 &modelView,
 // -----------------------------------------------------------------------------
 void SceneManager::drawObjects(const glm::mat4 &modelView,
                                ShaderProgram &shader) {
+//  glm::mat4 shadowView =
+//      glm::lookAt(glm::vec3(-11, 4, 0), glm::vec3(-9.29, 3.29, 0),
+//                  glm::vec3(10.29, 4.71, 0));
+//  float side = 10;
+//  glm::mat4 shadowProjection =
+//      glm::ortho<float>(-side, side, -5, side / 1.6, 0, 2.5 * side);
   glm::mat4 shadowView =
-      glm::lookAt(glm::vec3(-11, 4, 0), glm::vec3(-9.29, 3.29, 0),
-                  glm::vec3(10.29, 4.71, 0));
-  float side = 10;
-  glm::mat4 shadowProjection =
-      glm::ortho<float>(-side, side, -side, side, 0, 2.5 * side);
+      glm::lookAt(glm::vec3(0, 5, 0), glm::vec3(0, 4, 0), glm::vec3(1, 0, 0));
+  glm::mat4 shadowProjection = glm::perspective(60.f, (1280.0f / 800.0f), 0.01f, 100.f);
 
   std::for_each(constBeginObjects(world), constEndObjects(world),
                 [&](const Object *object) {
@@ -127,13 +133,18 @@ void SceneManager::mirrorRenderingPass() {
 
 // -----------------------------------------------------------------------------
 void SceneManager::shadowRenderingPass() {
-  glm::mat4 shadowView =
-      glm::lookAt(glm::vec3(-11, 4, 0), glm::vec3(-9.29, 3.29, 0),
-                  glm::vec3(10.29, 4.71, 0));
+//  glm::mat4 shadowView =
+//      glm::lookAt(glm::vec3(-11, 4, 0), glm::vec3(-9.29, 3.29, 0),
+//                  glm::vec3(10.29, 4.71, 0));
+//
+//  // The projection matrix is completelly arbitrary.
+//  float side = 10;
+//  glm::mat4 shadowProjection =
+//      glm::ortho<float>(-side, side, -5, side / 1.6, 0, 2.5 * side);
 
-  float side = 10;
-  glm::mat4 shadowProjection =
-      glm::ortho<float>(-side, side, -side, side, 0, 2.5 * side);
+  glm::mat4 shadowView =
+      glm::lookAt(glm::vec3(0, 5, 0), glm::vec3(0, 4, 0), glm::vec3(1, 0, 0));
+  glm::mat4 shadowProjection = glm::perspective(60.f, (1280.0f / 800.0f), 0.01f, 100.f);
 
   ShaderProgram &shadowShader = shadowManager.getShader();
   shadowShader.useProgram();
@@ -159,19 +170,13 @@ void SceneManager::drawShadowWorld(const glm::mat4 &modelView,
 // -----------------------------------------------------------------------------
 void SceneManager::screenRenderingPass() {
   worldShader.useProgram();
-  cameraMutex.lock();
-  // FIXME
-  // domino: Camera.cpp:55:
-  // glm::mat4 Camera::applyView(): Assertion `eye == position && "Wrong
-  // transformation construction"' failed.
-
   worldShader.setUniform("shadowTexture", 0);
-
+  SDL_LockMutex(cameraMutex);
   glm::mat4 modelView = camera.applyView();
-  cameraMutex.unlock();
+  SDL_UnlockMutex(cameraMutex);
   drawWorld(modelView, worldShader);
 
-  //  drawMirror(modelView);
+  //drawMirror(modelView);
 
   // Draw text on top of the scene.
   drawText();
@@ -196,7 +201,7 @@ void SceneManager::updateCameraRotation(glm::ivec2 diff) {
 
 // -----------------------------------------------------------------------------
 void SceneManager::updateCameraPosition(unsigned char mask) {
-  cameraMutex.lock();
+  SDL_LockMutex(cameraMutex); 
 
   if (mask & 8)
     camera.moveForward();
@@ -209,7 +214,7 @@ void SceneManager::updateCameraPosition(unsigned char mask) {
 
   // When rotating the camera the lights change intensity.
   camera.rotate(currentYRotation, currentXRotation);
-  cameraMutex.unlock();
+  SDL_UnlockMutex(cameraMutex);
 
   currentYRotation = 0;
   currentXRotation = 0;

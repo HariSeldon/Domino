@@ -11,8 +11,9 @@
 #include <glm/mat4x4.hpp>
 
 #include <atomic>
-#include <mutex>
 #include <string>
+
+#include "SDL2/SDL_thread.h"
 
 class Mirror;
 class ShadowManager;
@@ -74,7 +75,7 @@ private:
 
   std::atomic_int currentYRotation;
   std::atomic_int currentXRotation;
-  std::mutex cameraMutex;
+  SDL_mutex *cameraMutex;
 
   int fps;
   int lightMask;
