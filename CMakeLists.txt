@@ -49,112 +49,82 @@ install_targets("/${BIN_DIR}/" ${EXE_NAME})
 
 # ------------------------------------------------------------------------------
 # GL
-find_library(GL_LIBRARY_PATH GL
-             /usr/lib64
-             /usr/lib
-             /usr/local/lib64
-             /usr/local/lib
-             /opt/local/lib
+find_library(GL_LIB_PATH GL
              DOC "The GL library")
-if(EXISTS ${GL_LIBRARY_PATH})
+if(EXISTS ${GL_LIB_PATH})
   message(STATUS "Looking for GL: found")
-else(EXISTS ${GL_LIBRARY_PATH})
+else(EXISTS ${GL_LIB_PATH})
   message(FATAL_ERROR "Looking for GL: not found")
-endif(EXISTS ${GL_LIBRARY_PATH})
+endif(EXISTS ${GL_LIB_PATH})
 
-find_library(GLU_LIBRARY_PATH GLU
-             /usr/lib64
-             /usr/lib
-             /usr/local/lib64
-             /usr/local/lib
-             /opt/local/lib
+find_library(GLU_LIB_PATH GLU
              DOC "The GLU library")
-if(EXISTS ${GLU_LIBRARY_PATH})
+if(EXISTS ${GLU_LIB_PATH})
   message(STATUS "Looking for GLU: found")
-else(EXISTS ${GLU_LIBRARY_PATH})
+else(EXISTS ${GLU_LIB_PATH})
   message(FATAL_ERROR "Looking for GLU: not found")
-endif(EXISTS ${GLU_LIBRARY_PATH})
+endif(EXISTS ${GLU_LIB_PATH})
 
-find_library(GLEW_LIBRARY_PATH GLEW
-             /usr/lib64
-             /usr/lib
-             /usr/local/lib64
-             /usr/local/lib
-             /opt/local/lib
+find_library(GLEW_LIB_PATH GLEW
              DOC "The GLEW library")
-if(EXISTS ${GLEW_LIBRARY_PATH})
+if(EXISTS ${GLEW_LIB_PATH})
   message(STATUS "Looking for GLEW: found")
-else(EXISTS ${GLEW_LIBRARY_PATH})
+else(EXISTS ${GLEW_LIB_PATH})
   message(FATAL_ERROR "Looking for GLEW: not found")
-endif(EXISTS ${GLEW_LIBRARY_PATH})
+endif(EXISTS ${GLEW_LIB_PATH})
 
-find_library(SDL2_LIBRARY_PATH SDL2
-             /usr/lib64
-             /usr/lib
-             /usr/local/lib64
-             /usr/local/lib
-             /opt/local/lib
+find_library(SDL2_LIB_PATH SDL2
              DOC "The SDL2 library")
-if(EXISTS ${SDL2_LIBRARY_PATH})
+if(EXISTS ${SDL2_LIB_PATH})
   message(STATUS "Looking for SDL2: found")
-else(EXISTS ${SDL2_LIBRARY_PATH})
+else(EXISTS ${SDL2_LIB_PATH})
   message(FATAL_ERROR "Looking for SDL2: not found")
-endif(EXISTS ${SDL2_LIBRARY_PATH})
+endif(EXISTS ${SDL2_LIB_PATH})
 
-find_library(FREETYPE_LIBRARY_PATH freetype
-             /usr/lib64
-             /usr/lib
-             /usr/local/lib64
-             /usr/local/lib
-             /opt/local/lib
+
+find_library(SDL2_IMAGE_LIB_PATH SDL2_image
+             DOC "The SDL2 Image library")
+if(EXISTS ${SDL2_IMAGE_LIB_PATH})
+  message(STATUS "Looking for SDL2 Image: found")
+else(EXISTS ${SDL2_IMAGE_LIB_PATH})
+  message(FATAL_ERROR "Looking for SDL2 Image: not found")
+endif(EXISTS ${SDL2_IMAGE_LIB_PATH})
+
+find_library(FREETYPE_LIB_PATH freetype
              DOC "The freetype library")
-if(EXISTS ${FREETYPE_LIBRARY_PATH})
+if(EXISTS ${FREETYPE_LIB_PATH})
   message(STATUS "Looking for freetype: found")
-else(EXISTS ${FREETYPE_LIBRARY_PATH})
+else(EXISTS ${FREETYPE_LIB_PATH})
   message(FATAL_ERROR "Looking for freetype: not found")
-endif(EXISTS ${FREETYPE_LIBRARY_PATH})
+endif(EXISTS ${FREETYPE_LIB_PATH})
 
-target_link_libraries(${EXE_NAME} ${SDL2_LIBRARY_PATH} ${GLEW_LIBRARY_PATH} ${GLU_LIBRARY_PATH} ${GL_LIBRARY_PATH} ${FREETYPE_LIBRARY_PATH})
+target_link_libraries(${EXE_NAME} ${SDL2_LIB_PATH} ${SDL2_IMAGE_LIB_PATH} ${GLEW_LIB_PATH} ${GLU_LIB_PATH} ${GL_LIB_PATH} ${FREETYPE_LIB_PATH})
 
 # BulletCollision
-find_library(BULLET_COLLISION_LIBRARY_PATH BulletCollision
-             /usr/lib64
-             /usr/lib
-             /usr/local/lib64
-             /usr/local/lib
-             /opt/local/lib
+find_library(BULLET_COLLISION_LIB_PATH BulletCollision
              DOC "The BulletCollision library")
-if(EXISTS ${BULLET_COLLISION_LIBRARY_PATH})
+if(EXISTS ${BULLET_COLLISION_LIB_PATH})
   message(STATUS "Looking for BulletCollision: found")
-else(EXISTS ${BULLET_COLLISION_LIBRARY_PATH})
+else(EXISTS ${BULLET_COLLISION_LIB_PATH})
   message(FATAL_ERROR "Looking for BulletCollision: not found")
-endif(EXISTS ${BULLET_COLLISION_LIBRARY_PATH})
+endif(EXISTS ${BULLET_COLLISION_LIB_PATH})
 
 # BulletDynamics
-find_library(BULLET_DYNAMICS_LIBRARY_PATH BulletDynamics
-             /usr/lib64
-             /usr/lib
-             /usr/local/lib64
-             /usr/local/lib
-             /opt/local/lib
+find_library(BULLET_DYNAMICS_LIB_PATH BulletDynamics
              DOC "The BulleetDynamics library")
-if(EXISTS ${BULLET_DYNAMICS_LIBRARY_PATH})
+if(EXISTS ${BULLET_DYNAMICS_LIB_PATH})
   message(STATUS "Looking for BulletDynamics: found")
-else(EXISTS ${BULLET_DYNAMICS_LIBRARY_PATH})
+else(EXISTS ${BULLET_DYNAMICS_LIB_PATH})
   message(FATAL_ERROR "Looking for BulletDynamics: not found")
-endif(EXISTS ${BULLET_DYNAMICS_LIBRARY_PATH})
+endif(EXISTS ${BULLET_DYNAMICS_LIB_PATH})
 
 # LinearMath
-find_library(LINEAR_MATH_LIBRARY_PATH LinearMath
-             /usr/lib64
-             /usr/lib
-             /usr/local/lib64
-             /usr/local/lib
-             /opt/local/lib
+find_library(LINEAR_MATH_LIB_PATH LinearMath
              DOC "The LinearMath library")
-if(EXISTS ${LINEAR_MATH_LIBRARY_PATH})
+if(EXISTS ${LINEAR_MATH_LIB_PATH})
   message(STATUS "Looking for LinearMath: found")
-else(EXISTS ${LINEAR_MATH_LIBRARY_PATH})
+else(EXISTS ${LINEAR_MATH_LIB_PATH})
   message(FATAL_ERROR "Looking for LinearMath: not found")
-endif(EXISTS ${LINEAR_MATH_LIBRARY_PATH})
-target_link_libraries(${EXE_NAME} ${BULLET_DYNAMICS_LIBRARY_PATH} ${BULLET_COLLISION_LIBRARY_PATH} ${LINEAR_MATH_LIBRARY_PATH})
+endif(EXISTS ${LINEAR_MATH_LIB_PATH})
+
+target_link_libraries(${EXE_NAME} ${BULLET_DYNAMICS_LIB_PATH} ${BULLET_COLLISION_LIB_PATH} ${LINEAR_MATH_LIB_PATH})
