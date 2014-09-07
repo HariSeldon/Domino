@@ -188,15 +188,16 @@ void World::initObjects() {
 //                .setSides(btVector3(0.25, 2.0, 0.5))
 //                .create());
 
-//  addObject(meshBuilder.setTransform(btTransform(btQuaternion::getIdentity(),
-//                                                 btVector3(0.0, 1.0, 0.0)))
-//                .setMass(btScalar(0.0))
-//                .setAmbientColor(glm::vec4(0.1745, 0.01175, 0.01175, 1.0))
-//                .setDiffuseColor(glm::vec4(0.61424, 0.04136, 0.04136, 1.0))
-//                .setSpecularColor(glm::vec4(0.727811, 0.626959, 0.626959, 0.6))
-//                .setShininess(51.2f)
-//                .setObjFile("/home/hari/src/domino/obj/fighter.obj")
-//                .create());
+  btQuaternion yRotation(0, 0, M_PI_2);
+  addObject(meshBuilder.setTransform(btTransform(yRotation,
+                                                 btVector3(0.0, 30.0, 0.0)))
+                .setMass(btScalar(1.0))
+                .setAmbientColor(glm::vec4(0.1745, 0.01175, 0.01175, 1.0))
+                .setDiffuseColor(glm::vec4(0.61424, 0.04136, 0.04136, 1.0))
+                .setSpecularColor(glm::vec4(0.727811, 0.626959, 0.626959, 0.6))
+                .setShininess(51.2f)
+                .setMeshFile("/home/hari/src/domino/meshes/kufel.x3d")
+                .create());
 
 //  addObject(planeBuilder.setTransform(btTransform::getIdentity())
 //                        .setMass(btScalar(0.0))
@@ -209,61 +210,60 @@ void World::initObjects() {
 //                .setMass(btScalar(20.0))
 //                .setAmbientColor(glm::vec4(0.19225, 0.19225, 0.19225, 1.0))
 //                .setDiffuseColor(glm::vec4(0.50754, 0.50754, 0.50754, 1.0))
-//                .setSpecularColor(glm::vec4(0.508273, 0.508273, 0.508273,
-// 1.0))
+//                .setSpecularColor(glm::vec4(0.508273, 0.508273, 0.508273, 1.0))
 //                .setShininess(51.2f)
-//                .setSides(btVector3(5, 40.0, 10.0))
+//                .setSides(btVector3(2, 4.0, 1.0))
 //                .create());
 
-  // WORKING CONFIG.
-  int SIDES = 13;
-  btScalar RADIUS = 9;
-  btScalar angle = 2 * M_PI / SIDES;
-  btScalar currentAngle = 0;
-  int halfSides = ceil(SIDES / 2.0);
-
-  for (int index = 0; index < halfSides; ++index) {
-    btScalar currentStep = angle;
-
-    btScalar x1 = RADIUS * cos(currentAngle);
-    btScalar z1 = RADIUS * sin(currentAngle);
-    currentAngle += currentStep;
-
-    btScalar x2 = RADIUS * cos(currentAngle);
-    btScalar z2 = RADIUS * sin(currentAngle);
-
-    btVector3 destination(x2, 0, z2);
-    btVector3 origin(x1, 0, z1);
-
-    int full = 1;
-    if (index == (halfSides - 1)) {
-      full = 2;
-    }
-
-    traceDominoLine(origin, destination, this, full, index == 0);
-  }
-
-  currentAngle = 0;
-  for (int index = 0; index < halfSides; ++index) {
-    btScalar currentStep = angle;
-
-    btScalar x1 = RADIUS * cos(currentAngle);
-    btScalar z1 = RADIUS * sin(currentAngle);
-    currentAngle -= currentStep;
-
-    btScalar x2 = RADIUS * cos(currentAngle);
-    btScalar z2 = RADIUS * sin(currentAngle);
-
-    btVector3 destination(x2, 0, z2);
-    btVector3 origin(x1, 0, z1);
-
-    int full = 1;
-    if (index == (halfSides - 1)) {
-      full = 3;
-    }
-    traceDominoLine(origin, destination, this, full, index == 0);
-
-  }
+//  // WORKING CONFIG.
+//  int SIDES = 13;
+//  btScalar RADIUS = 9;
+//  btScalar angle = 2 * M_PI / SIDES;
+//  btScalar currentAngle = 0;
+//  int halfSides = ceil(SIDES / 2.0);
+//
+//  for (int index = 0; index < halfSides; ++index) {
+//    btScalar currentStep = angle;
+//
+//    btScalar x1 = RADIUS * cos(currentAngle);
+//    btScalar z1 = RADIUS * sin(currentAngle);
+//    currentAngle += currentStep;
+//
+//    btScalar x2 = RADIUS * cos(currentAngle);
+//    btScalar z2 = RADIUS * sin(currentAngle);
+//
+//    btVector3 destination(x2, 0, z2);
+//    btVector3 origin(x1, 0, z1);
+//
+//    int full = 1;
+//    if (index == (halfSides - 1)) {
+//      full = 2;
+//    }
+//
+//    traceDominoLine(origin, destination, this, full, index == 0);
+//  }
+//
+//  currentAngle = 0;
+//  for (int index = 0; index < halfSides; ++index) {
+//    btScalar currentStep = angle;
+//
+//    btScalar x1 = RADIUS * cos(currentAngle);
+//    btScalar z1 = RADIUS * sin(currentAngle);
+//    currentAngle -= currentStep;
+//
+//    btScalar x2 = RADIUS * cos(currentAngle);
+//    btScalar z2 = RADIUS * sin(currentAngle);
+//
+//    btVector3 destination(x2, 0, z2);
+//    btVector3 origin(x1, 0, z1);
+//
+//    int full = 1;
+//    if (index == (halfSides - 1)) {
+//      full = 3;
+//    }
+//    traceDominoLine(origin, destination, this, full, index == 0);
+//
+//  }
 
 //  // Wedge.
 //  btQuaternion yRotation(0.0, 0.0, 0.0);

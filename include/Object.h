@@ -19,7 +19,7 @@ class ShaderProgram;
 
 class Object : public Entity {
 protected:
-  Object(btTransform &transform, btScalar mass, btVector3 &inertia);
+  Object(const btTransform &transform, btScalar mass, btVector3 &inertia);
 
 public:
   virtual ~Object();
@@ -44,6 +44,7 @@ protected:
   glm::vec4 diffuseColor;
   glm::vec4 specularColor;
   float shininess;
+  std::string textureFile;
 
   std::string name;
 

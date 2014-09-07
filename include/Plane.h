@@ -8,11 +8,11 @@ class btVector3;
 
 class Plane : public Object {
 private:
-  Plane(btTransform &transform, btScalar mass, btVector3 &inertia,
-        const btScalar &side);
+  Plane(const btTransform &transform, const btScalar mass, btVector3 &inertia,
+        const btScalar side);
 
 private:
-  void computePoints(const btScalar &side);
+  void computePoints(const btScalar side);
 
   friend class PlaneBuilder;
 };
@@ -22,7 +22,7 @@ class PlaneBuilder : public ObjectBuilder<PlaneBuilder> {
 public:
   PlaneBuilder();
 
-  PlaneBuilder &setSide(btScalar side);
+  PlaneBuilder &setSide(const btScalar side);
 
   Plane *create();
 

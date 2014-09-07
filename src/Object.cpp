@@ -13,7 +13,7 @@
 
 #include <utility>
 
-Object::Object(btTransform &transform, btScalar mass, btVector3 &inertia)
+Object::Object(const btTransform &transform, btScalar mass, btVector3 &inertia)
     : Entity(transform), mass(mass), inertia(inertia) {}
 
 Object::~Object() {
