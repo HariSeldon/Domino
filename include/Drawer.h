@@ -19,12 +19,15 @@ class World;
 
 class btVector3;
 
+class SDL_Surface;
+
 class Drawer {
 public:
   ~Drawer();
 
 public:
   void initGPUObjects(const ShaderProgram &worldShader, const World &world);
+  void initTextures(const World& world);
   void initGPUShadowObjects(const ShaderProgram &shadowShader,
                             const World &world);
   void initMirror(const ShaderProgram &mirrorShader, const Mirror *mirror);
@@ -55,6 +58,9 @@ private:
   // Mapping between world objects (identified by their memory locations)
   // to their vertex VBO.
   std::unordered_map<intptr_t, GLuint> vboWorldMap; 
+  // Mapping between world objects (identifed by their memory locations)
+  // to their texture objects.
+  std::unordered_map<uintptr_t, GLuint> textureMap;
 
   // Ids of VBOs associated with the VAOs. These are kept so I know what to delete
   // to free the memory.

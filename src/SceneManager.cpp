@@ -16,6 +16,8 @@
 #include <glm/vec4.hpp>
 #include <glm/ext.hpp>
 
+#include "SDL/SDL_image.h"
+
 const float SceneManager::VIEW_ANGLE = 70.0f;
 const float SceneManager::Z_NEAR = 0.1f;
 const float SceneManager::Z_FAR = 2000.0f;
@@ -54,6 +56,7 @@ void SceneManager::initGPU() {
     ShaderProgram &mirrorShader = mirror->getShaderProgram();
     drawer.initMirror(mirrorShader, mirror);
   }
+  drawer.initTextures(world);
 }
 
 // -----------------------------------------------------------------------------

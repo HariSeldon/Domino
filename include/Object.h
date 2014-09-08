@@ -93,6 +93,8 @@ public:
                            constructionInfo);
 
   void getOpenGLMatrix(btScalar* matrix) const;
+
+  const std::string &getTextureFile() const;
 };
 
 //-----------------------------------------------------------------------------
@@ -111,6 +113,8 @@ public:
   Subtype& setSpecularColor(const glm::vec4& color);
   Subtype& setShininess(float shininess);
 
+  Subtype& setTextureFile(std::string textureFile);
+
   virtual Object* create() = 0;
 
 protected:
@@ -124,4 +128,5 @@ protected:
   glm::vec4 diffuseColor;
   glm::vec4 specularColor;
   float shininess;
+  std::string textureFile;
 };

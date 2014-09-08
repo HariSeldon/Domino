@@ -100,9 +100,7 @@ void Mesh::parseX3DFile(const std::string &meshFile) {
     pugi::xml_node appearance = shape.child("Appearance");
     pugi::xml_node material = appearance.child("Material");
 
-    std::string textureUrl = appearance.child("ImageTexture").attribute("url").value();
-
-    glm::vec3 diffuseColor = string2vec3(material.attribute("diffuseColor").value());
+    textureFile = appearance.child("ImageTexture").attribute("url").value();
 
     pugi::xml_node triangles = shape.child("IndexedTriangleSet");
     pugi::xml_node coordinate = triangles.child("Coordinate");

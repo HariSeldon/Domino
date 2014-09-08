@@ -85,6 +85,10 @@ void Object::getOpenGLMatrix(btScalar *matrix) const {
   transform.getOpenGLMatrix(matrix);
 }
 
+const std::string &Object::getTextureFile() const {
+  return textureFile;
+}
+
 //-----------------------------------------------------------------------------
 
 template <class Subtype>
@@ -132,6 +136,12 @@ Subtype &ObjectBuilder<Subtype>::setSpecularColor(const glm::vec4 &color) {
 template <class Subtype>
 Subtype &ObjectBuilder<Subtype>::setShininess(float shininess) {
   this->shininess = shininess;
+  return static_cast<Subtype &>(*this);
+}
+
+template <class Subtype>
+Subtype &ObjectBuilder<Subtype>::setTextureFile(std::string textureFile) {
+  this->textureFile = textureFile;
   return static_cast<Subtype &>(*this);
 }
 

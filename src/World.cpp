@@ -140,9 +140,10 @@ void World::initObjects() {
   // Plane.
   addObject(planeBuilder.setTransform(btTransform::getIdentity())
                 .setMass(btScalar(0.0))
-                .setAmbientColor(glm::vec4(0.0215, 0.1745, 0.0215, 1.0))
-                .setDiffuseColor(glm::vec4(0.07568, 0.61424, 0.07568, 1.0))
+//                .setAmbientColor(glm::vec4(0.0215, 0.1745, 0.0215, 1.0))
+//                .setDiffuseColor(glm::vec4(0.07568, 0.61424, 0.07568, 1.0))
                 .setSide(btScalar(50.0))
+                .setTextureFile("/home/hari/src/domino/textures/kufel.png")
                 .create());
 
 //  btQuaternion rotation(0.0, 0.0, M_PI_2);
@@ -192,9 +193,9 @@ void World::initObjects() {
   addObject(meshBuilder.setTransform(btTransform(yRotation,
                                                  btVector3(0.0, 30.0, 0.0)))
                 .setMass(btScalar(1.0))
-                .setAmbientColor(glm::vec4(0.1745, 0.01175, 0.01175, 1.0))
-                .setDiffuseColor(glm::vec4(0.61424, 0.04136, 0.04136, 1.0))
-                .setSpecularColor(glm::vec4(0.727811, 0.626959, 0.626959, 0.6))
+//                .setAmbientColor(glm::vec4(0.1745, 0.01175, 0.01175, 1.0))
+//                .setDiffuseColor(glm::vec4(0.61424, 0.04136, 0.04136, 1.0))
+//                .setSpecularColor(glm::vec4(0.727811, 0.626959, 0.626959, 0.6))
                 .setShininess(51.2f)
                 .setMeshFile("/home/hari/src/domino/meshes/kufel.x3d")
                 .create());

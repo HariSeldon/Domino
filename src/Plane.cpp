@@ -31,6 +31,8 @@ void Plane::computePoints(const btScalar side) {
 
   indices = { 0, 1, 2, 2, 3, 0 };
 
+  textureCoos = {{0, 1}, {1, 1}, {1, 0}, {0, 0}};
+
   glm::vec3 normal = computeNormal(first, second, third);
 
   normals = { normal, normal, normal, normal }; 
@@ -47,5 +49,6 @@ PlaneBuilder &PlaneBuilder::setSide(btScalar side) {
 Plane *PlaneBuilder::create() {
   Plane *plane = new Plane(transform, mass, inertia, side);
   ObjectBuilder::setColors(plane);
+  plane->textureFile = textureFile;
   return plane;
 }

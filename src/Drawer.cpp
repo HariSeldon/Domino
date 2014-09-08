@@ -20,6 +20,8 @@
 #include <algorithm>
 #include <iostream>
 
+#include "SDL/SDL_image.h"
+
 //-----------------------------------------------------------------------------
 void setColors(const Object *object, ShaderProgram &shader);
 void setOrientation(const Object *object, ShaderProgram &shader,
@@ -45,12 +47,54 @@ void Drawer::initGPUObjects(const ShaderProgram &worldShader,
     GLuint vertexVBOId = setupVertexVBO(object, worldShader);
     GLuint indexVBOId = setupIndexVBO(object);
     GLuint normalVBOId = setupNormalVBO(object, worldShader);
+    GLuint textureVBOId = setupTextureVBO(object, worldShader);
 
     // Unbind.
     glBindVertexArray(0);
 
     vaoWorldMap[objectAddress] = vaoId;
-    vboIds.insert(vboIds.end(), { vertexVBOId, indexVBOId, normalVBOId });
+    vboIds.insert(vboIds.end(), { vertexVBOId, indexVBOId, normalVBOId, textureVBOId});
+  });
+}
+
+//-----------------------------------------------------------------------------
+void Drawer::initTextures(const World &world) {
+  // Load textures.
+  std::for_each(constBeginObjects(world), constEndObjects(world),
+                [&](const Object *object) {
+    const std::string& textureFile = object->getTextureFile();
+    if(!textureFile.empty()) {
+      SDL_Surface *texSurface = IMG_Load(textureFile.c_str());
+      if(texSurface) {
+        intptr_t objectAddress = reinterpret_cast<intptr_t>(object);
+        
+        GLuint currentTexture = 0;
+        // Create the texture object. 
+        glGenTextures(1, &currentTexture);
+        checkOpenGLError("Drawer: glGenTextures");
+        
+        glBindTexture(GL_TEXTURE_2D, currentTexture);
+        checkOpenGLError("Drawer: glBindTexture");
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texSurface->w, texSurface->h, 0,
+                     GL_RGB, GL_UNSIGNED_BYTE, texSurface->pixels);
+        checkOpenGLError("Drawer: glTexImage2D");
+        
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        checkOpenGLError("Drawer: glTexParameteri");
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        checkOpenGLError("Drawer: glTexParameteri");
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        checkOpenGLError("Drawer: glTexParameteri");
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        checkOpenGLError("Drawer: glTexParameteri");
+        
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        textureMap[objectAddress] = currentTexture;
+      }
+      SDL_FreeSurface(texSurface);
+    }
   });
 }
 
@@ -122,6 +166,18 @@ GLuint Drawer::setupNormalVBO(const Object *object,
 }
 
 //-----------------------------------------------------------------------------
+GLuint Drawer::setupTextureVBO(const Object *object,
+                              const ShaderProgram &shader) {
+  GLuint texVBOId = 0;
+  glGenBuffers(1, &texVBOId);
+  glBindBuffer(GL_ARRAY_BUFFER, texVBOId);
+  glBufferData(GL_ARRAY_BUFFER, object->getPointsNumber() * sizeof(glm::vec2),
+               object->getTextureCoos(), GL_STATIC_DRAW);
+  shader.setAttribute("vertexTextureCoordinates", 2, GL_FLOAT);
+  return texVBOId;
+}
+
+//-----------------------------------------------------------------------------
 GLuint Drawer::setupIndexVBO(const Object *object) {
   GLuint indexVBOId = 0;
   glGenBuffers(1, &indexVBOId);
@@ -130,18 +186,6 @@ GLuint Drawer::setupIndexVBO(const Object *object) {
                object->getIndicesNumber() * sizeof(unsigned int),
                object->getIndices(), GL_STATIC_DRAW);
   return indexVBOId;
-}
-
-//-----------------------------------------------------------------------------
-GLuint Drawer::setupTextureVBO(const Object *object,
-                               const ShaderProgram &shader) {
-  GLuint textureVBOId = 0;
-  glGenBuffers(1, &textureVBOId);
-  glBindBuffer(GL_ARRAY_BUFFER, textureVBOId);
-  glBufferData(GL_ARRAY_BUFFER, object->getPointsNumber() * sizeof(glm::vec2),
-               object->getTextureCoos(), GL_STATIC_DRAW);
-  shader.setAttribute("vertexTextureCoordinates", 2, GL_FLOAT);
-  return textureVBOId;
 }
 
 //-----------------------------------------------------------------------------
@@ -162,6 +206,9 @@ void Drawer::drawObject(const Object *object, ShaderProgram &shader,
                         const glm::mat4 &shadowProjection) const {
 
   setColors(object, shader);
+  glBindTexture(GL_TEXTURE_2D, textureMap.at(reinterpret_cast<intptr_t>(object)));
+
+  shader.setUniform("texture", 0);
   setOrientation(object, shader, originalModelView, projection,
                  originalShadowModelView, shadowProjection);
 
@@ -170,6 +217,7 @@ void Drawer::drawObject(const Object *object, ShaderProgram &shader,
   glDrawElements(GL_TRIANGLES, object->getIndicesNumber(), GL_UNSIGNED_INT,
                  nullptr);
   glBindVertexArray(0);
+  glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 //------------------------------------------------------------------------------

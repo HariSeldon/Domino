@@ -50,6 +50,7 @@ public:
 
 private:
   void initGPU();
+  void initTextures();
   void setupProjection(const glm::ivec2 &screenSize);
   void drawWorld(const glm::mat4 &modelView, ShaderProgram &shader);
   void drawShadowWorld(const glm::mat4 &modelView, const glm::mat4 &projection,

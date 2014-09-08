@@ -1,10 +1,12 @@
 #version 330
 
 uniform sampler2D shadowTexture;
+uniform sampler2D texture;
 
 in vec3 position;
 in vec3 normal;
 in vec3 shadowPosition;
+in vec2 textureCoordinates;
 
 out vec4 outputColor;
 
@@ -60,7 +62,9 @@ vec4 shadeDirectionalLight(vec3 position, vec3 normal, vec3 cameraDirection,
                            int lightIndex) {
   // Get material properties.
   vec4 ambientMaterialColor = material.ambient;
-  vec4 diffuseMaterialColor = material.diffuse;
+  //vec4 diffuseMaterialColor = material.diffuse;
+  vec4 diffuseMaterialColor = texture2D(texture, textureCoordinates);
+  return diffuseMaterialColor;
   vec4 specularMaterialColor = material.specular;
   float shininess = material.shininess;
 

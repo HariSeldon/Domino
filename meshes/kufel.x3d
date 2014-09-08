@@ -29,7 +29,7 @@
 					<Shape>
 						<Appearance>
 							<ImageTexture DEF="IM_kufel"
-							              url='"/home/hari/Downloads/kufel.png" "kufel.png"'
+							              url="/home/hari/src/domino/textures/kufel.png"
 							              />
 							<TextureTransform 
 							                  translation="0.000000 0.000000"
