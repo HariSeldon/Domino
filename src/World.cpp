@@ -9,6 +9,7 @@
 #include "Mirror.h"
 #include "Object.h"
 #include "Plane.h"
+#include "SysDefines.h"
 
 #include <LinearMath/btVector3.h>
 
@@ -143,7 +144,7 @@ void World::initObjects() {
 //                .setAmbientColor(glm::vec4(0.0215, 0.1745, 0.0215, 1.0))
 //                .setDiffuseColor(glm::vec4(0.07568, 0.61424, 0.07568, 1.0))
                 .setSide(btScalar(50.0))
-                .setTextureFile("/home/hari/src/domino/textures/kufel.png")
+                .setTextureFile(TEXTURE_PATH "checkerboard.png")
                 .create());
 
 //  btQuaternion rotation(0.0, 0.0, M_PI_2);
@@ -197,7 +198,7 @@ void World::initObjects() {
 //                .setDiffuseColor(glm::vec4(0.61424, 0.04136, 0.04136, 1.0))
 //                .setSpecularColor(glm::vec4(0.727811, 0.626959, 0.626959, 0.6))
                 .setShininess(51.2f)
-                .setMeshFile("/home/hari/src/domino/meshes/kufel.x3d")
+                .setMeshFile(MESH_PATH "kufel.obj")
                 .create());
 
 //  addObject(planeBuilder.setTransform(btTransform::getIdentity())

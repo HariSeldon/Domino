@@ -9,6 +9,7 @@ set(BIN_DIR "bin")
 set(INCLUDE_DIR "include")
 set(SHADER_DIR "shaders")
 set(TEXTURE_DIR "textures")
+set(MESH_DIR "meshes")
 set(FONT_DIR "fonts")
 
 # Set project name.
@@ -20,7 +21,7 @@ set(INCLUDE_PATH ${PROJECT_SOURCE_DIR}/${INCLUDE_DIR})
 set(SHADER_PATH ${PROJECT_SOURCE_DIR}/${SHADER_DIR}/)
 set(TEXTURE_PATH ${PROJECT_SOURCE_DIR}/${TEXTURE_DIR}/)
 set(FONT_PATH ${PROJECT_SOURCE_DIR}/${FONT_DIR}/)
-set(UI_PATH ${PROJECT_SOURCE_DIR}/${UI_DIR})
+set(MESH_PATH ${PROJECT_SOURCE_DIR}/${MESH_DIR}/)
 
 # Files.
 file(GLOB SRC_FILES_LIST "${SRC_PATH}/*.cpp")

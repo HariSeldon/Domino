@@ -33,8 +33,8 @@ std::string readStream(std::ifstream &fileStream) {
 }
 
 // -----------------------------------------------------------------------------
-std::string getFileContent(const char *filePath) {
-  std::ifstream fileStream(filePath);
+std::string getFileContent(const std::string &filePath) {
+  std::ifstream fileStream(filePath.c_str());
   if (fileStream.is_open()) {
     return readStream(fileStream);
   } else {

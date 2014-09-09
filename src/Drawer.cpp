@@ -20,7 +20,8 @@
 #include <algorithm>
 #include <iostream>
 
-#include "SDL/SDL_image.h"
+#include "SDL2/SDL_image.h"
+#include "SDL2/SDL_pixels.h"
 
 //-----------------------------------------------------------------------------
 void setColors(const Object *object, ShaderProgram &shader);
@@ -76,8 +77,21 @@ void Drawer::initTextures(const World &world) {
         glBindTexture(GL_TEXTURE_2D, currentTexture);
         checkOpenGLError("Drawer: glBindTexture");
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texSurface->w, texSurface->h, 0,
-                     GL_RGB, GL_UNSIGNED_BYTE, texSurface->pixels);
+        GLint format = 0;
+        switch (texSurface->format->BytesPerPixel) {
+        case 3:
+          format = GL_RGB;
+          break;
+        case 4:
+          format = GL_RGBA;
+          break;
+        default:
+          std::cerr << "Unknown texture format.\n";
+          exit(1);
+        };
+
+        glTexImage2D(GL_TEXTURE_2D, 0, format, texSurface->w, texSurface->h, 0,
+                     format, GL_UNSIGNED_BYTE, texSurface->pixels);
         checkOpenGLError("Drawer: glTexImage2D");
         
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -88,6 +102,8 @@ void Drawer::initTextures(const World &world) {
         checkOpenGLError("Drawer: glTexParameteri");
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         checkOpenGLError("Drawer: glTexParameteri");
+
+        glGenerateMipmap(GL_TEXTURE_2D);
         
         glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -204,7 +220,6 @@ void Drawer::drawObject(const Object *object, ShaderProgram &shader,
                         const glm::mat4 &projection,
                         const glm::mat4 &originalShadowModelView,
                         const glm::mat4 &shadowProjection) const {
-
   setColors(object, shader);
   glBindTexture(GL_TEXTURE_2D, textureMap.at(reinterpret_cast<intptr_t>(object)));
 
