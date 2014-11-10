@@ -144,16 +144,19 @@ void ObjParser::parseMtlLine(const std::string &line) {
     specularExponent = stof(words[1]);
 
   if (firstWord == "Ka")
-    ambientColor = floatTriple2vec3(
-        std::vector<std::string>(words.begin() + 1, words.end()));
+    ambientColor = glm::vec4(floatTriple2vec3(std::vector<std::string>(
+                                 words.begin() + 1, words.end())),
+                             1.f);
 
   if (firstWord == "Kd")
-    diffuseColor = floatTriple2vec3(
-        std::vector<std::string>(words.begin() + 1, words.end()));
+    diffuseColor = glm::vec4(floatTriple2vec3(std::vector<std::string>(
+                                 words.begin() + 1, words.end())),
+                             1.f);
 
   if (firstWord == "Ks")
-    specularColor = floatTriple2vec3(
-        std::vector<std::string>(words.begin() + 1, words.end()));
+    specularColor = glm::vec4(floatTriple2vec3(std::vector<std::string>(
+                                  words.begin() + 1, words.end())),
+                              1.f);
 
   if (firstWord == "map_Kd")
     texFile = TEXTURE_PATH + words[1];

@@ -38,9 +38,7 @@ std::string getFileContent(const std::string &filePath) {
   if (fileStream.is_open()) {
     return readStream(fileStream);
   } else {
-    std::stringstream ss;
-    ss << "Cannot open: " << filePath;
-    throw std::runtime_error(ss.str());
+    throw std::runtime_error("Cannot open: " + filePath);
   }
 }
 

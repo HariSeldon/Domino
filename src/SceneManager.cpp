@@ -3,6 +3,7 @@
 #include "Drawer.h"
 #include "Light.h"
 #include "Mirror.h"
+#include "ScriptEngine.h"
 #include "ShaderProgram.h"
 #include "ShadowManager.h"
 #include "SysDefines.h"
@@ -34,6 +35,7 @@ SceneManager::SceneManager(const glm::ivec2 &screenSize)
       textManager(TextManager(FONT_PATH + FONT_FILE, FONT_HEIGHT, screenSize)),
       currentYRotation(0), currentXRotation(0), cameraMutex(SDL_CreateMutex()),
       fps(0), lightMask((2 << (world.getLightsNumber() - 1)) - 1) {
+  
   setupProjection(screenSize);
   initGPU();
   glClearColor(CLEAR_COLOR.x, CLEAR_COLOR.y, CLEAR_COLOR.z, CLEAR_COLOR.w);

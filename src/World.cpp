@@ -141,10 +141,10 @@ void World::initObjects() {
   // Plane.
   addObject(planeBuilder.setTransform(btTransform::getIdentity())
                 .setMass(btScalar(0.0))
-//                .setAmbientColor(glm::vec4(0.0215, 0.1745, 0.0215, 1.0))
-//                .setDiffuseColor(glm::vec4(0.07568, 0.61424, 0.07568, 1.0))
+                .setAmbientColor(glm::vec4(0.0, 0., 0., 1.0))
+                .setDiffuseColor(glm::vec4(0.0, 0., 0., 1.0))
                 .setSide(btScalar(50.0))
-                .setTextureFile(TEXTURE_PATH "checkerboard.png")
+                .setTextureFile("default.png")
                 .create());
 
 //  btQuaternion rotation(0.0, 0.0, M_PI_2);
@@ -190,15 +190,11 @@ void World::initObjects() {
 //                .setSides(btVector3(0.25, 2.0, 0.5))
 //                .create());
 
-  btQuaternion yRotation(0, 0, M_PI_2);
-  addObject(meshBuilder.setTransform(btTransform(yRotation,
-                                                 btVector3(0.0, 30.0, 0.0)))
+  btQuaternion yRotation(0, 4, 0);
+  addObject(meshBuilder.setTransform(
+                            btTransform(yRotation, btVector3(-3.0, 40.0, 0.0)))
                 .setMass(btScalar(1.0))
-//                .setAmbientColor(glm::vec4(0.1745, 0.01175, 0.01175, 1.0))
-//                .setDiffuseColor(glm::vec4(0.61424, 0.04136, 0.04136, 1.0))
-//                .setSpecularColor(glm::vec4(0.727811, 0.626959, 0.626959, 0.6))
-                .setShininess(51.2f)
-                .setMeshFile(MESH_PATH "kufel.obj")
+                .setMeshFile("barrel.obj")
                 .create());
 
 //  addObject(planeBuilder.setTransform(btTransform::getIdentity())
@@ -306,12 +302,12 @@ void World::initLights() {
   //  lights.push_back(light);
   //
   //
-  //  Light *light1 = lightBuilder.setPosition(glm::vec3(30.0f, 10.0f, 0.0f))
-  //                      .setAmbientColor(glm::vec4(0.9f, 0.9f, 0.9f, 1.0f))
-  //                      .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-  //                      .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-  //                      .createPositional();
-  //  lights.push_back(light1);
+  Light *light1 = lightBuilder.setPosition(glm::vec3(0.0f, 3.0f, 0.0f))
+                      .setAmbientColor(glm::vec4(0.9f, 0.9f, 0.9f, 1.0f))
+                      .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+                      .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+                      .createPositional();
+  lights.push_back(light1);
 
 //  Light *light2 = lightBuilder.setPosition(glm::vec3(0.0f, 2.0f, 0.0f))
 //              .setAmbientColor(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f))
@@ -337,12 +333,12 @@ void World::initLights() {
   //              .createPositional();
   //  lights.push_back(light4);
 
-  Light *light = lightBuilder.setAmbientColor(glm::vec4(0.7f, 0.7f, 0.7f, 1.0f))
-                     .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-                     .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-                     .setDirection(glm::vec3(1.0f, -1.f, 0.0f))
-                     .createDirectional();
-  lights.push_back(light);
+//  Light *light = lightBuilder.setAmbientColor(glm::vec4(0.7f, 0.7f, 0.7f, 1.0f))
+//                     .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+//                     .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+//                     .setDirection(glm::vec3(1.0f, -1.f, 0.0f))
+//                     .createDirectional();
+//  lights.push_back(light);
 }
 
 //-----------------------------------------------------------------------------

@@ -26,7 +26,7 @@
 //-----------------------------------------------------------------------------
 void setColors(const Object *object, ShaderProgram &shader);
 void setOrientation(const Object *object, ShaderProgram &shader,
-                    const glm::mat4 &originalModelView, 
+                    const glm::mat4 &originalModelView,
                     const glm::mat4 &projection,
                     const glm::mat4 &originalShadowModelView,
                     const glm::mat4 &shadowProjection);
@@ -54,7 +54,8 @@ void Drawer::initGPUObjects(const ShaderProgram &worldShader,
     glBindVertexArray(0);
 
     vaoWorldMap[objectAddress] = vaoId;
-    vboIds.insert(vboIds.end(), { vertexVBOId, indexVBOId, normalVBOId, textureVBOId});
+    vboIds.insert(vboIds.end(),
+                  {vertexVBOId, indexVBOId, normalVBOId, textureVBOId});
   });
 }
 
@@ -63,17 +64,17 @@ void Drawer::initTextures(const World &world) {
   // Load textures.
   std::for_each(constBeginObjects(world), constEndObjects(world),
                 [&](const Object *object) {
-    const std::string& textureFile = object->getTextureFile();
-    if(!textureFile.empty()) {
+    const std::string &textureFile = object->getTextureFile();
+    if (!textureFile.empty()) {
       SDL_Surface *texSurface = IMG_Load(textureFile.c_str());
-      if(texSurface) {
+      if (texSurface) {
         intptr_t objectAddress = reinterpret_cast<intptr_t>(object);
-        
+
         GLuint currentTexture = 0;
-        // Create the texture object. 
+        // Create the texture object.
         glGenTextures(1, &currentTexture);
         checkOpenGLError("Drawer: glGenTextures");
-        
+
         glBindTexture(GL_TEXTURE_2D, currentTexture);
         checkOpenGLError("Drawer: glBindTexture");
 
@@ -93,7 +94,7 @@ void Drawer::initTextures(const World &world) {
         glTexImage2D(GL_TEXTURE_2D, 0, format, texSurface->w, texSurface->h, 0,
                      format, GL_UNSIGNED_BYTE, texSurface->pixels);
         checkOpenGLError("Drawer: glTexImage2D");
-        
+
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
         checkOpenGLError("Drawer: glTexParameteri");
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
@@ -104,7 +105,7 @@ void Drawer::initTextures(const World &world) {
         checkOpenGLError("Drawer: glTexParameteri");
 
         glGenerateMipmap(GL_TEXTURE_2D);
-        
+
         glBindTexture(GL_TEXTURE_2D, 0);
 
         textureMap[objectAddress] = currentTexture;
@@ -119,9 +120,10 @@ void Drawer::initGPUShadowObjects(const ShaderProgram &shadowShader,
                                   const World &world) {
   for (auto mapIter : vaoWorldMap) {
     intptr_t objectAddress = mapIter.first;
-    Object *object = reinterpret_cast<Object*>(objectAddress); 
-    
-    GLuint vaoId = 0;;
+    Object *object = reinterpret_cast<Object *>(objectAddress);
+
+    GLuint vaoId = 0;
+
     glGenVertexArrays(1, &vaoId);
     glBindVertexArray(vaoId);
 
@@ -138,8 +140,7 @@ void Drawer::initGPUShadowObjects(const ShaderProgram &shadowShader,
 }
 
 //-----------------------------------------------------------------------------
-void Drawer::initMirror(const ShaderProgram &shader,
-                        const Mirror *mirror) {
+void Drawer::initMirror(const ShaderProgram &shader, const Mirror *mirror) {
   intptr_t objectAddress = reinterpret_cast<intptr_t>(mirror);
   GLuint vaoId = 0;
   // Create VAO.
@@ -154,7 +155,7 @@ void Drawer::initMirror(const ShaderProgram &shader,
   glBindVertexArray(0);
 
   vaoWorldMap[objectAddress] = vaoId;
-  vboIds.insert(vboIds.end(), { vertexVBOId, indexVBOId, textureVBOId });
+  vboIds.insert(vboIds.end(), {vertexVBOId, indexVBOId, textureVBOId});
 }
 
 //-----------------------------------------------------------------------------
@@ -183,7 +184,7 @@ GLuint Drawer::setupNormalVBO(const Object *object,
 
 //-----------------------------------------------------------------------------
 GLuint Drawer::setupTextureVBO(const Object *object,
-                              const ShaderProgram &shader) {
+                               const ShaderProgram &shader) {
   GLuint texVBOId = 0;
   glGenBuffers(1, &texVBOId);
   glBindBuffer(GL_ARRAY_BUFFER, texVBOId);
@@ -206,7 +207,6 @@ GLuint Drawer::setupIndexVBO(const Object *object) {
 
 //-----------------------------------------------------------------------------
 Drawer::~Drawer() {
-
   for (auto iter : vaoWorldMap)
     glDeleteVertexArrays(1, &iter.second);
 
@@ -221,7 +221,8 @@ void Drawer::drawObject(const Object *object, ShaderProgram &shader,
                         const glm::mat4 &originalShadowModelView,
                         const glm::mat4 &shadowProjection) const {
   setColors(object, shader);
-  glBindTexture(GL_TEXTURE_2D, textureMap.at(reinterpret_cast<intptr_t>(object)));
+  glBindTexture(GL_TEXTURE_2D,
+                textureMap.at(reinterpret_cast<intptr_t>(object)));
 
   shader.setUniform("texture", 0);
   setOrientation(object, shader, originalModelView, projection,
@@ -237,7 +238,7 @@ void Drawer::drawObject(const Object *object, ShaderProgram &shader,
 
 //------------------------------------------------------------------------------
 void Drawer::drawObjectForShadow(const Object *object, ShaderProgram &shader,
-                                 const glm::mat4 &originalModelView, 
+                                 const glm::mat4 &originalModelView,
                                  const glm::mat4 &projection) const {
   setOrientationForShadow(object, shader, originalModelView, projection);
 
@@ -258,7 +259,7 @@ void setColors(const Object *object, ShaderProgram &shader) {
 
 //------------------------------------------------------------------------------
 void setOrientation(const Object *object, ShaderProgram &shader,
-                    const glm::mat4 &originalModelView, 
+                    const glm::mat4 &originalModelView,
                     const glm::mat4 &projection,
                     const glm::mat4 &originalShadowModelView,
                     const glm::mat4 &shadowProjection) {
@@ -277,13 +278,13 @@ void setOrientation(const Object *object, ShaderProgram &shader,
   shader.setUniform("projectionMatrix", projection);
   shader.setUniform("modelViewMatrix", modelView);
   shader.setUniform("normalMatrix",
-                           glm::inverseTranspose(glm::mat3(modelView)));
+                    glm::inverseTranspose(glm::mat3(modelView)));
   shader.setUniform("mvpShadowMatrix", shadowMVP);
 }
 
 //------------------------------------------------------------------------------
 void setOrientationForShadow(const Object *object, ShaderProgram &shader,
-                             const glm::mat4 &originalModelView, 
+                             const glm::mat4 &originalModelView,
                              const glm::mat4 &projection) {
   btScalar transform[16];
   object->getOpenGLMatrix(transform);

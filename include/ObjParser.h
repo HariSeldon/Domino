@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 
 class Mesh;
 
@@ -21,6 +22,11 @@ public:
     return textureCoos;
   }
   inline const std::vector<FaceIndices> &getIndices() const { return indices; }
+  inline const glm::vec4 getAmbientColor() const { return ambientColor; }
+  inline const glm::vec4 getDiffuseColor() const { return diffuseColor; }
+  inline const glm::vec4 getSpecularColor() const { return specularColor; }
+  inline float getSpecularExponent() const { return specularExponent; }
+
   inline std::string getTexFile() const { return texFile; }
 
 private:
@@ -47,8 +53,8 @@ private:
   std::string materialName;
   std::string mtlFile;
   float specularExponent;
-  glm::vec3 ambientColor;
-  glm::vec3 diffuseColor;
-  glm::vec3 specularColor;
+  glm::vec4 ambientColor;
+  glm::vec4 diffuseColor;
+  glm::vec4 specularColor;
   std::string texFile;
 };

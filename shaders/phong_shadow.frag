@@ -64,7 +64,7 @@ vec4 shadeDirectionalLight(vec3 position, vec3 normal, vec3 cameraDirection,
   vec4 ambientMaterialColor = material.ambient;
   //vec4 diffuseMaterialColor = material.diffuse;
   vec4 diffuseMaterialColor = texture2D(texture, textureCoordinates);
-  return diffuseMaterialColor;
+  //vec4 diffuseMaterialColor = vec4(textureCoordinates, 0.f, 1.f);
   vec4 specularMaterialColor = material.specular;
   float shininess = material.shininess;
 
@@ -102,7 +102,8 @@ vec4 shadePositionalLight(vec3 position, vec3 normal, vec3 cameraDirection,
                           int lightIndex) {
   // Get material properties.
   vec4 ambientMaterialColor = material.ambient;
-  vec4 diffuseMaterialColor = material.diffuse;
+  //vec4 diffuseMaterialColor = material.diffuse;
+  vec4 diffuseMaterialColor = texture2D(texture, textureCoordinates);
   vec4 specularMaterialColor = material.specular;
   float shininess = material.shininess;
 
@@ -165,6 +166,8 @@ void main() {
 
   if (gl_FrontFacing == false) {
     normalizedNormal = -normalizedNormal; 
+    outputColor = vec4(0, 0, 0, 1);
+    return;
   }
 
   vec3 cameraDirection = normalize(-1.0 * position);

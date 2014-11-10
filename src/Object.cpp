@@ -7,6 +7,7 @@
 #include "Mesh.h"
 #include "Plane.h"
 #include "ShaderProgram.h"
+#include "SysDefines.h"
 
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 #include <BulletDynamics/Dynamics/btRigidBody.h>
@@ -141,7 +142,7 @@ Subtype &ObjectBuilder<Subtype>::setShininess(float shininess) {
 
 template <class Subtype>
 Subtype &ObjectBuilder<Subtype>::setTextureFile(std::string textureFile) {
-  this->textureFile = textureFile;
+  this->textureFile = TEXTURE_PATH + textureFile;
   return static_cast<Subtype &>(*this);
 }
 
