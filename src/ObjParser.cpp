@@ -11,6 +11,8 @@
 
 #include <boost/tokenizer.hpp>
 
+#include <iostream>
+
 //------------------------------------------------------------------------------
 inline glm::vec3 floatTriple2vec3(const std::vector<std::string> &words) {
   if (words.size() != 3) {
