@@ -48,7 +48,6 @@ void Window::initSDLWindow() {
 
 // -----------------------------------------------------------------------------
 Window::~Window() {
-  delete scene;
   SDL_RemoveTimer(eventTimerId);
   SDL_RemoveTimer(fpsTimerId);
   SDL_GL_DeleteContext(context);
@@ -90,16 +89,6 @@ void Window::renderingLoop() {
     SDL_GL_SwapWindow(sdlWindow);
     SDL_Delay(Window::DISPLAY_DELAY);
   }
-}
-
-// -----------------------------------------------------------------------------
-void Window::setScene(SceneManager *scene) {
-  this->scene = scene;
-}
-
-// -----------------------------------------------------------------------------
-SceneManager* Window::getScene() {
-  return scene;
 }
 
 // -----------------------------------------------------------------------------
