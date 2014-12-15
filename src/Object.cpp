@@ -14,6 +14,12 @@
 
 #include <utility>
 
+const glm::vec3 Object::DEFAULT_POSITION = {0.f, 0.f, 0.f};
+const glm::vec3 Object::DEFAULT_ROTATION = {0.f, 0.f, 0.f};
+const glm::vec4 Object::DEFAULT_AMBIENT_COLOR = {0.f, 0.f, 0.f, 1.f};
+const glm::vec4 Object::DEFAULT_DIFFUSE_COLOR = {0.f, 0.f, 0.f, 1.f};
+const glm::vec4 Object::DEFAULT_SPECULAR_COLOR = {0.f, 0.f, 0.f, 1.f};
+
 Object::Object(const btTransform &transform, btScalar mass, btVector3 &inertia)
     : Entity(transform), mass(mass), inertia(inertia) {}
 

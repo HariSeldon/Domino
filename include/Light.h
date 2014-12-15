@@ -12,8 +12,8 @@ public:
   static const glm::vec4 DEFAULT_AMBIENT_COLOR;
   static const glm::vec4 DEFAULT_DIFFUSE_COLOR;
   static const glm::vec4 DEFAULT_SPECULAR_COLOR;
-  static const glm::vec3 DEFAULT_SPOT_DIRECTION;
-  static const glm::vec3 DEFAULT_SPOT_POSITION;
+  static const glm::vec3 DEFAULT_DIRECTION;
+  static const glm::vec3 DEFAULT_POSITION;
   static const float DEFAULT_SPOT_CUTOFF;
   static constexpr float DEFAULT_SPOT_EXPONENT = 0.0f;
   static constexpr float DEFAULT_CONSTANT_ATTENUATION = 1.0f;

@@ -31,7 +31,8 @@ private:
   static constexpr int MAX_STEPS = 8;
 
 public:
-  void addObject(Object* object);
+  void addObject(Object *object);
+  void addLight(Light *light);
   void stepSimulation();
 
   const btVector3& getGravity() const;

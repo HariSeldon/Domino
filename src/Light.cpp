@@ -9,8 +9,8 @@
 const glm::vec4 Light::DEFAULT_AMBIENT_COLOR = { 0.f, 0.f, 0.f, 1.f };
 const glm::vec4 Light::DEFAULT_DIFFUSE_COLOR = { 1.f, 1.f, 1.f, 1.f };
 const glm::vec4 Light::DEFAULT_SPECULAR_COLOR = { 0.f, 0.f, 0.f, 1.f };
-const glm::vec3 Light::DEFAULT_SPOT_DIRECTION = { 0.f, 0.f, -1.f };
-const glm::vec3 Light::DEFAULT_SPOT_POSITION = { 0.f, 0.f, 0.f };
+const glm::vec3 Light::DEFAULT_DIRECTION = { 0.f, 0.f, -1.f };
+const glm::vec3 Light::DEFAULT_POSITION = { 0.f, 0.f, 0.f };
 const float Light::DEFAULT_SPOT_CUTOFF = 180.0f;
 
 // -----------------------------------------------------------------------------
@@ -161,8 +161,8 @@ void LightBuilder::setup() {
   diffuseColor = Light::DEFAULT_DIFFUSE_COLOR;
   specularColor = Light::DEFAULT_SPECULAR_COLOR;
 
-  direction = Light::DEFAULT_SPOT_DIRECTION;
-  position = Light::DEFAULT_SPOT_POSITION;
+  direction = Light::DEFAULT_DIRECTION;
+  position = Light::DEFAULT_POSITION;
 
   constantAttenuation = Light::DEFAULT_CONSTANT_ATTENUATION;
   linearAttenuation = Light::DEFAULT_LINEAR_ATTENUATION;

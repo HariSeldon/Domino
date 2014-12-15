@@ -88,7 +88,7 @@ template <typename type>
 void ShaderProgram::setUniform(const std::string &name, const type &value) {
   auto iter = uniformLocationsMap.find(name);
   if (iter == uniformLocationsMap.end()) {
-    std::cout << "Error setting: " << name << "\n";
+    //std::cout << "Error setting: " << name << "\n";
     return;
   }
   setUniformValue<type>(uniformLocationsMap[name], value);

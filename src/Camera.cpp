@@ -18,6 +18,14 @@ Camera::Camera()
 Camera::Camera(const glm::vec4 &position, float xRotation, float yRotation)
     : position(position), xRotation(xRotation), yRotation(yRotation) {}
 
+// ----------------------------------------------------------------------------- 
+void Camera::assign(const glm::vec4 position, float xRotation, float yRotation) {
+  this->position = position;
+  this->xRotation = xRotation;
+  this->yRotation = yRotation;
+}
+
+// ----------------------------------------------------------------------------- 
 void Camera::moveForward() { move(Camera::STEP); }
 
 void Camera::moveBackward() { move(-Camera::STEP); }

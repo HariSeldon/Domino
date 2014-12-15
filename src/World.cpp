@@ -11,18 +11,13 @@
 #include "Plane.h"
 #include "SysDefines.h"
 
-#include <LinearMath/btVector3.h>
+#include <iostream>
 
-const float World::DEFAULT_GRAVITY_X = 0.0f;
-const float World::DEFAULT_GRAVITY_Y = -10.0f;
-const float World::DEFAULT_GRAVITY_Z = 0.0f;
+#include <LinearMath/btVector3.h>
 
 // -----------------------------------------------------------------------------
 World::World() : mirror(nullptr) {
-  setGravity();
-  initObjects();
-  initLights();
-  initMirror();
+  ambientColor = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
 }
 
 // -----------------------------------------------------------------------------
@@ -46,6 +41,11 @@ void World::addObject(Object *object) {
 }
 
 // -----------------------------------------------------------------------------
+void World::addLight(Light *light) {
+  lights.push_back(light);
+}
+
+// -----------------------------------------------------------------------------
 void World::stepSimulation() {
   int steps = engine.getDynamicsWorld()->stepSimulation(
       1 / World::STEPS_PER_SECOND, World::MAX_STEPS);
@@ -63,10 +63,6 @@ void World::stepSimulation() {
 // -----------------------------------------------------------------------------
 const btVector3 &World::getGravity() const { return engine.getGravity(); }
 void World::setGravity(const btVector3 &gravity) { engine.setGravity(gravity); }
-void World::setGravity() {
-  engine.setGravity({ World::DEFAULT_GRAVITY_X, World::DEFAULT_GRAVITY_Y,
-                      World::DEFAULT_GRAVITY_Z });
-}
 
 // -----------------------------------------------------------------------------
 const glm::vec4 &World::getAmbientColor() const { return ambientColor; }
@@ -132,6 +128,7 @@ void traceDominoLine(const btVector3 &origin, const btVector3 &destination,
 
 // -----------------------------------------------------------------------------
 void World::initObjects() {
+  std::cout << "Init objects\n";
   PlaneBuilder planeBuilder;
   // SphereBuilder sphereBuilder;
   BoxBuilder boxBuilder;
@@ -289,56 +286,56 @@ void World::initObjects() {
 // -----------------------------------------------------------------------------
 void World::initLights() {
   ambientColor = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
-  LightBuilder lightBuilder;
-  //  Light* light = lightBuilder.setPosition(glm::vec3(0.0f, 2.0f, 0.0f))
-  //              .setDirection(glm::vec3(1.0f, 0.0f, 0.0f))
-  //              .setAmbientColor(glm::vec4(0.9f, 0.9f, 0.9f, 1.0f))
-  //              .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-  //              .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-  //              .setCutOff(45.0f)
-  //              .setSpotExponent(3.0f)
-  ////              .setLinearAttenuation(2.0f)
-  //              .createSpot();
-  //  lights.push_back(light);
-  //
-  //
-  Light *light1 = lightBuilder.setPosition(glm::vec3(0.0f, 3.0f, 0.0f))
-                      .setAmbientColor(glm::vec4(0.9f, 0.9f, 0.9f, 1.0f))
-                      .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-                      .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-                      .createPositional();
-  lights.push_back(light1);
-
-//  Light *light2 = lightBuilder.setPosition(glm::vec3(0.0f, 2.0f, 0.0f))
-//              .setAmbientColor(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f))
-//              .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-//              .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-//              .setLinearAttenuation(0.05f)
-//              .createPositional();
-//  lights.push_back(light2);
-
-  //  Light *light3 = lightBuilder.setPosition(glm::vec3(0.0f, 10.0f, 30.0f))
-  //              .setAmbientColor(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f))
-  //              .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-  //              .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-  //              .setLinearAttenuation(1.f)
-  //              .createPositional();
-  //  lights.push_back(light3);
-  //
-  //  Light *light4 = lightBuilder.setPosition(glm::vec3(0.0f, 10.0f, -30.0f))
-  //              .setAmbientColor(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f))
-  //              .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-  //              .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-  //              .setLinearAttenuation(1.f)
-  //              .createPositional();
-  //  lights.push_back(light4);
-
-//  Light *light = lightBuilder.setAmbientColor(glm::vec4(0.7f, 0.7f, 0.7f, 1.0f))
-//                     .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-//                     .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
-//                     .setDirection(glm::vec3(1.0f, -1.f, 0.0f))
-//                     .createDirectional();
-//  lights.push_back(light);
+//  LightBuilder lightBuilder;
+//  //  Light* light = lightBuilder.setPosition(glm::vec3(0.0f, 2.0f, 0.0f))
+//  //              .setDirection(glm::vec3(1.0f, 0.0f, 0.0f))
+//  //              .setAmbientColor(glm::vec4(0.9f, 0.9f, 0.9f, 1.0f))
+//  //              .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+//  //              .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+//  //              .setCutOff(45.0f)
+//  //              .setSpotExponent(3.0f)
+//  ////              .setLinearAttenuation(2.0f)
+//  //              .createSpot();
+//  //  lights.push_back(light);
+//  //
+//  //
+//  Light *light1 = lightBuilder.setPosition(glm::vec3(0.0f, 3.0f, 0.0f))
+//                      .setAmbientColor(glm::vec4(0.9f, 0.9f, 0.9f, 1.0f))
+//                      .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+//                      .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+//                      .createPositional();
+//  lights.push_back(light1);
+//
+////  Light *light2 = lightBuilder.setPosition(glm::vec3(0.0f, 2.0f, 0.0f))
+////              .setAmbientColor(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f))
+////              .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+////              .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+////              .setLinearAttenuation(0.05f)
+////              .createPositional();
+////  lights.push_back(light2);
+//
+//  //  Light *light3 = lightBuilder.setPosition(glm::vec3(0.0f, 10.0f, 30.0f))
+//  //              .setAmbientColor(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f))
+//  //              .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+//  //              .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+//  //              .setLinearAttenuation(1.f)
+//  //              .createPositional();
+//  //  lights.push_back(light3);
+//  //
+//  //  Light *light4 = lightBuilder.setPosition(glm::vec3(0.0f, 10.0f, -30.0f))
+//  //              .setAmbientColor(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f))
+//  //              .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+//  //              .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+//  //              .setLinearAttenuation(1.f)
+//  //              .createPositional();
+//  //  lights.push_back(light4);
+//
+////  Light *light = lightBuilder.setAmbientColor(glm::vec4(0.7f, 0.7f, 0.7f, 1.0f))
+////                     .setDiffuseColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+////                     .setSpecularColor(glm::vec4(1.f, 1.f, 1.f, 1.f))
+////                     .setDirection(glm::vec3(1.0f, -1.f, 0.0f))
+////                     .createDirectional();
+////  lights.push_back(light);
 }
 
 //-----------------------------------------------------------------------------

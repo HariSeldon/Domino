@@ -11,6 +11,7 @@
 #include <glm/mat4x4.hpp>
 
 #include <atomic>
+#include <memory>
 #include <string>
 
 #include "SDL2/SDL_thread.h"
@@ -32,7 +33,8 @@ public:
   static const std::string MAIN_FRAGMENT_SHADER;
 
 public:
-  SceneManager(const glm::ivec2 &screenSize);
+  SceneManager(const glm::ivec2 &screenSize, World *world,
+               Camera *camera);
   ~SceneManager();
 
 public:
@@ -64,7 +66,7 @@ private:
   void screenRenderingPass();
 
 private:
-  World world;
+  World* world;
   Drawer drawer;
   ShaderProgram worldShader;
   TextManager textManager;
@@ -72,7 +74,7 @@ private:
 
   glm::mat4 projection;
 
-  Camera camera;
+  Camera* camera;
 
   std::atomic_int currentYRotation;
   std::atomic_int currentXRotation;

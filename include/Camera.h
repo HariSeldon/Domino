@@ -10,12 +10,25 @@ public:
   Camera(const glm::vec4& position, float xRotation, float yRotation);
 
 public:
+  void assign(const glm::vec4 position, float xRotation, float yRotation);
   void moveForward();
   void moveBackward();
   void rotate(float xOffset, float yOffset);
   void rotateLeft();
   void rotateRight();
   glm::mat4 applyView();
+
+  inline const glm::vec4 &getPosition() const {
+    return position;
+  }
+
+  inline float getXRotation() const {
+    return xRotation;
+  }
+
+  inline float getYRotation() const {
+    return yRotation;
+  }
 
   void dump();
 

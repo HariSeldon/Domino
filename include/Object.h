@@ -18,6 +18,14 @@ class Drawer;
 class ShaderProgram;
 
 class Object : public Entity {
+public:
+  static const glm::vec3 DEFAULT_POSITION;
+  static const glm::vec3 DEFAULT_ROTATION;
+  static const glm::vec4 DEFAULT_AMBIENT_COLOR;
+  static const glm::vec4 DEFAULT_DIFFUSE_COLOR;
+  static const glm::vec4 DEFAULT_SPECULAR_COLOR;
+  static constexpr float DEFAULT_MASS = 0.f;
+
 protected:
   Object(const btTransform &transform, btScalar mass, btVector3 &inertia);
 

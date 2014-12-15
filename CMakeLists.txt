@@ -11,6 +11,8 @@ set(SHADER_DIR "shaders")
 set(TEXTURE_DIR "textures")
 set(MESH_DIR "meshes")
 set(FONT_DIR "fonts")
+set(EXT_DIR "ext")
+set(SCRIPT_DIR "scripts")
 
 # Set project name.
 project(PROJECT_NAME)
@@ -22,6 +24,8 @@ set(SHADER_PATH ${PROJECT_SOURCE_DIR}/${SHADER_DIR}/)
 set(TEXTURE_PATH ${PROJECT_SOURCE_DIR}/${TEXTURE_DIR}/)
 set(FONT_PATH ${PROJECT_SOURCE_DIR}/${FONT_DIR}/)
 set(MESH_PATH ${PROJECT_SOURCE_DIR}/${MESH_DIR}/)
+set(EXT_PATH ${PROJECT_SOURCE_DIR}/${EXT_DIR}/)
+set(SCRIPT_PATH ${PROJECT_SOURCE_DIR}/${SCRIPT_DIR}/)
 
 # Files.
 file(GLOB SRC_FILES_LIST "${SRC_PATH}/*.cpp")
@@ -34,7 +38,7 @@ set(BULLET_INCLUDE_DIR "/usr/include/bullet")
 set(FREETYPE_INCLUDE_DIR "/usr/include/freetype2")
 include_directories(${INCLUDE_PATH} "${CMAKE_BINARY_DIR}/${INCLUDE_DIR}")
 # Use system flag so to disable warnings when compiling using -Wall.
-include_directories(SYSTEM ${BULLET_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR})
+include_directories(SYSTEM ${BULLET_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR} ${PYTHON_INCLUDE_DIR})
 
 # Set compilation options.
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -Wall -Wextra -pedantic")
@@ -99,7 +103,7 @@ else(EXISTS ${FREETYPE_LIB_PATH})
   message(FATAL_ERROR "Looking for freetype: not found")
 endif(EXISTS ${FREETYPE_LIB_PATH})
 
-target_link_libraries(${EXE_NAME} ${SDL2_LIB_PATH} ${SDL2_IMAGE_LIB_PATH} ${GLEW_LIB_PATH} ${GLU_LIB_PATH} ${GL_LIB_PATH} ${FREETYPE_LIB_PATH})
+target_link_libraries(${EXE_NAME} ${SDL2_LIB_PATH} ${SDL2_IMAGE_LIB_PATH} ${GLEW_LIB_PATH} ${GLU_LIB_PATH} ${GL_LIB_PATH} ${FREETYPE_LIB_PATH} "/usr/lib64/liblua.so")
 
 # BulletCollision
 find_library(BULLET_COLLISION_LIB_PATH BulletCollision
