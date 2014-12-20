@@ -48,6 +48,14 @@ void Box::setupFaces(const glm::vec3 &halfSides) {
              frontBottomRight, backBottomRight // Bottom.
   };
 
+  textureCoos = { {1, 1}, {1, 0}, {0, 0}, {0, 1},
+                  {1, 1}, {1, 0}, {0, 0}, {0, 1},
+                  {1, 1}, {1, 0}, {0, 0}, {0, 1},
+                  {1, 1}, {1, 0}, {0, 0}, {0, 1},
+                  {1, 1}, {1, 0}, {0, 0}, {0, 1},
+                  {1, 1}, {1, 0}, {0, 0}, {0, 1}
+  };
+
   indices = { 0,  1,  2,  2,  3,  0,  // Front.
               4,  5,  6,  6,  7,  4,  // Right.
               8,  9,  10, 10, 11, 8,  // Back.
@@ -88,5 +96,6 @@ BoxBuilder &BoxBuilder::setSides(const btVector3 &sidesLengths) {
 Box *BoxBuilder::create() {
   Box *box = new Box(transform, mass, inertia, sidesLengths);
   ObjectBuilder::setColors(box);
+  box->textureFile = textureFile;
   return box;
 }

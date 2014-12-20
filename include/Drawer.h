@@ -51,16 +51,13 @@ private:
 private:
   // Mapping between world objects (identified by their memory locations) 
   // to VAOs. 
-  std::unordered_map<intptr_t, GLuint> vaoWorldMap;
-  // Mapping between world objects shadows (identified by their memory locations) 
-  // to VAOs.
-  std::unordered_map<intptr_t, GLuint> vaoShadowMap;
-  // Mapping between world objects (identified by their memory locations)
-  // to their vertex VBO.
-  std::unordered_map<intptr_t, GLuint> vboWorldMap; 
-  // Mapping between world objects (identifed by their memory locations)
-  // to their texture objects.
-  std::unordered_map<uintptr_t, GLuint> textureMap;
+  std::unordered_map<const Object*, GLuint> vaoWorldMap;
+  // Mapping between world objects shadows to VAOs.
+  std::unordered_map<const Object*, GLuint> vaoShadowMap;
+  // Mapping between world objects to their vertex VBO.
+  std::unordered_map<const Object*, GLuint> vboWorldMap; 
+  // Mapping between world objects to their texture objects.
+  std::unordered_map<const Object*, GLuint> textureMap;
 
   // Ids of VBOs associated with the VAOs. These are kept so I know what to delete
   // to free the memory.

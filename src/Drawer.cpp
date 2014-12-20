@@ -39,7 +39,6 @@ void Drawer::initGPUObjects(const ShaderProgram &worldShader,
                             const World &world) {
   std::for_each(constBeginObjects(world), constEndObjects(world),
                 [&](const Object *object) {
-    intptr_t objectAddress = reinterpret_cast<intptr_t>(object);
     GLuint vaoId = 0;
     // Create VAO.
     glGenVertexArrays(1, &vaoId);
@@ -53,7 +52,7 @@ void Drawer::initGPUObjects(const ShaderProgram &worldShader,
     // Unbind.
     glBindVertexArray(0);
 
-    vaoWorldMap[objectAddress] = vaoId;
+    vaoWorldMap.insert(std::pair<const Object*, GLuint>(object, vaoId));
     vboIds.insert(vboIds.end(),
                   {vertexVBOId, indexVBOId, normalVBOId, textureVBOId});
   });
@@ -68,8 +67,6 @@ void Drawer::initTextures(const World &world) {
     if (!textureFile.empty()) {
       SDL_Surface *texSurface = IMG_Load(textureFile.c_str());
       if (texSurface) {
-        intptr_t objectAddress = reinterpret_cast<intptr_t>(object);
-
         GLuint currentTexture = 0;
         // Create the texture object.
         glGenTextures(1, &currentTexture);
@@ -108,7 +105,7 @@ void Drawer::initTextures(const World &world) {
 
         glBindTexture(GL_TEXTURE_2D, 0);
 
-        textureMap[objectAddress] = currentTexture;
+        textureMap[object] = currentTexture;
       }
       SDL_FreeSurface(texSurface);
     }
@@ -119,8 +116,7 @@ void Drawer::initTextures(const World &world) {
 void Drawer::initGPUShadowObjects(const ShaderProgram &shadowShader,
                                   const World &world) {
   for (auto mapIter : vaoWorldMap) {
-    intptr_t objectAddress = mapIter.first;
-    Object *object = reinterpret_cast<Object *>(objectAddress);
+    const Object *object = mapIter.first;
 
     GLuint vaoId = 0;
 
@@ -134,14 +130,13 @@ void Drawer::initGPUShadowObjects(const ShaderProgram &shadowShader,
 
     glBindVertexArray(0);
 
-    vaoShadowMap[objectAddress] = vaoId;
+    vaoShadowMap.insert(std::pair<const Object *, GLuint>(object, vaoId));
     vboIds.push_back(indexVBOId);
   }
 }
 
 //-----------------------------------------------------------------------------
 void Drawer::initMirror(const ShaderProgram &shader, const Mirror *mirror) {
-  intptr_t objectAddress = reinterpret_cast<intptr_t>(mirror);
   GLuint vaoId = 0;
   // Create VAO.
   glGenVertexArrays(1, &vaoId);
@@ -154,7 +149,7 @@ void Drawer::initMirror(const ShaderProgram &shader, const Mirror *mirror) {
   // Unbind.
   glBindVertexArray(0);
 
-  vaoWorldMap[objectAddress] = vaoId;
+  vaoWorldMap[mirror] = vaoId;
   vboIds.insert(vboIds.end(), {vertexVBOId, indexVBOId, textureVBOId});
 }
 
@@ -221,14 +216,13 @@ void Drawer::drawObject(const Object *object, ShaderProgram &shader,
                         const glm::mat4 &originalShadowModelView,
                         const glm::mat4 &shadowProjection) const {
   setColors(object, shader);
-  glBindTexture(GL_TEXTURE_2D,
-                textureMap.at(reinterpret_cast<intptr_t>(object)));
+  glBindTexture(GL_TEXTURE_2D, textureMap.at(object));
 
   shader.setUniform("texture", 0);
   setOrientation(object, shader, originalModelView, projection,
                  originalShadowModelView, shadowProjection);
 
-  GLuint vao = vaoWorldMap.at(reinterpret_cast<intptr_t>(object));
+  GLuint vao = vaoWorldMap.at(object);
   glBindVertexArray(vao);
   glDrawElements(GL_TRIANGLES, object->getIndicesNumber(), GL_UNSIGNED_INT,
                  nullptr);
@@ -242,7 +236,7 @@ void Drawer::drawObjectForShadow(const Object *object, ShaderProgram &shader,
                                  const glm::mat4 &projection) const {
   setOrientationForShadow(object, shader, originalModelView, projection);
 
-  GLuint vao = vaoShadowMap.at(reinterpret_cast<intptr_t>(object));
+  GLuint vao = vaoShadowMap.at(object);
   glBindVertexArray(vao);
   glDrawElements(GL_TRIANGLES, object->getIndicesNumber(), GL_UNSIGNED_INT,
                  nullptr);

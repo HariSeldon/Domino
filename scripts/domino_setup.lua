@@ -139,6 +139,61 @@ function addPlane(plane)
 end
 
 --------------------------------------------------------------------------------
+function addBox(box)
+  -- Mandatory parameters.
+  if box.sides == nil then
+    error("Box sides missing");
+  end
+  if box.textureFile == nil then
+    error("Box texture missing");
+  end
+
+  -- Optional parameters.
+  if box.mass == nil then
+    box.mass = 0;
+  end
+  if box.position == nil then
+    box.position = CENTER;
+  end
+  if box.orientation == nil then
+    box.orientation = CENTER;
+  end
+  if box.ambientColor == nil then
+    box.ambientColor = BLACK;
+  end
+  if box.diffuseColor == nil then
+    box.diffuseColor = BLACK; 
+  end 
+  if box.specularColor == nil then
+    box.specularColor = BLACK; 
+  end 
+
+  engine:_addBox(box.sides.x,
+                 box.sides.y,
+                 box.sides.z,
+                 box.mass,
+                 box.position.x,
+                 box.position.y,
+                 box.position.z,
+                 box.orientation.x,
+                 box.orientation.y,
+                 box.orientation.z,
+                 box.ambientColor.r,
+                 box.ambientColor.g,
+                 box.ambientColor.b,
+                 box.ambientColor.a,
+                 box.diffuseColor.r,
+                 box.diffuseColor.g,
+                 box.diffuseColor.b,
+                 box.diffuseColor.a,
+                 box.specularColor.r,
+                 box.specularColor.g,
+                 box.specularColor.b,
+                 box.specularColor.a,
+                 box.textureFile);
+end
+
+--------------------------------------------------------------------------------
 function addMesh(mesh)
   -- Mandatory parameters.
   if mesh.objFile == nil then
