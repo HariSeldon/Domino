@@ -13,6 +13,7 @@ set(MESH_DIR "meshes")
 set(FONT_DIR "fonts")
 set(EXT_DIR "ext")
 set(SCRIPT_DIR "scripts")
+set(GLM_DIR "glm")
 
 # Set project name.
 project(PROJECT_NAME)
@@ -36,15 +37,17 @@ configure_file(${CMAKE_SOURCE_DIR}/${INCLUDE_DIR}/SysDefines.h.cmake
                ${CMAKE_BINARY_DIR}/${INCLUDE_DIR}/SysDefines.h)
 set(BULLET_INCLUDE_DIR "/usr/include/bullet")
 set(FREETYPE_INCLUDE_DIR "/usr/include/freetype2")
-include_directories(${INCLUDE_PATH} "${CMAKE_BINARY_DIR}/${INCLUDE_DIR}")
+include_directories(${EXT_PATH} ${INCLUDE_PATH} "${CMAKE_BINARY_DIR}/${INCLUDE_DIR}" )
 # Use system flag so to disable warnings when compiling using -Wall.
-include_directories(SYSTEM ${BULLET_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR} ${PYTHON_INCLUDE_DIR})
+include_directories(SYSTEM ${BULLET_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR})
 
 # Set compilation options.
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -Wall -Wextra -pedantic")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -Wall -Wextra -pedantic")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 add_definitions("-g")
+# This is to remove GLM warning.
+add_definitions("-DGLM_FORCE_RADIANS")
 
 # Add sources to executable.
 add_executable(${EXE_NAME} ${SRC_FILES_LIST})
