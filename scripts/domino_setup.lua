@@ -25,22 +25,23 @@ function setCamera(camera)
   end
 
   -- Check fields of position.
-  if type(position.x) ~= "number" then
+  if type(camera.position.x) ~= "number" then
     error("No x coordinate in camera position.");
-  elseif type(position.y) ~= "number" then
+  elseif type(camera.position.y) ~= "number" then
     error("No y coordinate in camera position.");
-  elseif type(position.z) ~= "number" then
+  elseif type(camera.position.z) ~= "number" then
     error("No z coordinate in camera position.");
   end
   -- Check fields of orientation.
-  if type(orientation.x) ~= "number" then
+  if type(camera.orientation.x) ~= "number" then
     error("No x coordinate in camera orientation.");
-  elseif type(orientation.y) ~= "number" then
+  elseif type(camera.orientation.y) ~= "number" then
     error("No y coordinate in camera orientation.");
   end
 
-  engine:_setCamera(position.x, position.y, position.z,
-                    orientation.x, orientation.y, viewAngle, zNear, zFar);
+  engine:_setCamera(camera.position.x, camera.position.y, camera.position.z,
+                    camera.orientation.x, camera.orientation.y, 
+                    camera.viewAngle, camera.zNear, camera.zFar);
 end
 
 --------------------------------------------------------------------------------
