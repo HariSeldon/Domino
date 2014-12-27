@@ -80,9 +80,12 @@ int setCamera(lua_State *luaState) {
   float positionZ = static_cast<float>(luaL_checknumber(luaState, 4));
   float rotationX = static_cast<float>(luaL_checknumber(luaState, 5));
   float rotationY = static_cast<float>(luaL_checknumber(luaState, 6));
+  float viewAngle = static_cast<float>(luaL_checknumber(luaState, 7));
+  float zNear = static_cast<float>(luaL_checknumber(luaState, 8));
+  float zFar = static_cast<float>(luaL_checknumber(luaState, 9));
 
-  engine->camera->assign({positionX, positionY, positionZ, 1.0}, rotationX,
-                         rotationY);
+  engine->camera->assign({positionX, positionY, positionZ, 1.0},
+                         {rotationX, rotationY}, viewAngle, zNear, zFar);
   return 0;
 }
 

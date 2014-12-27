@@ -1,19 +1,24 @@
 #pragma once
 
 #include <glm/fwd.hpp>
+#include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
 
 class Camera {
 
 public:
   Camera();
-  Camera(const glm::vec4& position, float xRotation, float yRotation);
+  Camera(const glm::vec4 position, 
+         const glm::vec2 rotation,
+         float viewAngle, float zNear, float zFar);
 
 public:
-  void assign(const glm::vec4 position, float xRotation, float yRotation);
+  void assign(const glm::vec4 position, const glm::vec2 rotation,
+              float viewAngle, float zNear, float zFar);
+
   void moveForward();
   void moveBackward();
-  void rotate(float xOffset, float yOffset);
+  void rotate(const glm::vec2 offset);
   void rotateLeft();
   void rotateRight();
   glm::mat4 applyView();
@@ -22,12 +27,24 @@ public:
     return position;
   }
 
-  inline float getXRotation() const {
-    return xRotation;
+  inline float getXOrientation() const {
+    return orientation.x;
   }
 
-  inline float getYRotation() const {
-    return yRotation;
+  inline float getYOrientation() const {
+    return orientation.y;
+  }
+  
+  inline float getViewAngle() const {
+    return viewAngle;
+  }
+
+  inline float getZNear() const {
+    return zNear;
+  }
+
+  inline float getZFar() const {
+    return zFar;
   }
 
   void dump();
@@ -39,13 +56,13 @@ private:
 private:
   glm::vec4 position;
   // In radians.
-  float xRotation;
-  float yRotation;
+  glm::vec2 orientation;
+  // In degrees.
+  float viewAngle;
+  float zNear;
+  float zFar;
 
-  static constexpr float ROTATION_FACTOR = 0.0004f;
   static constexpr float FIXED_ROTATION_ANGLE = 0.02f;
+  static const float ROTATION_FACTOR;
   static constexpr float STEP = 0.3f;
-  static constexpr float DEFAULT_X_ROTATION = 0.f;
-  static constexpr float DEFAULT_Y_ROTATION = 0.f;
-  static const glm::vec4 DEFAULT_POSITION;
 };

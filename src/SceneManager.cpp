@@ -10,17 +10,12 @@
 #include "World.h"
 
 #include <algorithm>
-#include <iostream>
 
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
 #include <glm/ext.hpp>
 
 #include "SDL/SDL_image.h"
-
-const float SceneManager::VIEW_ANGLE = 70.0f;
-const float SceneManager::Z_NEAR = 0.1f;
-const float SceneManager::Z_FAR = 2000.0f;
 
 const glm::vec4 SceneManager::CLEAR_COLOR = { 0.2f, 0.4f, 0.6f, 1.f };
 
@@ -31,7 +26,7 @@ const std::string SceneManager::MAIN_FRAGMENT_SHADER = "phong_shadow.frag";
 // -----------------------------------------------------------------------------
 SceneManager::SceneManager(const glm::ivec2 &screenSize,
                            World *world, Camera *camera)
-    : world(std::move(world)), camera(std::move(camera)),
+    : world(world), camera(camera),
       worldShader(MAIN_VERTEX_SHADER, MAIN_FRAGMENT_SHADER),
       textManager(TextManager(FONT_PATH + FONT_FILE, FONT_HEIGHT, screenSize)),
       currentYRotation(0), currentXRotation(0), cameraMutex(SDL_CreateMutex()),
@@ -47,8 +42,8 @@ SceneManager::SceneManager(const glm::ivec2 &screenSize,
 void SceneManager::setupProjection(const glm::ivec2 &screenSize) {
   glViewport(0, 0, screenSize.x, screenSize.y);
   float aspectRatio = (float)screenSize.x / (float)screenSize.y;
-  projection = glm::perspective(SceneManager::VIEW_ANGLE, aspectRatio,
-                                SceneManager::Z_NEAR, SceneManager::Z_FAR);
+  projection = glm::perspective(camera->getViewAngle(), aspectRatio,
+                                camera->getZNear(), camera->getZFar());
 }
 
 // -----------------------------------------------------------------------------
@@ -220,7 +215,7 @@ void SceneManager::updateCameraPosition(unsigned char mask) {
     camera->rotateRight();
 
   // When rotating the camera the lights change intensity.
-  camera->rotate(currentYRotation, currentXRotation);
+  camera->rotate({currentYRotation, -currentXRotation});
   SDL_UnlockMutex(cameraMutex);
 
   currentYRotation = 0;

@@ -53,25 +53,25 @@ function traceDominoLine(start, finish)
 end
 
 
-setCamera({x = 1, y = 1, z = 1}, {x = 0, y = 0});
+setCamera({position = {x = 1, y = 1, z = 1}, orientation = {x = 0, y = 0}});
 setGravity({x = 0, y = -9.81, z = 0});
 addPositionalLight({position = {x = 0, y = 10, z = 0}, constantAttenuation = 2});
 addPlane({side = 60, textureFile = "default.png"});
---addMesh({objFile = "barrel.obj", position = {x = 0, y = 20, z = 0.5}, mass = 10});
-
---traceDominoLine({x = 1, y = 20, z = 1}, {x = 20, y = 0, z = 20});
---traceDominoLine({x = -1, y = 0, z = 1}, {x = -20, y = 0, z = 20});
---traceDominoLine({x = 20, y = 0, z = 21}, {x = 1, y = 0, z = 80});
---traceDominoLine({x = -20, y = 0, z = 21}, {x = -1, y = 0, z = 80});
-addBox({sides = {x = 1, y = 2.5, z =2}, 
-        position = {x = 0, y = 20, z = -0.5}, 
-        orientation = {x = 0, y = 0, z = 0},
-        mass = 10, textureFile = "checker.png"});
+addMesh({objFile = "barrel.obj", position = {x = 0, y = 20, z = 0.5}, mass = 10});
 --
---addBox({sides = {x = 0.25, y = 2.5, z =1}, 
---        position = {x = 0, y = 1.25, z = 80.5}, 
---        orientation = {x = 1.57, y = 0, z = 0},
+----traceDominoLine({x = 1, y = 20, z = 1}, {x = 20, y = 0, z = 20});
+----traceDominoLine({x = -1, y = 0, z = 1}, {x = -20, y = 0, z = 20});
+----traceDominoLine({x = 20, y = 0, z = 21}, {x = 1, y = 0, z = 80});
+----traceDominoLine({x = -20, y = 0, z = 21}, {x = -1, y = 0, z = 80});
+--addBox({sides = {x = 1, y = 2.5, z =2}, 
+--        position = {x = 0, y = 20, z = -0.5}, 
+--        orientation = {x = 0, y = 0, z = 0},
 --        mass = 10, textureFile = "checker.png"});
-
---traceDominoLine({x = 20, y = 0, z = 1}, {x = 20, y = 0, z = 21});
---traceDominoLine({x = -20, y = 0, z = 22}, {x = 20, y = 0, z = 22});
+----
+----addBox({sides = {x = 0.25, y = 2.5, z =1}, 
+----        position = {x = 0, y = 1.25, z = 80.5}, 
+----        orientation = {x = 1.57, y = 0, z = 0},
+----        mass = 10, textureFile = "checker.png"});
+--
+----traceDominoLine({x = 20, y = 0, z = 1}, {x = 20, y = 0, z = 21});
+----traceDominoLine({x = -20, y = 0, z = 22}, {x = 20, y = 0, z = 22});

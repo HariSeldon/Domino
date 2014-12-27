@@ -5,12 +5,11 @@
 #include "ScriptEngine.h"
 
 #include <memory>
-#include <iostream>
 
 extern Camera *tmpCamera;
 extern World *tmpWorld;
 
-int main(int, char**) {
+int main(int, char **) {
   World *world = new World();
   Camera *camera = new Camera();
 
@@ -19,15 +18,13 @@ int main(int, char**) {
 
   runScript("hello.lua");
 
-  std::cout << "ligths number: " << world->getLightsNumber() << "\n";
-
   // Init GL.
   glm::ivec2 screenSize = GLInitializer::initSDL();
   Window window;
   GLInitializer::initGL();
 
-  auto sceneManager =
-      std::unique_ptr<SceneManager>(new SceneManager(screenSize, world, camera));
+  auto sceneManager = std::unique_ptr<SceneManager>(
+      new SceneManager(screenSize, world, camera));
 
   window.setScene(std::move(sceneManager));
   window.startRendering();

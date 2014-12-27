@@ -7,7 +7,23 @@ BLACK = {r = 0, g = 0, b = 0, a = 1};
 WHITE = {r = 1, g = 1, b = 1, a = 1};
 
 --------------------------------------------------------------------------------
-function setCamera(position, orientation)
+function setCamera(camera)
+  if camera.position == nil then
+    camera.position = CENTER;
+  end
+  if camera.orientation == nil then
+    camera.orientation = CENTER;
+  end
+  if camera.viewAngle == nil then 
+    camera.viewAngle = 70;
+  end 
+  if camera.zNear == nil then
+    camera.zNear = 0.1;
+  end 
+  if camera.zFar == nil then
+    camera.zFar = 2000;
+  end
+
   -- Check fields of position.
   if type(position.x) ~= "number" then
     error("No x coordinate in camera position.");
@@ -24,7 +40,7 @@ function setCamera(position, orientation)
   end
 
   engine:_setCamera(position.x, position.y, position.z,
-                    orientation.x, orientation.y);
+                    orientation.x, orientation.y, viewAngle, zNear, zFar);
 end
 
 --------------------------------------------------------------------------------
