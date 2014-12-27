@@ -55,9 +55,11 @@ end
 
 setCamera({position = {x = 1, y = 1, z = 1}, orientation = {x = 0, y = 0}});
 setGravity({x = 0, y = -9.81, z = 0});
-addPositionalLight({position = {x = 0, y = 10, z = 0}, constantAttenuation = 2});
+--addPositionalLight({position = {x = 0, y = 10, z = 0}, constantAttenuation = 2});
+addDirectionalLight({direction = {x = -1, y = -1, z = 0}});
 addPlane({side = 60, textureFile = "default.png"});
-addMesh({objFile = "barrel.obj", position = {x = 0, y = 20, z = 0.5}, mass = 10});
+addMesh({objFile = "barrel.obj", position = {x = 0, y = 20, z = 0.5},
+         orientation = {x = 10, y = 4, z = 8}, mass = 10});
 --
 ----traceDominoLine({x = 1, y = 20, z = 1}, {x = 20, y = 0, z = 20});
 ----traceDominoLine({x = -1, y = 0, z = 1}, {x = -20, y = 0, z = 20});

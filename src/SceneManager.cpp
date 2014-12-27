@@ -20,8 +20,8 @@
 const glm::vec4 SceneManager::CLEAR_COLOR = { 0.2f, 0.4f, 0.6f, 1.f };
 
 const std::string SceneManager::FONT_FILE = "VeraMono.ttf";
-const std::string SceneManager::MAIN_VERTEX_SHADER = "phong_shadow.vert";
-const std::string SceneManager::MAIN_FRAGMENT_SHADER = "phong_shadow.frag";
+const std::string SceneManager::MAIN_VERTEX_SHADER = "phong.vert";
+const std::string SceneManager::MAIN_FRAGMENT_SHADER = "phong.frag";
 
 // -----------------------------------------------------------------------------
 SceneManager::SceneManager(const glm::ivec2 &screenSize,
@@ -68,7 +68,7 @@ SceneManager::~SceneManager() {
 // -----------------------------------------------------------------------------
 void SceneManager::drawScene() {
   //mirrorRenderingPass();
-  shadowRenderingPass();
+  //shadowRenderingPass();
   screenRenderingPass();
 }
 
@@ -177,10 +177,7 @@ void SceneManager::screenRenderingPass() {
   glm::mat4 modelView = camera->applyView();
   SDL_UnlockMutex(cameraMutex);
   drawWorld(modelView, worldShader);
-
   //drawMirror(modelView);
-
-  // Draw text on top of the scene.
   drawText();
 }
 

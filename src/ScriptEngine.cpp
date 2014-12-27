@@ -16,13 +16,15 @@ World *tmpWorld = nullptr;
 
 static luaL_Reg ScriptEngineTable[] = {{nullptr, nullptr}};
 
-static luaL_Reg ScriptEngineMetatable[] = {{"_setGravity", setGravity},
-                                           {"_setCamera", setCamera},
-                                           {"_addPositionalLight", addPositionalLight},
-                                           {"_addPlane", addPlane},
-                                           {"_addMesh", addMesh},
-                                           {"_addBox", addBox},
-                                           {nullptr, nullptr}};
+static luaL_Reg ScriptEngineMetatable[] = {
+    {"_setGravity", setGravity},
+    {"_setCamera", setCamera},
+    {"_addPositionalLight", addPositionalLight},
+    {"_addDirectionalLight", addDirectionalLight},
+    {"_addPlane", addPlane},
+    {"_addMesh", addMesh},
+    {"_addBox", addBox},
+    {nullptr, nullptr}};
 
 ScriptEngine* NewScriptEngine(lua_State* L) { 
   return new ScriptEngine(tmpWorld, tmpCamera); 
@@ -69,6 +71,17 @@ int setGravity(lua_State *luaState) {
   float gravityZ = static_cast<float>(luaL_checknumber(luaState, 4));
   
   engine->world->setGravity({gravityX, gravityY, gravityZ});
+  return 0;
+}
+
+// -----------------------------------------------------------------------------
+int setClearColor(lua_State *luaState) {
+  ScriptEngine *engine = luaW_check<ScriptEngine>(luaState, 1);
+  float colorR = static_cast<float>(luaL_checknumber(luaState, 2));
+  float colorG = static_cast<float>(luaL_checknumber(luaState, 3));
+  float colorB = static_cast<float>(luaL_checknumber(luaState, 4));
+  float colorA = static_cast<float>(luaL_checknumber(luaState, 5));
+
   return 0;
 }
 
@@ -121,6 +134,39 @@ int addPositionalLight(lua_State *luaState) {
                       .setLinearAttenuation(linearAttenuation)
                       .setQuadraticAttenuation(quadraticAttenuation)
                       .createPositional();
+
+  engine->world->addLight(light);
+  return 0;
+}
+
+// -----------------------------------------------------------------------------
+int addDirectionalLight(lua_State *luaState) {
+  ScriptEngine *engine = luaW_check<ScriptEngine>(luaState, 1);
+  float directionX = static_cast<float>(luaL_checknumber(luaState, 2));
+  float directionY = static_cast<float>(luaL_checknumber(luaState, 3));
+  float directionZ = static_cast<float>(luaL_checknumber(luaState, 4));
+  float ambientColorR = static_cast<float>(luaL_checknumber(luaState, 5));
+  float ambientColorG = static_cast<float>(luaL_checknumber(luaState, 6));
+  float ambientColorB = static_cast<float>(luaL_checknumber(luaState, 7));
+  float ambientColorA = static_cast<float>(luaL_checknumber(luaState, 8));
+  float diffuseColorR = static_cast<float>(luaL_checknumber(luaState, 9));
+  float diffuseColorG = static_cast<float>(luaL_checknumber(luaState, 10));
+  float diffuseColorB = static_cast<float>(luaL_checknumber(luaState, 11));
+  float diffuseColorA = static_cast<float>(luaL_checknumber(luaState, 12));
+  float specularColorR = static_cast<float>(luaL_checknumber(luaState, 13));
+  float specularColorG = static_cast<float>(luaL_checknumber(luaState, 14));
+  float specularColorB = static_cast<float>(luaL_checknumber(luaState, 15));
+  float specularColorA = static_cast<float>(luaL_checknumber(luaState, 16));
+
+  LightBuilder lightBuilder;
+  Light *light = lightBuilder.setDirection({directionX, directionY, directionZ})
+                     .setAmbientColor({ambientColorR, ambientColorG,
+                                       ambientColorB, ambientColorA})
+                     .setDiffuseColor({diffuseColorR, diffuseColorG,
+                                       diffuseColorB, diffuseColorA})
+                     .setSpecularColor({specularColorR, specularColorG,
+                                        specularColorB, specularColorA})
+                     .createDirectional();
 
   engine->world->addLight(light);
   return 0;

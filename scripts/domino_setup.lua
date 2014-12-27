@@ -2,6 +2,7 @@ engine = ScriptEngine.new();
 
 -- Positions.
 CENTER = { x = 0, y = 0, z = 0};
+TOP_DOWN_DIRECTION = {x = 0, y = -1, z = 0};
 -- Color.
 BLACK = {r = 0, g = 0, b = 0, a = 1};
 WHITE = {r = 1, g = 1, b = 1, a = 1};
@@ -59,6 +60,22 @@ function setGravity(gravity)
 end
   
 --------------------------------------------------------------------------------
+function setClearColor(color) 
+  -- Check fields of position.
+  if type(color.r) ~= "number" then
+    error("No r coordinate in color.");
+  elseif type(color.g) ~= "number" then
+    error("No g coordinate in color.");
+  elseif type(color.b) ~= "number" then
+    error("No b coordinate in color.");
+  elseif type(color.a) ~= "number" then
+    error("No a coordinate in color.");
+  end
+
+  engine:_setClearColor(color.r, color.g, color.b, color.a);
+end
+
+--------------------------------------------------------------------------------
 function addPositionalLight(light)
   if light.position == nil then
     light.position = CENTER;
@@ -100,6 +117,39 @@ function addPositionalLight(light)
                              light.constantAttenuation,
                              light.linearAttenuation,
                              light.quadraticAttenuation); 
+end
+
+--------------------------------------------------------------------------------
+function addDirectionalLight(light)
+  if light.direction == nil then
+    light.direction = TOP_DOWN_DIRECTION;
+  end
+  if light.ambientColor == nil then
+    light.ambientColor = WHITE; 
+  end
+  if light.diffuseColor == nil then
+    light.diffuseColor = WHITE; 
+  end 
+  if light.specularColor == nil then
+    light.specularColor = WHITE; 
+  end 
+
+  engine:_addDirectionalLight(light.direction.x,
+                              light.direction.y,
+                              light.direction.z,
+                              light.ambientColor.r,
+                              light.ambientColor.g,
+                              light.ambientColor.b,
+                              light.ambientColor.a,
+                              light.diffuseColor.r,
+                              light.diffuseColor.g,
+                              light.diffuseColor.b,
+                              light.diffuseColor.a,
+                              light.specularColor.r,
+                              light.specularColor.g,
+                              light.specularColor.b,
+                              light.specularColor.a);
+
 end
 
 --------------------------------------------------------------------------------
