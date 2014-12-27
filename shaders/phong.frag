@@ -1,7 +1,10 @@
 #version 330
 
+uniform sampler2D texture;
+
 in vec3 position;
 in vec3 normal;
+in vec2 textureCoordinates;
 
 // Don't use functions glBindFragDataLocation and glGetFragDataLocation
 // Rely on the default behaviour: output is associated to location 0.
@@ -59,7 +62,7 @@ vec4 shadeDirectionalLight(vec3 position, vec3 normal, vec3 cameraDirection,
                            int lightIndex) {
   // Get material properties.
   vec4 ambientMaterialColor = material.ambient;
-  vec4 diffuseMaterialColor = material.diffuse;
+  vec4 diffuseMaterialColor = texture2D(texture, textureCoordinates);
   vec4 specularMaterialColor = material.specular;
   float shininess = material.shininess;
 
@@ -93,7 +96,8 @@ vec4 shadePositionalLight(vec3 position, vec3 normal, vec3 cameraDirection,
                           int lightIndex) {
   // Get material properties.
   vec4 ambientMaterialColor = material.ambient;
-  vec4 diffuseMaterialColor = material.diffuse;
+  //vec4 diffuseMaterialColor = material.diffuse;
+  vec4 diffuseMaterialColor = texture2D(texture, textureCoordinates);
   vec4 specularMaterialColor = material.specular;
   float shininess = material.shininess;
 

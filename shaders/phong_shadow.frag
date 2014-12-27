@@ -64,7 +64,6 @@ vec4 shadeDirectionalLight(vec3 position, vec3 normal, vec3 cameraDirection,
   vec4 ambientMaterialColor = material.ambient;
   //vec4 diffuseMaterialColor = material.diffuse;
   vec4 diffuseMaterialColor = texture2D(texture, textureCoordinates);
-  //vec4 diffuseMaterialColor = vec4(textureCoordinates, 0.f, 1.f);
   vec4 specularMaterialColor = material.specular;
   float shininess = material.shininess;
 
