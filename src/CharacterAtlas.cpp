@@ -48,7 +48,7 @@ void CharacterAtlas::computeTextureSize(FT_Face fontFace) {
     width += glyph->bitmap.width + 1;
     // The height of the texture is going to be the height of the tallest
     // character.
-    height = std::max(height, glyph->bitmap.rows);
+    height = std::max(height, static_cast<int>(glyph->bitmap.rows));
   }
 }
 
