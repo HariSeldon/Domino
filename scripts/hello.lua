@@ -55,6 +55,7 @@ end
 
 setCamera({position = {x = 1, y = 1, z = 1}, orientation = {x = 0, y = 0}});
 setGravity({x = 0, y = -9.81, z = 0});
+setBackgroundColor({r = 0.2, g = 0.4, b = 0.6, a = 1});
 --addPositionalLight({position = {x = 0, y = 10, z = 0}, constantAttenuation = 2});
 addDirectionalLight({direction = {x = -1, y = -1, z = 0}});
 addPlane({side = 60, textureFile = "default.png"});

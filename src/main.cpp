@@ -1,30 +1,32 @@
-#include "Window.h"
-
 #include "GLInitializer.h"
+#include "SceneContainer.h"
 #include "SceneManager.h"
 #include "ScriptEngine.h"
+#include "Window.h"
 
 #include <memory>
 
-extern Camera *tmpCamera;
-extern World *tmpWorld;
+#include <glm/ext.hpp>
+
+extern SceneContainer *tmpContainer;
 
 int main(int, char **) {
-  World *world = new World();
-  Camera *camera = new Camera();
+  auto container = new SceneContainer();
+  tmpContainer = container;
 
-  tmpCamera = camera;
-  tmpWorld = world;
-
+  // Fill the container with the script.
   runScript("hello.lua");
 
   // Init GL.
   glm::ivec2 screenSize = GLInitializer::initSDL();
+  
+  std::cout << "Size: " << glm::to_string(screenSize) << "\n";
+
   Window window;
   GLInitializer::initGL();
 
   auto sceneManager = std::unique_ptr<SceneManager>(
-      new SceneManager(screenSize, world, camera));
+      new SceneManager(screenSize, container));
 
   window.setScene(std::move(sceneManager));
   window.startRendering();

@@ -17,16 +17,14 @@
 
 #include "SDL/SDL_image.h"
 
-const glm::vec4 SceneManager::CLEAR_COLOR = { 0.2f, 0.4f, 0.6f, 1.f };
-
 const std::string SceneManager::FONT_FILE = "VeraMono.ttf";
 const std::string SceneManager::MAIN_VERTEX_SHADER = "phong.vert";
 const std::string SceneManager::MAIN_FRAGMENT_SHADER = "phong.frag";
 
 // -----------------------------------------------------------------------------
 SceneManager::SceneManager(const glm::ivec2 &screenSize,
-                           World *world, Camera *camera)
-    : world(world), camera(camera),
+                           SceneContainer *container)
+    : world(container->getWorld()), camera(container->getCamera()),
       worldShader(MAIN_VERTEX_SHADER, MAIN_FRAGMENT_SHADER),
       textManager(TextManager(FONT_PATH + FONT_FILE, FONT_HEIGHT, screenSize)),
       currentYRotation(0), currentXRotation(0), cameraMutex(SDL_CreateMutex()),
@@ -34,7 +32,9 @@ SceneManager::SceneManager(const glm::ivec2 &screenSize,
   lightMask = (2 << (world->getLightsNumber() - 1)) - 1;
   setupProjection(screenSize);
   initGPU();
-  glClearColor(CLEAR_COLOR.x, CLEAR_COLOR.y, CLEAR_COLOR.z, CLEAR_COLOR.w);
+  glm::vec4 backgroundColor = container->getBackgroundColor();
+  glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z,
+               backgroundColor.w);
   checkOpenGLError("GLInitializer: glClearColor");
 }
 

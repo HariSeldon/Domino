@@ -4,8 +4,9 @@
 
 #include <glm/fwd.hpp>
 
-#include <unordered_map>
+#include <map>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 class Box;
@@ -49,15 +50,16 @@ private:
   GLuint setupTextureVBO(const Object *object, const ShaderProgram &shader);
 
 private:
-  // Mapping between world objects (identified by their memory locations) 
-  // to VAOs. 
-  std::unordered_map<const Object*, GLuint> vaoWorldMap;
-  // Mapping between world objects shadows to VAOs.
-  std::unordered_map<const Object*, GLuint> vaoShadowMap;
-  // Mapping between world objects to their vertex VBO.
-  std::unordered_map<const Object*, GLuint> vboWorldMap; 
-  // Mapping between world objects to their texture objects.
-  std::unordered_map<const Object*, GLuint> textureMap;
+  // Mapping between world objects and shaders.
+  std::map<const ShaderProgram *, const std::vector<const Object*>> shaderMap;
+  // Mapping between world objects and VAOs.
+  std::unordered_map<const Object *, GLuint> vaoWorldMap;
+  // Mapping between world objects shadows and VAOs.
+  std::unordered_map<const Object *, GLuint> vaoShadowMap;
+  // Mapping between world objects and their vertex VBO.
+  std::unordered_map<const Object *, GLuint> vboWorldMap;
+  // Mapping between world objects and their texture objects.
+  std::unordered_map<const Object *, GLuint> textureMap;
 
   // Ids of VBOs associated with the VAOs. These are kept so I know what to delete
   // to free the memory.

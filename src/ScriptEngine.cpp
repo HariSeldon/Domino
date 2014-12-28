@@ -8,37 +8,36 @@
 #include "Light.h"
 #include "Mesh.h"
 #include "Plane.h"
+#include "SceneContainer.h"
 #include "SysDefines.h"
 #include "World.h"
 
-Camera *tmpCamera = nullptr;
-World *tmpWorld = nullptr;
+SceneContainer *tmpContainer = nullptr;
 
 static luaL_Reg ScriptEngineTable[] = {{nullptr, nullptr}};
 
 static luaL_Reg ScriptEngineMetatable[] = {
-    {"_setGravity", setGravity},
-    {"_setCamera", setCamera},
-    {"_addPositionalLight", addPositionalLight},
-    {"_addDirectionalLight", addDirectionalLight},
-    {"_addPlane", addPlane},
-    {"_addMesh", addMesh},
     {"_addBox", addBox},
+    {"_addDirectionalLight", addDirectionalLight},
+    {"_addMesh", addMesh},
+    {"_addPlane", addPlane},
+    {"_addPositionalLight", addPositionalLight},
+    {"_addSphere", addSphere},
+    {"_addSpotLight", addSpotLight},
+    {"_setBackgroundColor", setBackgroundColor},
+    {"_setCamera", setCamera},
+    {"_setGravity", setGravity},
     {nullptr, nullptr}};
 
-ScriptEngine* NewScriptEngine(lua_State* L) { 
-  return new ScriptEngine(tmpWorld, tmpCamera); 
+ScriptEngine *NewScriptEngine(lua_State *L) {
+  return new ScriptEngine(tmpContainer);
 }
 
 // =============================================================================
-LuaState::LuaState() : luaState(luaL_newstate()) {
-  luaL_openlibs(luaState);
-}
+LuaState::LuaState() : luaState(luaL_newstate()) { luaL_openlibs(luaState); }
 
 // -----------------------------------------------------------------------------
-LuaState::~LuaState() {
-  lua_close(luaState);
-}
+LuaState::~LuaState() { lua_close(luaState); }
 
 // -----------------------------------------------------------------------------
 void LuaState::runScript(const std::string &scriptFile) {
@@ -53,13 +52,12 @@ void LuaState::runScript(const std::string &scriptFile) {
 }
 
 // =============================================================================
-ScriptEngine::ScriptEngine(World *world, Camera *camera)
-    : world(world), camera(camera) {}
+ScriptEngine::ScriptEngine(SceneContainer *container) : container(container) {}
 
 // -----------------------------------------------------------------------------
 void runScript(const std::string &scriptName) {
-  LuaState state; 
-  std::string scriptFile = SCRIPT_PATH + scriptName; 
+  LuaState state;
+  std::string scriptFile = SCRIPT_PATH + scriptName;
   state.runScript(scriptFile);
 }
 
@@ -69,19 +67,20 @@ int setGravity(lua_State *luaState) {
   float gravityX = static_cast<float>(luaL_checknumber(luaState, 2));
   float gravityY = static_cast<float>(luaL_checknumber(luaState, 3));
   float gravityZ = static_cast<float>(luaL_checknumber(luaState, 4));
-  
-  engine->world->setGravity({gravityX, gravityY, gravityZ});
+
+  engine->container->setGravity({gravityX, gravityY, gravityZ});
   return 0;
 }
 
 // -----------------------------------------------------------------------------
-int setClearColor(lua_State *luaState) {
+int setBackgroundColor(lua_State *luaState) {
   ScriptEngine *engine = luaW_check<ScriptEngine>(luaState, 1);
   float colorR = static_cast<float>(luaL_checknumber(luaState, 2));
   float colorG = static_cast<float>(luaL_checknumber(luaState, 3));
   float colorB = static_cast<float>(luaL_checknumber(luaState, 4));
   float colorA = static_cast<float>(luaL_checknumber(luaState, 5));
 
+  engine->container->setBackgroundColor({colorR, colorG, colorB, colorA});
   return 0;
 }
 
@@ -97,8 +96,8 @@ int setCamera(lua_State *luaState) {
   float zNear = static_cast<float>(luaL_checknumber(luaState, 8));
   float zFar = static_cast<float>(luaL_checknumber(luaState, 9));
 
-  engine->camera->assign({positionX, positionY, positionZ, 1.0},
-                         {rotationX, rotationY}, viewAngle, zNear, zFar);
+  engine->container->setCamera({positionX, positionY, positionZ, 1.0},
+                               {rotationX, rotationY}, viewAngle, zNear, zFar);
   return 0;
 }
 
@@ -120,22 +119,27 @@ int addPositionalLight(lua_State *luaState) {
   float specularColorG = static_cast<float>(luaL_checknumber(luaState, 14));
   float specularColorB = static_cast<float>(luaL_checknumber(luaState, 15));
   float specularColorA = static_cast<float>(luaL_checknumber(luaState, 16));
-  float constantAttenuation = static_cast<float>(luaL_checknumber(luaState, 17));
+  float constantAttenuation =
+      static_cast<float>(luaL_checknumber(luaState, 17));
   float linearAttenuation = static_cast<float>(luaL_checknumber(luaState, 18));
-  float quadraticAttenuation = static_cast<float>(luaL_checknumber(luaState, 19));
-  
-  LightBuilder lightBuilder;
-  Light *light = lightBuilder
-                      .setPosition(glm::vec3(positionX, positionY, positionZ))      
-                      .setAmbientColor({ambientColorR, ambientColorG, ambientColorB, ambientColorA})
-                      .setDiffuseColor({diffuseColorR, diffuseColorG, diffuseColorB, diffuseColorA})
-                      .setSpecularColor({specularColorR, specularColorG, specularColorB, specularColorA})
-                      .setConstantAttenuation(constantAttenuation)
-                      .setLinearAttenuation(linearAttenuation)
-                      .setQuadraticAttenuation(quadraticAttenuation)
-                      .createPositional();
+  float quadraticAttenuation =
+      static_cast<float>(luaL_checknumber(luaState, 19));
 
-  engine->world->addLight(light);
+  LightBuilder lightBuilder;
+  Light *light =
+      lightBuilder.setPosition(glm::vec3(positionX, positionY, positionZ))
+          .setAmbientColor(
+               {ambientColorR, ambientColorG, ambientColorB, ambientColorA})
+          .setDiffuseColor(
+               {diffuseColorR, diffuseColorG, diffuseColorB, diffuseColorA})
+          .setSpecularColor(
+               {specularColorR, specularColorG, specularColorB, specularColorA})
+          .setConstantAttenuation(constantAttenuation)
+          .setLinearAttenuation(linearAttenuation)
+          .setQuadraticAttenuation(quadraticAttenuation)
+          .createPositional();
+
+  engine->container->addLight(light);
   return 0;
 }
 
@@ -168,7 +172,12 @@ int addDirectionalLight(lua_State *luaState) {
                                         specularColorB, specularColorA})
                      .createDirectional();
 
-  engine->world->addLight(light);
+  engine->container->addLight(light);
+  return 0;
+}
+
+// -----------------------------------------------------------------------------
+int addSpotLight(lua_State *luaState) {
   return 0;
 }
 
@@ -196,20 +205,27 @@ int addPlane(lua_State *luaState) {
   float specularColorB = static_cast<float>(luaL_checknumber(luaState, 20));
   float specularColorA = static_cast<float>(luaL_checknumber(luaState, 21));
   const char *textureFile = luaL_checkstring(luaState, 22);
-  
+  const char *shaderFile = luaL_checkstring(luaState, 23);
+
   PlaneBuilder planeBuilder;
   btQuaternion rotation(rotationX, rotationY, rotationZ);
-  Plane *plane = planeBuilder
-                      .setTransform(btTransform(rotation, btVector3(positionX, positionY, positionZ)))
-                      .setSide(side)
-                      .setMass(mass)
-                      .setAmbientColor({ambientColorR, ambientColorG, ambientColorB, ambientColorA})
-                      .setDiffuseColor({diffuseColorR, diffuseColorG, diffuseColorB, diffuseColorA})
-                      .setSpecularColor({specularColorR, specularColorG, specularColorB, specularColorA})
-                      .setTextureFile(textureFile)
-                      .create();
+  Plane *plane =
+      planeBuilder.setTransform(
+                       btTransform(rotation,
+                                   btVector3(positionX, positionY, positionZ)))
+          .setSide(side)
+          .setMass(mass)
+          .setAmbientColor(
+               {ambientColorR, ambientColorG, ambientColorB, ambientColorA})
+          .setDiffuseColor(
+               {diffuseColorR, diffuseColorG, diffuseColorB, diffuseColorA})
+          .setSpecularColor(
+               {specularColorR, specularColorG, specularColorB, specularColorA})
+          .setTextureFile(textureFile)
+          .create();
 
-  engine->world->addObject(plane);
+  engine->container->addShader(plane, std::string(shaderFile));
+  engine->container->addObject(plane);
   return 0;
 }
 
@@ -239,20 +255,26 @@ int addBox(lua_State *luaState) {
   float specularColorB = static_cast<float>(luaL_checknumber(luaState, 22));
   float specularColorA = static_cast<float>(luaL_checknumber(luaState, 23));
   const char *textureFile = luaL_checkstring(luaState, 24);
-  
+  const char *shaderFile = luaL_checkstring(luaState, 25);
+
   BoxBuilder boxBuilder;
   btQuaternion rotation(rotationX, rotationY, rotationZ);
-  Box *box = boxBuilder
-             .setTransform(btTransform(rotation, btVector3(positionX, positionY, positionZ)))
-             .setSides({sideX, sideY, sideZ})
-             .setMass(mass)
-             .setAmbientColor({ambientColorR, ambientColorG, ambientColorB, ambientColorA})
-             .setDiffuseColor({diffuseColorR, diffuseColorG, diffuseColorB, diffuseColorA})
-             .setSpecularColor({specularColorR, specularColorG, specularColorB, specularColorA})
-             .setTextureFile(textureFile)
-             .create();
+  Box *box = boxBuilder.setTransform(btTransform(rotation,
+                                                 btVector3(positionX, positionY,
+                                                           positionZ)))
+                 .setSides({sideX, sideY, sideZ})
+                 .setMass(mass)
+                 .setAmbientColor({ambientColorR, ambientColorG, ambientColorB,
+                                   ambientColorA})
+                 .setDiffuseColor({diffuseColorR, diffuseColorG, diffuseColorB,
+                                   diffuseColorA})
+                 .setSpecularColor({specularColorR, specularColorG,
+                                    specularColorB, specularColorA})
+                 .setTextureFile(textureFile)
+                 .create();
 
-  engine->world->addObject(box);
+  engine->container->addShader(box, std::string(shaderFile));
+  engine->container->addObject(box);
   return 0;
 }
 
@@ -279,19 +301,28 @@ int addMesh(lua_State *luaState) {
   float specularColorG = static_cast<float>(luaL_checknumber(luaState, 19));
   float specularColorB = static_cast<float>(luaL_checknumber(luaState, 20));
   float specularColorA = static_cast<float>(luaL_checknumber(luaState, 21));
-  
+  const char *shaderFile = luaL_checkstring(luaState, 22);
+
   MeshBuilder meshBuilder;
   btQuaternion rotation(rotationX, rotationY, rotationZ);
-  Mesh *mesh = meshBuilder
-                      .setMeshFile(meshFile)
-                      .setTransform(btTransform(rotation, btVector3(positionX, positionY, positionZ)))
-                      .setMass(mass)
-                      .setAmbientColor({ambientColorR, ambientColorG, ambientColorB, ambientColorA})
-                      .setDiffuseColor({diffuseColorR, diffuseColorG, diffuseColorB, diffuseColorA})
-                      .setSpecularColor({specularColorR, specularColorG, specularColorB, specularColorA})
-                      .create();
+  Mesh *mesh = meshBuilder.setMeshFile(meshFile)
+                   .setTransform(btTransform(
+                       rotation, btVector3(positionX, positionY, positionZ)))
+                   .setMass(mass)
+                   .setAmbientColor({ambientColorR, ambientColorG,
+                                     ambientColorB, ambientColorA})
+                   .setDiffuseColor({diffuseColorR, diffuseColorG,
+                                     diffuseColorB, diffuseColorA})
+                   .setSpecularColor({specularColorR, specularColorG,
+                                      specularColorB, specularColorA})
+                   .create();
 
-  engine->world->addObject(mesh);
+  engine->container->addShader(mesh, std::string(shaderFile));
+  engine->container->addObject(mesh);
   return 0;
 }
 
+// -----------------------------------------------------------------------------
+int addSphere(lua_State *luaState) {
+  return 0;
+}

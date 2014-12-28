@@ -60,7 +60,7 @@ function setGravity(gravity)
 end
   
 --------------------------------------------------------------------------------
-function setClearColor(color) 
+function setBackgroundColor(color) 
   -- Check fields of position.
   if type(color.r) ~= "number" then
     error("No r coordinate in color.");
@@ -72,7 +72,7 @@ function setClearColor(color)
     error("No a coordinate in color.");
   end
 
-  engine:_setClearColor(color.r, color.g, color.b, color.a);
+  engine:_setBackgroundColor(color.r, color.g, color.b, color.a);
 end
 
 --------------------------------------------------------------------------------
@@ -181,6 +181,7 @@ function addPlane(plane)
   if plane.specularColor == nil then
     plane.specularColor = BLACK; 
   end 
+  plane.shader = "phong";
 
   engine:_addPlane(plane.side,
                    plane.mass,
@@ -202,7 +203,8 @@ function addPlane(plane)
                    plane.specularColor.g,
                    plane.specularColor.b,
                    plane.specularColor.a,
-                   plane.textureFile);
+                   plane.textureFile,
+                   plane.shader);
 end
 
 --------------------------------------------------------------------------------
@@ -286,6 +288,7 @@ function addMesh(mesh)
   if mesh.specularColor == nil then
     mesh.specularColor = BLACK; 
   end 
+  mesh.shader = "phong";
 
   engine:_addMesh(mesh.objFile,
                   mesh.mass,
@@ -306,5 +309,6 @@ function addMesh(mesh)
                   mesh.specularColor.r,
                   mesh.specularColor.g,
                   mesh.specularColor.b,
-                  mesh.specularColor.a);
+                  mesh.specularColor.a,
+                  mesh.shader);
 end

@@ -2,6 +2,7 @@
 
 #include "Camera.h"
 #include "Drawer.h"
+#include "SceneContainer.h"
 #include "ShaderProgram.h"
 #include "ShadowManager.h"
 #include "TextManager.h"
@@ -33,8 +34,7 @@ public:
   static const std::string MAIN_FRAGMENT_SHADER;
 
 public:
-  SceneManager(const glm::ivec2 &screenSize, World *world,
-               Camera *camera);
+  SceneManager(const glm::ivec2 &screenSize, SceneContainer *container);
   ~SceneManager();
 
 public:
@@ -67,6 +67,7 @@ private:
 
 private:
   World* world;
+
   Drawer drawer;
   ShaderProgram worldShader;
   TextManager textManager;
