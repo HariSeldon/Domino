@@ -1,11 +1,13 @@
 #include "Drawer.h"
 
 #include "Box.h"
-#include "Plane.h"
+#include "Light.h"
 #include "MathUtils.h"
 #include "Mirror.h"
 #include "Object.h"
+#include "Plane.h"
 #include "ShaderProgram.h"
+#include "SysDefines.h"
 #include "World.h"
 
 #include <GL/glew.h>
@@ -35,27 +37,44 @@ void setOrientationForShadow(const Object *object, ShaderProgram &shader,
                              const glm::mat4 &projection);
 
 //-----------------------------------------------------------------------------
-void Drawer::initGPUObjects(const ShaderProgram &worldShader,
-                            const World &world) {
-  std::for_each(constBeginObjects(world), constEndObjects(world),
-                [&](const Object *object) {
-    GLuint vaoId = 0;
-    // Create VAO.
-    glGenVertexArrays(1, &vaoId);
-    glBindVertexArray(vaoId);
+void Drawer::initGPUObjects(
+    const std::map<const Object *, const std::string> &shaderFileMap,
+    const World &world) {
 
-    GLuint vertexVBOId = setupVertexVBO(object, worldShader);
-    GLuint indexVBOId = setupIndexVBO(object);
-    GLuint normalVBOId = setupNormalVBO(object, worldShader);
-    GLuint textureVBOId = setupTextureVBO(object, worldShader);
+  for (auto x : shaderFileMap) {
+    const Object *object = x.first;
+    const std::string shaderName = x.second;
+    ShaderProgram *program =
+        new ShaderProgram(shaderName + ".vert", shaderName + ".frag");
 
-    // Unbind.
-    glBindVertexArray(0);
+    auto &objectVector = shaderMap[program];
+    objectVector.push_back(object);
+  }
 
-    vaoWorldMap.insert(std::pair<const Object*, GLuint>(object, vaoId));
-    vboIds.insert(vboIds.end(),
-                  {vertexVBOId, indexVBOId, normalVBOId, textureVBOId});
-  });
+  for (auto x : shaderMap) {
+    const ShaderProgram *shader = x.first;
+    const auto objectVector = x.second;
+
+    for (const auto &object : objectVector) {
+
+      GLuint vaoId = 0;
+      // Create VAO.
+      glGenVertexArrays(1, &vaoId);
+      glBindVertexArray(vaoId);
+
+      GLuint vertexVBOId = setupVertexVBO(object, *shader);
+      GLuint indexVBOId = setupIndexVBO(object);
+      GLuint normalVBOId = setupNormalVBO(object, *shader);
+      GLuint textureVBOId = setupTextureVBO(object, *shader);
+
+      // Unbind.
+      glBindVertexArray(0);
+
+      vaoWorldMap.insert(std::pair<const Object *, GLuint>(object, vaoId));
+      vboIds.insert(vboIds.end(),
+                    {vertexVBOId, indexVBOId, normalVBOId, textureVBOId});
+    }
+  };
 }
 
 //-----------------------------------------------------------------------------
@@ -207,6 +226,35 @@ Drawer::~Drawer() {
 
   if (vboIds.size() > 0)
     glDeleteBuffers(vboIds.size(), vboIds.data());
+}
+
+//-----------------------------------------------------------------------------
+void Drawer::drawObjects(const World *world, const glm::mat4 &originalModelView,
+                         const glm::mat4 &projection,
+                         const glm::mat4 &originalShadowModelView,
+                         const glm::mat4 &shadowProjection,
+                         int lightMask) const {
+  for (auto x : shaderMap) {
+    ShaderProgram *shader = x.first;
+    const auto objectVector = x.second;
+    shader->useProgram();
+
+    for (const auto &object : objectVector) {
+      drawObject(object, *shader, originalModelView, projection,
+                 originalShadowModelView, shadowProjection);
+    }
+    setLights(world, shader, originalModelView, lightMask);
+  };
+}
+
+//-----------------------------------------------------------------------------
+void Drawer::setLights(const World *world, ShaderProgram *shader,
+                       const glm::mat4 &modelView, int lightMask) const {
+  shader->setUniform("ambientColor", world->getAmbientColor());
+  shader->setUniform("lightsNumber", world->getLightsNumber());
+  shader->setUniform("lightMask", lightMask);
+  std::for_each(constBeginLights(*world), constEndLights(*world),
+                [&](const Light *light) { light->draw(*shader, modelView); });
 }
 
 //-----------------------------------------------------------------------------

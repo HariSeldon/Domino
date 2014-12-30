@@ -46,6 +46,10 @@ public:
   inline World *getWorld() const { return world; }
   inline Camera *getCamera() const { return camera; }
   inline glm::vec4 getBackgroundColor() const { return backgroundColor; }
+  inline const std::map<const Object *, const std::string> &
+  getShaderMap() const {
+    return shaderFileMap;
+  }
 
 private:
   World *world;

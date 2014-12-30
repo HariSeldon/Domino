@@ -18,20 +18,17 @@
 #include "SDL/SDL_image.h"
 
 const std::string SceneManager::FONT_FILE = "VeraMono.ttf";
-const std::string SceneManager::MAIN_VERTEX_SHADER = "phong.vert";
-const std::string SceneManager::MAIN_FRAGMENT_SHADER = "phong.frag";
 
 // -----------------------------------------------------------------------------
 SceneManager::SceneManager(const glm::ivec2 &screenSize,
                            SceneContainer *container)
     : world(container->getWorld()), camera(container->getCamera()),
-      worldShader(MAIN_VERTEX_SHADER, MAIN_FRAGMENT_SHADER),
       textManager(TextManager(FONT_PATH + FONT_FILE, FONT_HEIGHT, screenSize)),
       currentYRotation(0), currentXRotation(0), cameraMutex(SDL_CreateMutex()),
       fps(0) {
   lightMask = (2 << (world->getLightsNumber() - 1)) - 1;
   setupProjection(screenSize);
-  initGPU();
+  initGPU(container);
   glm::vec4 backgroundColor = container->getBackgroundColor();
   glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z,
                backgroundColor.w);
@@ -47,8 +44,8 @@ void SceneManager::setupProjection(const glm::ivec2 &screenSize) {
 }
 
 // -----------------------------------------------------------------------------
-void SceneManager::initGPU() {
-  drawer.initGPUObjects(worldShader, *world);
+void SceneManager::initGPU(SceneContainer *container) {
+  drawer.initGPUObjects(container->getShaderMap(), *world);
   drawer.initGPUShadowObjects(shadowManager.getShader(), *world);
   if (Mirror *mirror = world->getMirror()) {
     ShaderProgram &mirrorShader = mirror->getShaderProgram();
@@ -73,42 +70,18 @@ void SceneManager::drawScene() {
 }
 
 // -----------------------------------------------------------------------------
-void SceneManager::drawWorld(const glm::mat4 &modelView,
-                             ShaderProgram &shader) {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  drawObjects(modelView, shader);
-  drawLights(modelView, shader);
-}
-
-// -----------------------------------------------------------------------------
-void SceneManager::drawObjects(const glm::mat4 &modelView,
-                               ShaderProgram &shader) {
+void SceneManager::drawWorld(const glm::mat4 &modelView) {
   glm::mat4 shadowView =
       glm::lookAt(glm::vec3(-11, 4, 0), glm::vec3(-9.29, 3.29, 0),
                   glm::vec3(10.29, 4.71, 0));
   float side = 11;
   glm::mat4 shadowProjection =
       glm::ortho<float>(-side, side, -5, side / 1.6, 0, 2.5 * side);
-//  glm::mat4 shadowView =
-//      glm::lookAt(glm::vec3(0, 5, 0), glm::vec3(0, 4, 0), glm::vec3(1, 0, 0));
-//  glm::mat4 shadowProjection = glm::perspective(60.f, (1280.0f / 800.0f), 0.01f, 100.f);
 
-  std::for_each(constBeginObjects(*world), constEndObjects(*world),
-                [&](const Object *object) {
-    drawer.drawObject(object, shader, modelView, projection, shadowView,
-                      shadowProjection);
-  });
-}
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-// -----------------------------------------------------------------------------
-void SceneManager::drawLights(const glm::mat4 &modelView,
-                              ShaderProgram &shader) {
-  shader.setUniform("ambientColor", world->getAmbientColor());
-  shader.setUniform("lightsNumber", world->getLightsNumber());
-  shader.setUniform("lightMask", lightMask);
-  std::for_each(constBeginLights(*world), constEndLights(*world),
-                [&](const Light *light) { light->draw(shader, modelView); });
+  drawer.drawObjects(world, modelView, projection, shadowView, shadowProjection,
+                     lightMask);
 }
 
 // -----------------------------------------------------------------------------
@@ -124,36 +97,32 @@ void SceneManager::drawMirror(const glm::mat4 &modelView) {
 
 // -----------------------------------------------------------------------------
 void SceneManager::mirrorRenderingPass() {
-  if (Mirror *mirror = world->getMirror()) {
-    // Draw the scene on the mirror texture from the point of view of the
-    // mirror.
-    mirror->enableMirror();
-    glm::mat4 cameraView = mirror->getModelView();
-    drawWorld(cameraView, worldShader);
-    mirror->disableMirror();
-  }
+//  if (Mirror *mirror = world->getMirror()) {
+//    // Draw the scene on the mirror texture from the point of view of the
+//    // mirror.
+//    mirror->enableMirror();
+//    glm::mat4 cameraView = mirror->getModelView();
+//    drawWorld(cameraView, worldShader);
+//    mirror->disableMirror();
+//  }
 }
 
 // -----------------------------------------------------------------------------
 void SceneManager::shadowRenderingPass() {
-  glm::mat4 shadowView =
-      glm::lookAt(glm::vec3(-11, 4, 0), glm::vec3(-9.29, 3.29, 0),
-                  glm::vec3(10.29, 4.71, 0));
-
-  // The projection matrix is completelly arbitrary.
-  float side = 11;
-  glm::mat4 shadowProjection =
-      glm::ortho<float>(-side, side, -5, side / 1.6, 0, 2.5 * side);
-
 //  glm::mat4 shadowView =
-//      glm::lookAt(glm::vec3(0, 5, 0), glm::vec3(0, 4, 0), glm::vec3(1, 0, 0));
-//  glm::mat4 shadowProjection = glm::perspective(60.f, (1280.0f / 800.0f), 0.01f, 100.f);
-
-  ShaderProgram &shadowShader = shadowManager.getShader();
-  shadowShader.useProgram();
-  shadowManager.enableShadow();
-  drawShadowWorld(shadowView, shadowProjection, shadowShader);
-  shadowManager.disableShadow();
+//      glm::lookAt(glm::vec3(-11, 4, 0), glm::vec3(-9.29, 3.29, 0),
+//                  glm::vec3(10.29, 4.71, 0));
+//
+//  // The projection matrix is completelly arbitrary.
+//  float side = 11;
+//  glm::mat4 shadowProjection =
+//      glm::ortho<float>(-side, side, -5, side / 1.6, 0, 2.5 * side);
+//
+//  ShaderProgram &shadowShader = shadowManager.getShader();
+//  shadowShader.useProgram();
+//  shadowManager.enableShadow();
+//  drawShadowWorld(shadowView, shadowProjection, shadowShader);
+//  shadowManager.disableShadow();
 }
 
 // -----------------------------------------------------------------------------
@@ -171,12 +140,10 @@ void SceneManager::drawShadowWorld(const glm::mat4 &modelView,
 
 // -----------------------------------------------------------------------------
 void SceneManager::screenRenderingPass() {
-  worldShader.useProgram();
-  worldShader.setUniform("shadowTexture", 0);
   SDL_LockMutex(cameraMutex);
   glm::mat4 modelView = camera->applyView();
   SDL_UnlockMutex(cameraMutex);
-  drawWorld(modelView, worldShader);
+  drawWorld(modelView);
   //drawMirror(modelView);
   drawText();
 }
