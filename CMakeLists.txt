@@ -15,6 +15,8 @@ set(EXT_DIR "ext")
 set(SCRIPT_DIR "scripts")
 set(GLM_DIR "glm")
 set(BULLET_DIR "bullet")
+set(LUA_DIR "lua")
+set(LUA_LIB "Lua")
 
 # Set project name.
 project(PROJECT_NAME)
@@ -28,7 +30,8 @@ set(FONT_PATH ${PROJECT_SOURCE_DIR}/${FONT_DIR}/)
 set(MESH_PATH ${PROJECT_SOURCE_DIR}/${MESH_DIR}/)
 set(EXT_PATH ${PROJECT_SOURCE_DIR}/${EXT_DIR}/)
 set(SCRIPT_PATH ${PROJECT_SOURCE_DIR}/${SCRIPT_DIR}/)
-set(BULLET_PATH ${EXT_PATH}/${BULLET_DIR})
+set(BULLET_PATH ${EXT_PATH}/${BULLET_DIR}/)
+set(LUA_PATH ${EXT_PATH}/${LUA_DIR}/)
 
 # Files.
 file(GLOB SRC_FILES_LIST "${SRC_PATH}/*.cpp")
@@ -38,10 +41,11 @@ file(GLOB SRC_FILES_LIST "${SRC_PATH}/*.cpp")
 configure_file(${CMAKE_SOURCE_DIR}/${INCLUDE_DIR}/SysDefines.h.cmake 
                ${CMAKE_BINARY_DIR}/${INCLUDE_DIR}/SysDefines.h)
 set(BULLET_INCLUDE_DIR "${BULLET_PATH}/src")
+set(LUA_INCLUDE_DIR "${LUA_PATH}/src")
 set(FREETYPE_INCLUDE_DIR "/usr/include/freetype2")
 include_directories(${EXT_PATH} ${INCLUDE_PATH} "${CMAKE_BINARY_DIR}/${INCLUDE_DIR}" )
 # Use system flag so to disable warnings when compiling using -Wall.
-include_directories(SYSTEM ${BULLET_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR})
+include_directories(SYSTEM ${BULLET_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR} ${LUA_PATH})
 
 # Set compilation options.
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -Wall -Wextra -pedantic")
@@ -108,23 +112,35 @@ else(EXISTS ${FREETYPE_LIB_PATH})
   message(FATAL_ERROR "Looking for freetype: not found")
 endif(EXISTS ${FREETYPE_LIB_PATH})
 
-find_library(LUA_LIB_PATH lua
-             DOC "The lua library")
-if(EXISTS ${LUA_LIB_PATH})
-  message(STATUS "Looking for freetype: found")
-else(EXISTS ${LUA_LIB_PATH})
-  message(FATAL_ERROR "Looking for freetype: not found")
-endif(EXISTS ${LUA_LIB_PATH})
+find_library(DL_LIB_PATH dl
+             DOC "The dl library")
+if(EXISTS ${DL_LIB_PATH})
+  message(STATUS "Looking for dl: found")
+else(EXISTS ${DL_LIB_PATH})
+  message(FATAL_ERROR "Looking for dl: not found")
+endif(EXISTS ${DL_LIB_PATH})
+
+find_library(READ_LINE_LIB_PATH readline
+             DOC "The readline library")
+if(EXISTS ${READ_LINE_LIB_PATH})
+  message(STATUS "Looking for readline: found")
+else(EXISTS ${READ_LINE_LIB_PATH})
+  message(FATAL_ERROR "Looking for readline: not found")
+endif(EXISTS ${READ_LINE_LIB_PATH})
 
 target_link_libraries(${EXE_NAME} ${SDL2_LIB_PATH} 
                                   ${SDL2_IMAGE_LIB_PATH} 
                                   ${GLEW_LIB_PATH} 
                                   ${GLU_LIB_PATH} 
                                   ${GL_LIB_PATH} 
-                                  ${FREETYPE_LIB_PATH} 
-                                  ${LUA_LIB_PATH})
+                                  ${FREETYPE_LIB_PATH}) 
 
 add_subdirectory(${BULLET_PATH})
 # Warning! Preserve this ordering for these static libraries.
 # Dynamics depends on Collision and they both depend on LinearMath.
 target_link_libraries(${EXE_NAME} BulletDynamics BulletCollision LinearMath)
+
+add_subdirectory(${LUA_PATH})
+target_link_libraries(${EXE_NAME} ${LUA_LIB}
+                                  ${DL_LIB_PATH}
+                                  ${READ_LINE_LIB_PATH})
