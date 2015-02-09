@@ -112,22 +112,6 @@ else(EXISTS ${FREETYPE_LIB_PATH})
   message(FATAL_ERROR "Looking for freetype: not found")
 endif(EXISTS ${FREETYPE_LIB_PATH})
 
-find_library(DL_LIB_PATH dl
-             DOC "The dl library")
-if(EXISTS ${DL_LIB_PATH})
-  message(STATUS "Looking for dl: found")
-else(EXISTS ${DL_LIB_PATH})
-  message(FATAL_ERROR "Looking for dl: not found")
-endif(EXISTS ${DL_LIB_PATH})
-
-find_library(READ_LINE_LIB_PATH readline
-             DOC "The readline library")
-if(EXISTS ${READ_LINE_LIB_PATH})
-  message(STATUS "Looking for readline: found")
-else(EXISTS ${READ_LINE_LIB_PATH})
-  message(FATAL_ERROR "Looking for readline: not found")
-endif(EXISTS ${READ_LINE_LIB_PATH})
-
 target_link_libraries(${EXE_NAME} ${SDL2_LIB_PATH} 
                                   ${SDL2_IMAGE_LIB_PATH} 
                                   ${GLEW_LIB_PATH} 
