@@ -17,6 +17,7 @@ set(GLM_DIR "glm")
 set(BULLET_DIR "bullet")
 set(LUA_DIR "lua")
 set(LUA_LIB "Lua")
+set(DOMINO_SETUP_LUA "domino_setup.lua")
 
 # Set project name.
 project(PROJECT_NAME)
@@ -128,3 +129,10 @@ add_subdirectory(${LUA_PATH})
 target_link_libraries(${EXE_NAME} ${LUA_LIB}
                                   ${DL_LIB_PATH}
                                   ${READ_LINE_LIB_PATH})
+
+# ------------------------------------------------------------------------------
+# Copy lua config file.
+add_custom_command(TARGET ${EXE_NAME}
+                   POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy ${SCRIPT_PATH}/${DOMINO_SETUP_LUA} 
+                   ${CMAKE_BINARY_DIR}/${DOMINO_SETUP_LUA})
