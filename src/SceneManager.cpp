@@ -24,8 +24,8 @@ SceneManager::SceneManager(const glm::ivec2 &screenSize,
                            SceneContainer *container)
     : world(container->getWorld()), camera(container->getCamera()),
       textManager(TextManager(FONT_PATH + FONT_FILE, FONT_HEIGHT, screenSize)),
-      currentYRotation(0), currentXRotation(0), cameraMutex(SDL_CreateMutex()),
-      fps(0) {
+      currentYRotation(0.0), currentXRotation(0.0), currentOffset(0.0),
+      positionMutex(SDL_CreateMutex()), fps(0) {
   lightMask = (2 << (world->getLightsNumber() - 1)) - 1;
   setupProjection(screenSize);
   initGPU(container);
@@ -59,7 +59,7 @@ SceneManager::~SceneManager() {
   delete world;
   delete camera;
   glUseProgram(0);
-  SDL_DestroyMutex(cameraMutex);
+  SDL_DestroyMutex(positionMutex);
 }
 
 // -----------------------------------------------------------------------------
@@ -140,9 +140,7 @@ void SceneManager::drawShadowWorld(const glm::mat4 &modelView,
 
 // -----------------------------------------------------------------------------
 void SceneManager::screenRenderingPass() {
-  SDL_LockMutex(cameraMutex);
   glm::mat4 modelView = camera->applyView();
-  SDL_UnlockMutex(cameraMutex);
   drawWorld(modelView);
   //drawMirror(modelView);
   drawText();
@@ -160,30 +158,39 @@ void SceneManager::drawText() {
 void SceneManager::setFps(int fps) { this->fps = fps; }
 
 // -----------------------------------------------------------------------------
-void SceneManager::updateCameraRotation(glm::ivec2 diff) {
-  currentXRotation += diff.x;
-  currentYRotation += diff.y;
+void SceneManager::updateCameraPosition() {
+  SDL_LockMutex(positionMutex);
+
+  camera->move(currentOffset);
+  camera->rotate({currentYRotation, -currentXRotation});
+
+  currentOffset = 0.0f;
+  currentXRotation = 0.0f;
+  currentYRotation = 0.0f;
+
+  SDL_UnlockMutex(positionMutex);
 }
 
 // -----------------------------------------------------------------------------
-void SceneManager::updateCameraPosition(unsigned char mask) {
-  SDL_LockMutex(cameraMutex); 
+void SceneManager::updateCurrentCameraRotation(glm::vec2 diff) {
+  SDL_LockMutex(positionMutex);
+  currentXRotation += diff.x;
+  currentYRotation += diff.y;
+  SDL_UnlockMutex(positionMutex);
+}
 
+// -----------------------------------------------------------------------------
+void SceneManager::updateCurrentCameraPosition(unsigned char mask) {
+  SDL_LockMutex(positionMutex);
   if (mask & 8)
-    camera->moveForward();
+    currentOffset += Camera::STEP; 
   if (mask & 4)
-    camera->moveBackward();
+    currentOffset -= Camera::STEP; 
   if (mask & 2)
-    camera->rotateLeft();
+    currentXRotation -= Camera::FIXED_ROTATION_ANGLE * 1500;
   if (mask & 1)
-    camera->rotateRight();
-
-  // When rotating the camera the lights change intensity.
-  camera->rotate({currentYRotation, -currentXRotation});
-  SDL_UnlockMutex(cameraMutex);
-
-  currentYRotation = 0;
-  currentXRotation = 0;
+    currentXRotation += Camera::FIXED_ROTATION_ANGLE * 1500;
+  SDL_UnlockMutex(positionMutex);
 }
 
 // -----------------------------------------------------------------------------

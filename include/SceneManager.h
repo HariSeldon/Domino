@@ -32,8 +32,9 @@ public:
 public:
   void drawScene();
 
-  void updateCameraPosition(unsigned char keyMask);
-  void updateCameraRotation(glm::ivec2 diff);
+  void updateCameraPosition();
+  void updateCurrentCameraPosition(unsigned char keyMask);
+  void updateCurrentCameraRotation(glm::vec2 diff);
 
   void setFps(int fps);
 
@@ -66,9 +67,10 @@ private:
 
   Camera* camera;
 
-  std::atomic_int currentYRotation;
-  std::atomic_int currentXRotation;
-  SDL_mutex *cameraMutex;
+  float currentYRotation;
+  float currentXRotation;
+  float currentOffset;
+  SDL_mutex *positionMutex;
 
   int fps;
   int lightMask;

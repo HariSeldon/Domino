@@ -25,7 +25,7 @@ void abort(const std::string &message);
 Window::Window()
     : sdlWindow(nullptr), context(nullptr), scene(nullptr),
       eventTimerId(0), fpsTimerId(0), keyboardManager(this), running(true),
-      currentYRotation(0), currentXRotation(0), frameCounter(0)  {
+      frameCounter(0)  {
   initSDLWindow();
 }
 
@@ -83,6 +83,7 @@ void Window::renderingLoop() {
     if (!running)
       break;
 
+    scene->updateCameraPosition();
     scene->drawScene();
 
     ++frameCounter;
@@ -92,7 +93,7 @@ void Window::renderingLoop() {
 }
 
 // -----------------------------------------------------------------------------
-void Window::updateCameraPosition() {
+void Window::updateCurrentCameraPosition() {
   unsigned char forward = keyboardManager.isForwardDown() << 3;
   unsigned char backward = keyboardManager.isBackwardDown() << 2;
   unsigned char left = keyboardManager.isLeftDown() << 1;
@@ -100,7 +101,7 @@ void Window::updateCameraPosition() {
 
   unsigned char mask = forward | backward | left | right;
 
-  scene->updateCameraPosition(mask);
+  scene->updateCurrentCameraPosition(mask);
 }
 
 // -----------------------------------------------------------------------------
@@ -135,7 +136,7 @@ Uint32 eventHandler(Uint32 interval, void *windowPtr) {
     case SDL_MOUSEMOTION: {
       int xDiff = event.motion.xrel;
       int yDiff = event.motion.yrel;
-      scene->updateCameraRotation({xDiff, yDiff});
+      scene->updateCurrentCameraRotation({xDiff, yDiff});
       break;
     }
 
@@ -148,7 +149,7 @@ Uint32 eventHandler(Uint32 interval, void *windowPtr) {
     }
   }
 
-  window->updateCameraPosition();
+  window->updateCurrentCameraPosition();
   // This makes the update of the scene independent of the frame-rate.
   // It also causes a race condidtion. 
   scene->stepSimulation(); 

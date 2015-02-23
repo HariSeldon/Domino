@@ -7,6 +7,8 @@
 class Camera {
 
 public:
+  static constexpr float STEP = 0.5f;
+  static constexpr float FIXED_ROTATION_ANGLE = 0.02f;
   Camera();
   Camera(const glm::vec4 position, 
          const glm::vec2 rotation,
@@ -16,6 +18,7 @@ public:
   void assign(const glm::vec4 position, const glm::vec2 rotation,
               float viewAngle, float zNear, float zFar);
 
+  void move(float step);
   void moveForward();
   void moveBackward();
   void rotate(const glm::vec2 offset);
@@ -51,7 +54,6 @@ public:
 
 private:
   glm::mat4 buildTransform();
-  void move(float step);
 
 private:
   glm::vec4 position;
@@ -62,7 +64,5 @@ private:
   float zNear;
   float zFar;
 
-  static constexpr float FIXED_ROTATION_ANGLE = 0.02f;
   static const float ROTATION_FACTOR;
-  static constexpr float STEP = 0.3f;
 };

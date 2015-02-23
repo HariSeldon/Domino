@@ -37,7 +37,7 @@ private:
   void initSDLWindow();
   void attachTimers();
   void renderingLoop();
-  void updateCameraPosition();
+  void updateCurrentCameraPosition();
   void setupProjection(); 
   inline SceneManager* getScene() {
     return scene.get();
@@ -56,8 +56,6 @@ private:
 
   bool running; 
 
-  std::atomic_int currentYRotation;
-  std::atomic_int currentXRotation;
   std::mutex cameraMutex;
 
   std::atomic_int frameCounter;
