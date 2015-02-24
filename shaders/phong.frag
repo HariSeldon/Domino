@@ -167,10 +167,9 @@ void main() {
   vec4 finalFragmentColor = shadeAmbientColor();
 
   for (int lightIndex = 0; lightIndex < lightsNumber; ++lightIndex) {
-    // FIXME: find a better way.
-    if ((lightMask >> lightIndex) % 2 == 0) {
+    if ( int((1 << lightIndex) & lightMask) == 0) {
       continue;
-    }
+    } 
 
     LightInfo light = lights[lightIndex];
 
