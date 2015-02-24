@@ -1,7 +1,7 @@
-#ifndef SCRIPT_ENGINE_H
-#define SCRIPT_ENGINE_H
+#pragma once
 
 #include "Camera.h"
+#include "Light.h"
 #include "World.h"
 
 extern "C" {
@@ -60,8 +60,7 @@ public:
 
 public:
   SceneContainer *container;
+  LightBuilder lightBuilder;
 };
 
 void runScript(const std::string &scriptName);
-
-#endif

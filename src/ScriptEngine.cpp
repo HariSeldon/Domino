@@ -125,9 +125,9 @@ int addPositionalLight(lua_State *luaState) {
   float quadraticAttenuation =
       static_cast<float>(luaL_checknumber(luaState, 19));
 
-  LightBuilder lightBuilder;
   Light *light =
-      lightBuilder.setPosition(glm::vec3(positionX, positionY, positionZ))
+      engine->lightBuilder.setPosition(
+                               glm::vec3(positionX, positionY, positionZ))
           .setAmbientColor(
                {ambientColorR, ambientColorG, ambientColorB, ambientColorA})
           .setDiffuseColor(
@@ -162,15 +162,15 @@ int addDirectionalLight(lua_State *luaState) {
   float specularColorB = static_cast<float>(luaL_checknumber(luaState, 15));
   float specularColorA = static_cast<float>(luaL_checknumber(luaState, 16));
 
-  LightBuilder lightBuilder;
-  Light *light = lightBuilder.setDirection({directionX, directionY, directionZ})
-                     .setAmbientColor({ambientColorR, ambientColorG,
-                                       ambientColorB, ambientColorA})
-                     .setDiffuseColor({diffuseColorR, diffuseColorG,
-                                       diffuseColorB, diffuseColorA})
-                     .setSpecularColor({specularColorR, specularColorG,
-                                        specularColorB, specularColorA})
-                     .createDirectional();
+  Light *light =
+      engine->lightBuilder.setDirection({directionX, directionY, directionZ})
+          .setAmbientColor(
+               {ambientColorR, ambientColorG, ambientColorB, ambientColorA})
+          .setDiffuseColor(
+               {diffuseColorR, diffuseColorG, diffuseColorB, diffuseColorA})
+          .setSpecularColor(
+               {specularColorR, specularColorG, specularColorB, specularColorA})
+          .createDirectional();
 
   engine->container->addLight(light);
   return 0;
