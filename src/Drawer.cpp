@@ -74,7 +74,7 @@ void Drawer::initGPUObjects(
       vboIds.insert(vboIds.end(),
                     {vertexVBOId, indexVBOId, normalVBOId, textureVBOId});
     }
-  };
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -315,9 +315,7 @@ void setOrientation(const Object *object, ShaderProgram &shader,
       biasMatrix * shadowProjection * originalShadowModelView * modelView;
   modelView = originalModelView * modelView;
 
-  // FIXME I can avoid setting the projection uniform every time.
-  // If I cannot integrate projection and model view hoist this out.
-  shader.setUniform("projectionMatrix", projection);
+  shader.setUniform("mvpMatrix", projection * modelView);
   shader.setUniform("modelViewMatrix", modelView);
   shader.setUniform("normalMatrix",
                     glm::inverseTranspose(glm::mat3(modelView)));

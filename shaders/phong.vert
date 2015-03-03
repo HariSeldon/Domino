@@ -1,7 +1,6 @@
 #version 330
 
-// FIXME: replace the projectionMatrix with mvpMatrix -> this saves a MM.
-uniform mat4 projectionMatrix;
+uniform mat4 mvpMatrix;
 uniform mat4 modelViewMatrix;
 uniform mat3 normalMatrix;
 
@@ -19,5 +18,5 @@ void main () {
 
   textureCoordinates = vertexTextureCoordinates;
   
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.);
+  gl_Position = mvpMatrix * vec4(vertexPosition, 1.);
 }
