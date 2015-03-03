@@ -49,8 +49,6 @@ public:
 
 private:
   void initWorld();
-  void initLights();
-  void initObjects();
   void initMirror();
 
 //-----------------------------------------------------------------------------
