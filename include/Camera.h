@@ -3,6 +3,8 @@
 #include <glm/fwd.hpp>
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
+#include <glm/mat4x4.hpp>
+
 
 class Camera {
 
@@ -63,6 +65,7 @@ private:
   float viewAngle;
   float zNear;
   float zFar;
+  glm::mat4 currentTransform;
 
   static const float ROTATION_FACTOR;
 };

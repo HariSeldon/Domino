@@ -16,7 +16,7 @@ Camera::Camera() {}
 Camera::Camera(const glm::vec4 position, const glm::vec2 orientation,
                float viewAngle, float zNear, float zFar)
     : position(position), orientation(orientation), viewAngle(viewAngle),
-      zNear(zNear), zFar(zFar) {}
+      zNear(zNear), zFar(zFar), currentTransform(buildTransform()) {}
 
 // ----------------------------------------------------------------------------- 
 void Camera::assign(const glm::vec4 position,  const glm::vec2 orientation,
@@ -35,7 +35,7 @@ void Camera::moveBackward() { move(-Camera::STEP); }
 
 // ----------------------------------------------------------------------------- 
 void Camera::move(float step) {
-  glm::mat4 currentTransform = buildTransform();
+  currentTransform = buildTransform();
   // Translate in the new coordinate system.
   currentTransform = glm::translate(currentTransform, glm::vec3(0, 0, step));
   // Get the new center.
@@ -61,8 +61,6 @@ void Camera::rotateRight() {
 
 // ----------------------------------------------------------------------------- 
 glm::mat4 Camera::applyView() {
-  glm::mat4 currentTransform = buildTransform();
-
   // Compute center.
   glm::mat4 centerMatrix = currentTransform;
   centerMatrix = glm::translate(centerMatrix, glm::vec3(0.f, 0.f, 1.f));
