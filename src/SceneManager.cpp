@@ -15,7 +15,7 @@
 #include <glm/vec4.hpp>
 #include <glm/ext.hpp>
 
-#include "SDL/SDL_image.h"
+#include "SDL2/SDL_image.h"
 
 const std::string SceneManager::FONT_FILE = "VeraMono.ttf";
 

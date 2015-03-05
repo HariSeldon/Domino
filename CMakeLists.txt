@@ -46,7 +46,7 @@ set(LUA_INCLUDE_DIR "${LUA_PATH}/src")
 set(FREETYPE_INCLUDE_DIR "/usr/include/freetype2")
 include_directories(${EXT_PATH} ${INCLUDE_PATH} "${CMAKE_BINARY_DIR}/${INCLUDE_DIR}" )
 # Use system flag so to disable warnings when compiling using -Wall.
-include_directories(SYSTEM ${BULLET_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR} ${LUA_PATH})
+include_directories(SYSTEM ${BULLET_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR} ${LUA_INCLUDE_DIR})
 
 # Set compilation options.
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -Wall -Wextra -pedantic")
