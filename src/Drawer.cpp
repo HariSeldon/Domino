@@ -239,11 +239,11 @@ void Drawer::drawObjects(const World *world, const glm::mat4 &originalModelView,
     const auto objectVector = x.second;
     shader->useProgram();
 
+    setLights(world, shader, originalModelView, lightMask);
     for (const auto &object : objectVector) {
       drawObject(object, *shader, originalModelView, projection,
                  originalShadowModelView, shadowProjection);
     }
-    setLights(world, shader, originalModelView, lightMask);
   };
 }
 
