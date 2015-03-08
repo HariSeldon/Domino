@@ -107,7 +107,7 @@ void PositionalLight::draw(ShaderProgram &shaderProgram,
                                "].quadraticAttenuation",
                            quadraticAttenuation);
   shaderProgram.setUniform("lights[" + std::to_string(number) + "].spotCutOff",
-                           180.0f);
+                           Light::DEFAULT_SPOT_CUTOFF);
   shaderProgram.setUniform("lights[" + std::to_string(number) + "].position",
                            modelView * position);
 }
@@ -143,9 +143,10 @@ void SpotLight::draw(ShaderProgram &shaderProgram,
   glm::normalize(screenSpaceDirection);
 
   PositionalLight::draw(shaderProgram, modelView);
-
   shaderProgram.setUniform("lights[" + std::to_string(number) + "].spotCutOff",
                            cutOff);
+  shaderProgram.setUniform("lights[" + std::to_string(number) + "].spotCosCutOff",
+                           glm::cos(glm::radians(cutOff)));
   shaderProgram.setUniform(
       "lights[" + std::to_string(number) + "].spotExponent", exponent);
   shaderProgram.setUniform("lights[" + std::to_string(number) +

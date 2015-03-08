@@ -153,6 +153,64 @@ function addDirectionalLight(light)
 end
 
 --------------------------------------------------------------------------------
+function addSpotLight(light)
+  if light.position == nil then
+    light.position = CENTER;
+  end
+  if light.direction == nil then
+    light.direction = TOP_DOWN_DIRECTION;
+  end
+  if light.ambientColor == nil then
+    light.ambientColor = WHITE; 
+  end
+  if light.diffuseColor == nil then
+    light.diffuseColor = WHITE; 
+  end 
+  if light.specularColor == nil then
+    light.specularColor = WHITE; 
+  end 
+  if light.constantAttenuation == nil then
+    light.constantAttenuation = 1;
+  end
+  if light.linearAttenuation == nil then
+    light.linearAttenuation = 0;
+  end
+  if light.quadraticAttenuation == nil then
+    light.quadraticAttenuation = 0;
+  end
+  if light.exponent == nil then
+    light.exponent = 1;
+  end
+  if light.cutoff == nil then
+    light.cutoff = 1;
+  end
+
+  engine:_addSpotLight(light.position.x,
+                       light.position.y,
+                       light.position.z,
+                       light.direction.x,
+                       light.direction.y,
+                       light.direction.z,
+                       light.ambientColor.r,
+                       light.ambientColor.g,
+                       light.ambientColor.b,
+                       light.ambientColor.a,
+                       light.diffuseColor.r,
+                       light.diffuseColor.g,
+                       light.diffuseColor.b,
+                       light.diffuseColor.a,
+                       light.specularColor.r,
+                       light.specularColor.g,
+                       light.specularColor.b,
+                       light.specularColor.a,
+                       light.constantAttenuation,
+                       light.linearAttenuation,
+                       light.quadraticAttenuation,
+                       light.exponent,
+                       light.cutoff); 
+end
+
+--------------------------------------------------------------------------------
 function addPlane(plane)
   -- Mandatory parameters.
   if plane.side == nil then

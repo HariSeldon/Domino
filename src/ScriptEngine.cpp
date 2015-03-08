@@ -178,6 +178,50 @@ int addDirectionalLight(lua_State *luaState) {
 
 // -----------------------------------------------------------------------------
 int addSpotLight(lua_State *luaState) {
+  ScriptEngine *engine = luaW_check<ScriptEngine>(luaState, 1);
+  float positionX = static_cast<float>(luaL_checknumber(luaState, 2));
+  float positionY = static_cast<float>(luaL_checknumber(luaState, 3));
+  float positionZ = static_cast<float>(luaL_checknumber(luaState, 4));
+  float directionX = static_cast<float>(luaL_checknumber(luaState, 5));
+  float directionY = static_cast<float>(luaL_checknumber(luaState, 6));
+  float directionZ = static_cast<float>(luaL_checknumber(luaState, 7));
+  float ambientColorR = static_cast<float>(luaL_checknumber(luaState, 8));
+  float ambientColorG = static_cast<float>(luaL_checknumber(luaState, 9));
+  float ambientColorB = static_cast<float>(luaL_checknumber(luaState, 10));
+  float ambientColorA = static_cast<float>(luaL_checknumber(luaState, 11));
+  float diffuseColorR = static_cast<float>(luaL_checknumber(luaState, 12));
+  float diffuseColorG = static_cast<float>(luaL_checknumber(luaState, 13));
+  float diffuseColorB = static_cast<float>(luaL_checknumber(luaState, 14));
+  float diffuseColorA = static_cast<float>(luaL_checknumber(luaState, 15));
+  float specularColorR = static_cast<float>(luaL_checknumber(luaState, 16));
+  float specularColorG = static_cast<float>(luaL_checknumber(luaState, 17));
+  float specularColorB = static_cast<float>(luaL_checknumber(luaState, 18));
+  float specularColorA = static_cast<float>(luaL_checknumber(luaState, 19));
+  float constantAttenuation =
+      static_cast<float>(luaL_checknumber(luaState, 20));
+  float linearAttenuation = static_cast<float>(luaL_checknumber(luaState, 21));
+  float quadraticAttenuation =
+      static_cast<float>(luaL_checknumber(luaState, 22));
+  float exponent = static_cast<float>(luaL_checknumber(luaState, 23));
+  float cutoff = static_cast<float>(luaL_checknumber(luaState, 24));
+
+  Light *light =
+      engine->lightBuilder.setPosition({positionX, positionY, positionZ})
+          .setDirection({directionX, directionY, directionZ})
+          .setAmbientColor(
+               {ambientColorR, ambientColorG, ambientColorB, ambientColorA})
+          .setDiffuseColor(
+               {diffuseColorR, diffuseColorG, diffuseColorB, diffuseColorA})
+          .setSpecularColor(
+               {specularColorR, specularColorG, specularColorB, specularColorA})
+          .setConstantAttenuation(constantAttenuation)
+          .setLinearAttenuation(linearAttenuation)
+          .setQuadraticAttenuation(quadraticAttenuation)
+          .setSpotExponent(exponent)
+          .setCutOff(cutoff)
+          .createSpot();
+
+  engine->container->addLight(light);
   return 0;
 }
 
