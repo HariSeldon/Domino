@@ -6,11 +6,14 @@
 #include "Box.h"
 #include "Camera.h"
 #include "Light.h"
+#include "LightBulb.h"
 #include "Mesh.h"
 #include "Plane.h"
 #include "SceneContainer.h"
 #include "SysDefines.h"
 #include "World.h"
+
+#include <iostream>
 
 SceneContainer *tmpContainer = nullptr;
 
@@ -18,10 +21,11 @@ static luaL_Reg ScriptEngineTable[] = {{nullptr, nullptr}};
 
 static luaL_Reg ScriptEngineMetatable[] = {
     {"_addBox", addBox},
+    {"_addLightBulb", addLightBulb},
     {"_addDirectionalLight", addDirectionalLight},
     {"_addMesh", addMesh},
     {"_addPlane", addPlane},
-    {"_addPositionalLight", addPositionalLight},
+//    {"_addPositionalLight", addPositionalLight},
     {"_addSphere", addSphere},
     {"_addSpotLight", addSpotLight},
     {"_setBackgroundColor", setBackgroundColor},
@@ -101,31 +105,81 @@ int setCamera(lua_State *luaState) {
   return 0;
 }
 
-// -----------------------------------------------------------------------------
-int addPositionalLight(lua_State *luaState) {
-  ScriptEngine *engine = luaW_check<ScriptEngine>(luaState, 1);
-  float positionX = static_cast<float>(luaL_checknumber(luaState, 2));
-  float positionY = static_cast<float>(luaL_checknumber(luaState, 3));
-  float positionZ = static_cast<float>(luaL_checknumber(luaState, 4));
-  float ambientColorR = static_cast<float>(luaL_checknumber(luaState, 5));
-  float ambientColorG = static_cast<float>(luaL_checknumber(luaState, 6));
-  float ambientColorB = static_cast<float>(luaL_checknumber(luaState, 7));
-  float ambientColorA = static_cast<float>(luaL_checknumber(luaState, 8));
-  float diffuseColorR = static_cast<float>(luaL_checknumber(luaState, 9));
-  float diffuseColorG = static_cast<float>(luaL_checknumber(luaState, 10));
-  float diffuseColorB = static_cast<float>(luaL_checknumber(luaState, 11));
-  float diffuseColorA = static_cast<float>(luaL_checknumber(luaState, 12));
-  float specularColorR = static_cast<float>(luaL_checknumber(luaState, 13));
-  float specularColorG = static_cast<float>(luaL_checknumber(luaState, 14));
-  float specularColorB = static_cast<float>(luaL_checknumber(luaState, 15));
-  float specularColorA = static_cast<float>(luaL_checknumber(luaState, 16));
-  float constantAttenuation =
-      static_cast<float>(luaL_checknumber(luaState, 17));
-  float linearAttenuation = static_cast<float>(luaL_checknumber(luaState, 18));
-  float quadraticAttenuation =
-      static_cast<float>(luaL_checknumber(luaState, 19));
+//// -----------------------------------------------------------------------------
+//int addPositionalLight(lua_State *luaState) {
+//  ScriptEngine *engine = luaW_check<ScriptEngine>(luaState, 1);
+//  float positionX = static_cast<float>(luaL_checknumber(luaState, 2));
+//  float positionY = static_cast<float>(luaL_checknumber(luaState, 3));
+//  float positionZ = static_cast<float>(luaL_checknumber(luaState, 4));
+//  float ambientColorR = static_cast<float>(luaL_checknumber(luaState, 5));
+//  float ambientColorG = static_cast<float>(luaL_checknumber(luaState, 6));
+//  float ambientColorB = static_cast<float>(luaL_checknumber(luaState, 7));
+//  float ambientColorA = static_cast<float>(luaL_checknumber(luaState, 8));
+//  float diffuseColorR = static_cast<float>(luaL_checknumber(luaState, 9));
+//  float diffuseColorG = static_cast<float>(luaL_checknumber(luaState, 10));
+//  float diffuseColorB = static_cast<float>(luaL_checknumber(luaState, 11));
+//  float diffuseColorA = static_cast<float>(luaL_checknumber(luaState, 12));
+//  float specularColorR = static_cast<float>(luaL_checknumber(luaState, 13));
+//  float specularColorG = static_cast<float>(luaL_checknumber(luaState, 14));
+//  float specularColorB = static_cast<float>(luaL_checknumber(luaState, 15));
+//  float specularColorA = static_cast<float>(luaL_checknumber(luaState, 16));
+//  float constantAttenuation =
+//      static_cast<float>(luaL_checknumber(luaState, 17));
+//  float linearAttenuation = static_cast<float>(luaL_checknumber(luaState, 18));
+//  float quadraticAttenuation =
+//      static_cast<float>(luaL_checknumber(luaState, 19));
+//
+//  Light *light =
+//      engine->lightBuilder.setPosition(
+//                               glm::vec3(positionX, positionY, positionZ))
+//          .setAmbientColor(
+//               {ambientColorR, ambientColorG, ambientColorB, ambientColorA})
+//          .setDiffuseColor(
+//               {diffuseColorR, diffuseColorG, diffuseColorB, diffuseColorA})
+//          .setSpecularColor(
+//               {specularColorR, specularColorG, specularColorB, specularColorA})
+//          .setConstantAttenuation(constantAttenuation)
+//          .setLinearAttenuation(linearAttenuation)
+//          .setQuadraticAttenuation(quadraticAttenuation)
+//          .createPositional();
+//
+//  engine->container->addLight(light);
+//  return 0;
+//}
 
-  Light *light =
+// -----------------------------------------------------------------------------
+int addLightBulb(lua_State *luaState) {
+  ScriptEngine *engine = luaW_check<ScriptEngine>(luaState, 1);
+  float side = static_cast<float>(luaL_checknumber(luaState, 2));
+  float mass = static_cast<float>(luaL_checknumber(luaState, 3));
+  float positionX = static_cast<float>(luaL_checknumber(luaState, 4));
+  float positionY = static_cast<float>(luaL_checknumber(luaState, 5));
+  float positionZ = static_cast<float>(luaL_checknumber(luaState, 6));
+  float rotationX = static_cast<float>(luaL_checknumber(luaState, 7));
+  float rotationY = static_cast<float>(luaL_checknumber(luaState, 8));
+  float rotationZ = static_cast<float>(luaL_checknumber(luaState, 9));
+  float ambientColorR = static_cast<float>(luaL_checknumber(luaState, 10));
+  float ambientColorG = static_cast<float>(luaL_checknumber(luaState, 11));
+  float ambientColorB = static_cast<float>(luaL_checknumber(luaState, 12));
+  float ambientColorA = static_cast<float>(luaL_checknumber(luaState, 13));
+  float diffuseColorR = static_cast<float>(luaL_checknumber(luaState, 14));
+  float diffuseColorG = static_cast<float>(luaL_checknumber(luaState, 15));
+  float diffuseColorB = static_cast<float>(luaL_checknumber(luaState, 16));
+  float diffuseColorA = static_cast<float>(luaL_checknumber(luaState, 17));
+  float specularColorR = static_cast<float>(luaL_checknumber(luaState, 18));
+  float specularColorG = static_cast<float>(luaL_checknumber(luaState, 19));
+  float specularColorB = static_cast<float>(luaL_checknumber(luaState, 20));
+  float specularColorA = static_cast<float>(luaL_checknumber(luaState, 21));
+  float constantAttenuation =
+      static_cast<float>(luaL_checknumber(luaState, 22));
+  float linearAttenuation = static_cast<float>(luaL_checknumber(luaState, 23));
+  float quadraticAttenuation =
+      static_cast<float>(luaL_checknumber(luaState, 24));
+  const char *textureFile = luaL_checkstring(luaState, 25);
+  const char *shaderFile = luaL_checkstring(luaState, 26);
+
+  LightBuilder lightBuilder;
+  PositionalLight *light =
       engine->lightBuilder.setPosition(
                                glm::vec3(positionX, positionY, positionZ))
           .setAmbientColor(
@@ -139,7 +193,23 @@ int addPositionalLight(lua_State *luaState) {
           .setQuadraticAttenuation(quadraticAttenuation)
           .createPositional();
 
-  engine->container->addLight(light);
+  LightBulbBuilder lightBulbBuilder;
+  btQuaternion rotation(rotationX, rotationY, rotationZ);
+  LightBulb *bulb =
+      lightBulbBuilder.setTransform(
+                           btTransform(rotation, btVector3(positionX, positionY,
+                                                           positionZ)))
+          .setAmbientColor({0, 0, 0, 1})
+          .setDiffuseColor({0, 0, 0, 1})
+          .setSpecularColor({0, 0, 0, 1})
+          .setLight(light)
+          .setSide(1.0f)
+          .setTextureFile(textureFile)
+          .create();
+
+
+  engine->container->addShader(bulb, std::string(shaderFile));
+  engine->container->addLightBulb(bulb);
   return 0;
 }
 
@@ -162,7 +232,7 @@ int addDirectionalLight(lua_State *luaState) {
   float specularColorB = static_cast<float>(luaL_checknumber(luaState, 15));
   float specularColorA = static_cast<float>(luaL_checknumber(luaState, 16));
 
-  Light *light =
+  DirectionalLight *light =
       engine->lightBuilder.setDirection({directionX, directionY, directionZ})
           .setAmbientColor(
                {ambientColorR, ambientColorG, ambientColorB, ambientColorA})
@@ -172,56 +242,56 @@ int addDirectionalLight(lua_State *luaState) {
                {specularColorR, specularColorG, specularColorB, specularColorA})
           .createDirectional();
 
-  engine->container->addLight(light);
+  engine->container->addDirectionalLight(light);
   return 0;
 }
 
 // -----------------------------------------------------------------------------
 int addSpotLight(lua_State *luaState) {
-  ScriptEngine *engine = luaW_check<ScriptEngine>(luaState, 1);
-  float positionX = static_cast<float>(luaL_checknumber(luaState, 2));
-  float positionY = static_cast<float>(luaL_checknumber(luaState, 3));
-  float positionZ = static_cast<float>(luaL_checknumber(luaState, 4));
-  float directionX = static_cast<float>(luaL_checknumber(luaState, 5));
-  float directionY = static_cast<float>(luaL_checknumber(luaState, 6));
-  float directionZ = static_cast<float>(luaL_checknumber(luaState, 7));
-  float ambientColorR = static_cast<float>(luaL_checknumber(luaState, 8));
-  float ambientColorG = static_cast<float>(luaL_checknumber(luaState, 9));
-  float ambientColorB = static_cast<float>(luaL_checknumber(luaState, 10));
-  float ambientColorA = static_cast<float>(luaL_checknumber(luaState, 11));
-  float diffuseColorR = static_cast<float>(luaL_checknumber(luaState, 12));
-  float diffuseColorG = static_cast<float>(luaL_checknumber(luaState, 13));
-  float diffuseColorB = static_cast<float>(luaL_checknumber(luaState, 14));
-  float diffuseColorA = static_cast<float>(luaL_checknumber(luaState, 15));
-  float specularColorR = static_cast<float>(luaL_checknumber(luaState, 16));
-  float specularColorG = static_cast<float>(luaL_checknumber(luaState, 17));
-  float specularColorB = static_cast<float>(luaL_checknumber(luaState, 18));
-  float specularColorA = static_cast<float>(luaL_checknumber(luaState, 19));
-  float constantAttenuation =
-      static_cast<float>(luaL_checknumber(luaState, 20));
-  float linearAttenuation = static_cast<float>(luaL_checknumber(luaState, 21));
-  float quadraticAttenuation =
-      static_cast<float>(luaL_checknumber(luaState, 22));
-  float exponent = static_cast<float>(luaL_checknumber(luaState, 23));
-  float cutoff = static_cast<float>(luaL_checknumber(luaState, 24));
-
-  Light *light =
-      engine->lightBuilder.setPosition({positionX, positionY, positionZ})
-          .setDirection({directionX, directionY, directionZ})
-          .setAmbientColor(
-               {ambientColorR, ambientColorG, ambientColorB, ambientColorA})
-          .setDiffuseColor(
-               {diffuseColorR, diffuseColorG, diffuseColorB, diffuseColorA})
-          .setSpecularColor(
-               {specularColorR, specularColorG, specularColorB, specularColorA})
-          .setConstantAttenuation(constantAttenuation)
-          .setLinearAttenuation(linearAttenuation)
-          .setQuadraticAttenuation(quadraticAttenuation)
-          .setSpotExponent(exponent)
-          .setCutOff(cutoff)
-          .createSpot();
-
-  engine->container->addLight(light);
+//  ScriptEngine *engine = luaW_check<ScriptEngine>(luaState, 1);
+//  float positionX = static_cast<float>(luaL_checknumber(luaState, 2));
+//  float positionY = static_cast<float>(luaL_checknumber(luaState, 3));
+//  float positionZ = static_cast<float>(luaL_checknumber(luaState, 4));
+//  float directionX = static_cast<float>(luaL_checknumber(luaState, 5));
+//  float directionY = static_cast<float>(luaL_checknumber(luaState, 6));
+//  float directionZ = static_cast<float>(luaL_checknumber(luaState, 7));
+//  float ambientColorR = static_cast<float>(luaL_checknumber(luaState, 8));
+//  float ambientColorG = static_cast<float>(luaL_checknumber(luaState, 9));
+//  float ambientColorB = static_cast<float>(luaL_checknumber(luaState, 10));
+//  float ambientColorA = static_cast<float>(luaL_checknumber(luaState, 11));
+//  float diffuseColorR = static_cast<float>(luaL_checknumber(luaState, 12));
+//  float diffuseColorG = static_cast<float>(luaL_checknumber(luaState, 13));
+//  float diffuseColorB = static_cast<float>(luaL_checknumber(luaState, 14));
+//  float diffuseColorA = static_cast<float>(luaL_checknumber(luaState, 15));
+//  float specularColorR = static_cast<float>(luaL_checknumber(luaState, 16));
+//  float specularColorG = static_cast<float>(luaL_checknumber(luaState, 17));
+//  float specularColorB = static_cast<float>(luaL_checknumber(luaState, 18));
+//  float specularColorA = static_cast<float>(luaL_checknumber(luaState, 19));
+//  float constantAttenuation =
+//      static_cast<float>(luaL_checknumber(luaState, 20));
+//  float linearAttenuation = static_cast<float>(luaL_checknumber(luaState, 21));
+//  float quadraticAttenuation =
+//      static_cast<float>(luaL_checknumber(luaState, 22));
+//  float exponent = static_cast<float>(luaL_checknumber(luaState, 23));
+//  float cutoff = static_cast<float>(luaL_checknumber(luaState, 24));
+//
+//  Light *light =
+//      engine->lightBuilder.setPosition({positionX, positionY, positionZ})
+//          .setDirection({directionX, directionY, directionZ})
+//          .setAmbientColor(
+//               {ambientColorR, ambientColorG, ambientColorB, ambientColorA})
+//          .setDiffuseColor(
+//               {diffuseColorR, diffuseColorG, diffuseColorB, diffuseColorA})
+//          .setSpecularColor(
+//               {specularColorR, specularColorG, specularColorB, specularColorA})
+//          .setConstantAttenuation(constantAttenuation)
+//          .setLinearAttenuation(linearAttenuation)
+//          .setQuadraticAttenuation(quadraticAttenuation)
+//          .setSpotExponent(exponent)
+//          .setCutOff(cutoff)
+//          .createSpot();
+//
+//  engine->container->addSpotLight(light);
   return 0;
 }
 

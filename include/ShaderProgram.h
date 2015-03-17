@@ -12,7 +12,8 @@ class FragmentShader;
 
 class ShaderProgram {
 public:
-  ShaderProgram(const std::string &vertexShaderFileName,
+  ShaderProgram(const std::string &name,
+                const std::string &vertexShaderFileName,
                 const std::string &fragmentShaderFileName);
   ~ShaderProgram();
 
@@ -20,6 +21,8 @@ public:
   GLuint getProgramId() const;
   void useProgram() const;
   
+  const std::string getName() const { return name; }
+
   // Uniform management.
   int getUniformLocation(const std::string &uniformName) const;
   template <typename type>
@@ -39,4 +42,5 @@ private:
   FragmentShader *fragmentShader;
   std::unordered_map<std::string, int> uniformLocationsMap;
   std::unordered_map<std::string, int> attributeLocationsMap;
+  std::string name;
 };

@@ -2,6 +2,7 @@
 
 #include "Box.h"
 #include "Drawer.h"
+#include "LightBulb.h"
 #include "MathUtils.h"
 #include "Mirror.h"
 #include "Mesh.h"
@@ -164,3 +165,4 @@ template class ObjectBuilder<PlaneBuilder>;
 template class ObjectBuilder<BoxBuilder>;
 template class ObjectBuilder<MirrorBuilder>;
 template class ObjectBuilder<MeshBuilder>;
+template class ObjectBuilder<LightBulbBuilder>;

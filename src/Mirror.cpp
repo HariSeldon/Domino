@@ -18,7 +18,7 @@ const std::string Mirror::MIRROR_FRAGMENT_SHADER = "mirror.frag";
 Mirror::Mirror(btTransform &transform, btScalar mass, btVector3 &inertia,
                const btScalar &side)
     : Object(transform, mass, inertia), fboId(0), dboId(0), mirrorTexture(0),
-      shader(MIRROR_VERTEX_SHADER, MIRROR_FRAGMENT_SHADER) {
+      shader("mirror", MIRROR_VERTEX_SHADER, MIRROR_FRAGMENT_SHADER) {
   computePoints(side);
   setupBulletShape();
 

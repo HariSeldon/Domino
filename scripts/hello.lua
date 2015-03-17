@@ -52,21 +52,38 @@ function traceDominoLine(start, finish)
 
 end
 
-
-setCamera({position = {x = 0, y = 20, z = 0}, orientation = {x = 1.54, y = 0}});
+setCamera({position = {x = 0, y = 2, z = -20}, orientation = {x = 0, y = 0}});
 setGravity({x = 0, y = -9.81, z = 0});
 setBackgroundColor({r = 0.2, g = 0.4, b = 0.6, a = 1});
---addPositionalLight({position = {x = 0, y = 1, z = 0}, constantAttenuation = 1});
+--addPositionalLight({position = {x = 20, y = 1, z = 0}, constantAttenuation = 1});
 --addPositionalLight({position = {x = 19, y = 1, z = 5}, constantAttenuation = 1});
-addSpotLight({position = {x = 0, y = 20, z = 0}, direction = {x = 0, y = -1, z = 0}, 
-              constantAttenuation = 1, cutoff = 70, exponent = 10});
---addPositionalLight({position = {x = 20, y = 0.1, z = 0}, constantAttenuation = 0.1});
+--addSpotLight({position = {x = 0, y = 30, z = 0}, direction = {x = 0, y = -1, z = 0}, 
+--              constantAttenuation = 1, cutoff = 85, exponent = 10, constantAttenuation = 2});
+--addPositionalLight({position = {x = 0, y = 10, z = 0}, constantAttenuation = 1});
 --addPositionalLight({position = {x = 0, y = 0.1, z = 20}, constantAttenuation = 0.1});
 --addPositionalLight({position = {x = 20, y = 0.1, z = 20}, constantAttenuation = 0.1});
 --addDirectionalLight({direction = {x = -1, y = -1, z = 0}});
+--addBox({sides = {x = 100, y = 100, z = 100}, 
+--        position = {x = 0, y = 0, z = 0}, 
+--        orientation = {x = 0, y = 0, z = 0},
+--        mass = 0, textureFile = "default.png"});
+--addBox({sides = {x = 2, y = 2, z = 2}, 
+--        position = {x = 0, y = 100, z = 0}, 
+--        orientation = {x = 0, y = 0, z = 0},
+--        mass = 0.01, textureFile = "checkerboard.png"});
+addBox({sides = {x = 2, y = 2, z = 2}, 
+        position = {x = 10, y = 5, z = 0}, 
+        mass = 0, textureFile = "checkerboard.png"});
+addLightBulb({side = 1, 
+              position = {x = 0, y = 10, z = 0}, 
+              mass = 0, linearAttenuation = 0.2, shader = "gouraud"});
+addLightBulb({side = 1, 
+              position = {x = 20, y = 10, z = 10}, 
+              mass = 0, linearAttenuation = 0.2, shader = "gouraud"});
 addPlane({side = 60, textureFile = "default.png"});
-addMesh({objFile = "barrel.obj", position = {x = 10, y = 2, z = 0}, mass = 10});
-addMesh({objFile = "barrel.obj", position = {x = -10, y = 2, z = 0}, mass = 10});
+addMesh({objFile = "barrel.obj", position = {x = 0, y = 2, z = 0}, mass = 10});
+--addMesh({objFile = "barrel.obj", position = {x = -10, y = 20, z = 0}, mass = 10});
+--addMesh({objFile = "barrel.obj", position = {x = -10, y = 30, z = 0}, mass = 10});
 --
 ----traceDominoLine({x = 1, y = 20, z = 1}, {x = 20, y = 0, z = 20});
 ----traceDominoLine({x = -1, y = 0, z = 1}, {x = -20, y = 0, z = 20});

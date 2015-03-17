@@ -28,7 +28,7 @@ public:
 
 public:
   void
-  initGPUObjects(const std::map<const Object *, const std::string> &shaderMap,
+  initGPUObjects(const std::map<const std::string, std::vector<const Object *>> &shaderMap,
                  const World &world);
   void initTextures(const World& world);
   void initGPUShadowObjects(const ShaderProgram &shadowShader,

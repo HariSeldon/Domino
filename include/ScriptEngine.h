@@ -24,7 +24,8 @@ int addBox(lua_State *luaState);
 int addDirectionalLight(lua_State *luaState);
 int addMesh(lua_State *luaState);
 int addPlane(lua_State *luaState);
-int addPositionalLight(lua_State *luaState);
+int addLightBulb(lua_State *luaState);
+//int addPositionalLight(lua_State *luaState);
 int addSphere(lua_State *luaState);
 int addSpotLight(lua_State *luaState);
 int setBackgroundColor(lua_State *luaState);
@@ -48,15 +49,6 @@ private:
 class ScriptEngine {
 public:
   ScriptEngine(SceneContainer *container);
-
-public:
-  void setBackgroundColor(float r, float g, float b, float a);
-  void setGravity(float x, float y, float z);
-  void setCamera(float x, float y, float z, float angleX, float angleY);
-  void addPlane(float side);
-  void addMesh();
-  void addBox();
-  void addSphere();
 
 public:
   SceneContainer *container;

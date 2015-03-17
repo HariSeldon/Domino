@@ -10,6 +10,9 @@
 #include <vector>
 
 class Light;
+class LightBulb;
+class PositionalLight;
+class DirectionalLight;
 class Mirror;
 class Object;
 
@@ -22,17 +25,18 @@ private:
   glm::vec4 ambientColor;
   std::vector<Object*> objects;
   std::vector<Light*> lights;
+  std::vector<LightBulb*> bulbs;
   Mirror* mirror;
   Engine engine;
   static const float DEFAULT_GRAVITY_X;
-  static const float DEFAULT_GRAVITY_Y;
-  static const float DEFAULT_GRAVITY_Z;
   static constexpr float STEPS_PER_SECOND = 70.0f;
   static constexpr int MAX_STEPS = 8;
 
 public:
   void addObject(Object *object);
-  void addLight(Light *light);
+  void addLightBulb(LightBulb *lightBulb);
+//  void addPositionalLight(PositionalLight *light);
+  void addDirectionalLight(DirectionalLight *light);
   void stepSimulation();
 
   const btVector3& getGravity() const;

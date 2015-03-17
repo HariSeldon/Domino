@@ -28,9 +28,11 @@ int queryAttributeLocation(GLuint programID, const char *attributeName);
 void checkErrors(GLuint programID);
 
 // -----------------------------------------------------------------------------
-ShaderProgram::ShaderProgram(const std::string &vertexShaderFileName,
+ShaderProgram::ShaderProgram(const std::string &name,
+                             const std::string &vertexShaderFileName,
                              const std::string &fragmentShaderFileName)
-    : vertexShader(new VertexShader(SHADER_PATH + vertexShaderFileName)),
+    : name(name),
+      vertexShader(new VertexShader(SHADER_PATH + vertexShaderFileName)),
       fragmentShader(new FragmentShader(SHADER_PATH + fragmentShaderFileName)) {
 
   programID = glCreateProgram();

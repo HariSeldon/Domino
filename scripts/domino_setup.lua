@@ -75,49 +75,49 @@ function setBackgroundColor(color)
   engine:_setBackgroundColor(color.r, color.g, color.b, color.a);
 end
 
---------------------------------------------------------------------------------
-function addPositionalLight(light)
-  if light.position == nil then
-    light.position = CENTER;
-  end
-  if light.ambientColor == nil then
-    light.ambientColor = WHITE; 
-  end
-  if light.diffuseColor == nil then
-    light.diffuseColor = WHITE; 
-  end 
-  if light.specularColor == nil then
-    light.specularColor = WHITE; 
-  end 
-  if light.constantAttenuation == nil then
-    light.constantAttenuation = 1;
-  end
-  if light.linearAttenuation == nil then
-    light.linearAttenuation = 0;
-  end
-  if light.quadraticAttenuation == nil then
-    light.quadraticAttenuation = 0;
-  end
-
-  engine:_addPositionalLight(light.position.x,
-                             light.position.y,
-                             light.position.z,
-                             light.ambientColor.r,
-                             light.ambientColor.g,
-                             light.ambientColor.b,
-                             light.ambientColor.a,
-                             light.diffuseColor.r,
-                             light.diffuseColor.g,
-                             light.diffuseColor.b,
-                             light.diffuseColor.a,
-                             light.specularColor.r,
-                             light.specularColor.g,
-                             light.specularColor.b,
-                             light.specularColor.a,
-                             light.constantAttenuation,
-                             light.linearAttenuation,
-                             light.quadraticAttenuation); 
-end
+----------------------------------------------------------------------------------
+--function addPositionalLight(light)
+--  if light.position == nil then
+--    light.position = CENTER;
+--  end
+--  if light.ambientColor == nil then
+--    light.ambientColor = WHITE; 
+--  end
+--  if light.diffuseColor == nil then
+--    light.diffuseColor = WHITE; 
+--  end 
+--  if light.specularColor == nil then
+--    light.specularColor = WHITE; 
+--  end 
+--  if light.constantAttenuation == nil then
+--    light.constantAttenuation = 1;
+--  end
+--  if light.linearAttenuation == nil then
+--    light.linearAttenuation = 0;
+--  end
+--  if light.quadraticAttenuation == nil then
+--    light.quadraticAttenuation = 0;
+--  end
+--
+--  engine:_addPositionalLight(light.position.x,
+--                             light.position.y,
+--                             light.position.z,
+--                             light.ambientColor.r,
+--                             light.ambientColor.g,
+--                             light.ambientColor.b,
+--                             light.ambientColor.a,
+--                             light.diffuseColor.r,
+--                             light.diffuseColor.g,
+--                             light.diffuseColor.b,
+--                             light.diffuseColor.a,
+--                             light.specularColor.r,
+--                             light.specularColor.g,
+--                             light.specularColor.b,
+--                             light.specularColor.a,
+--                             light.constantAttenuation,
+--                             light.linearAttenuation,
+--                             light.quadraticAttenuation); 
+--end
 
 --------------------------------------------------------------------------------
 function addDirectionalLight(light)
@@ -239,7 +239,9 @@ function addPlane(plane)
   if plane.specularColor == nil then
     plane.specularColor = BLACK; 
   end 
-  plane.shader = "phong";
+  if plane.shader == nil then
+    plane.shader = "phong";
+  end
 
   engine:_addPlane(plane.side,
                    plane.mass,
@@ -271,9 +273,6 @@ function addBox(box)
   if box.sides == nil then
     error("Box sides missing");
   end
-  if box.textureFile == nil then
-    error("Box texture missing");
-  end
 
   -- Optional parameters.
   if box.mass == nil then
@@ -294,6 +293,12 @@ function addBox(box)
   if box.specularColor == nil then
     box.specularColor = BLACK; 
   end 
+  if box.shader == nil then
+    box.shader = "phong";
+  end
+  if box.textureFile == nil then
+    box.textureFile = "";
+  end
 
   engine:_addBox(box.sides.x,
                  box.sides.y,
@@ -317,7 +322,77 @@ function addBox(box)
                  box.specularColor.g,
                  box.specularColor.b,
                  box.specularColor.a,
-                 box.textureFile);
+                 box.textureFile,
+                 box.shader);
+end
+
+--------------------------------------------------------------------------------
+function addLightBulb(bulb)
+  -- Mandatory parameters.
+  if bulb.side == nil then
+    error("Lightbulb side missing");
+  end
+
+  -- Optional parameters.
+  if bulb.mass == nil then
+    bulb.mass = 0;
+  end
+  if bulb.position == nil then
+    bulb.position = CENTER;
+  end
+  if bulb.orientation == nil then
+    bulb.orientation = CENTER;
+  end
+  if bulb.ambientColor == nil then
+    bulb.ambientColor = BLACK;
+  end
+  if bulb.diffuseColor == nil then
+    bulb.diffuseColor = WHITE; 
+  end 
+  if bulb.specularColor == nil then
+    bulb.specularColor = WHITE; 
+  end 
+  if bulb.constantAttenuation == nil then
+    bulb.constantAttenuation = 1;
+  end
+  if bulb.linearAttenuation == nil then
+    bulb.linearAttenuation = 0;
+  end
+  if bulb.quadraticAttenuation == nil then
+    bulb.quadraticAttenuation = 0;
+  end
+  if bulb.textureFile == nil then
+    bulb.textureFile = "";
+  end
+  if bulb.shader == nil then
+    bulb.shader = "phong";
+  end
+
+  engine:_addLightBulb(bulb.side,
+                       bulb.mass,
+                       bulb.position.x,
+                       bulb.position.y,
+                       bulb.position.z,
+                       bulb.orientation.x,
+                       bulb.orientation.y,
+                       bulb.orientation.z,
+                       bulb.ambientColor.r,
+                       bulb.ambientColor.g,
+                       bulb.ambientColor.b,
+                       bulb.ambientColor.a,
+                       bulb.diffuseColor.r,
+                       bulb.diffuseColor.g,
+                       bulb.diffuseColor.b,
+                       bulb.diffuseColor.a,
+                       bulb.specularColor.r,
+                       bulb.specularColor.g,
+                       bulb.specularColor.b,
+                       bulb.specularColor.a,
+                       bulb.constantAttenuation,
+                       bulb.linearAttenuation,
+                       bulb.quadraticAttenuation,
+                       bulb.textureFile,
+                       bulb.shader);
 end
 
 --------------------------------------------------------------------------------
@@ -346,7 +421,9 @@ function addMesh(mesh)
   if mesh.specularColor == nil then
     mesh.specularColor = BLACK; 
   end 
-  mesh.shader = "phong";
+  if mesh.shader == nil then
+    mesh.shader = "phong";
+  end
 
   engine:_addMesh(mesh.objFile,
                   mesh.mass,

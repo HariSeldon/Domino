@@ -38,17 +38,17 @@ void setOrientationForShadow(const Object *object, ShaderProgram &shader,
 
 //-----------------------------------------------------------------------------
 void Drawer::initGPUObjects(
-    const std::map<const Object *, const std::string> &shaderFileMap,
+    const std::map<const std::string, std::vector<const Object *>> &shaderFileMap,
     const World &world) {
 
   for (auto x : shaderFileMap) {
-    const Object *object = x.first;
-    const std::string shaderName = x.second;
-    ShaderProgram *program =
-        new ShaderProgram(shaderName + ".vert", shaderName + ".frag");
+    const std::string shaderName = x.first;
+    auto objectVector = x.second;
 
-    auto &objectVector = shaderMap[program];
-    objectVector.push_back(object);
+    ShaderProgram *program =
+        new ShaderProgram(shaderName, shaderName + ".vert", shaderName + ".frag");
+
+    shaderMap[program] = objectVector;
   }
 
   for (auto x : shaderMap) {
@@ -234,9 +234,9 @@ void Drawer::drawObjects(const World *world, const glm::mat4 &originalModelView,
                          const glm::mat4 &originalShadowModelView,
                          const glm::mat4 &shadowProjection,
                          int lightMask) const {
-  for (auto x : shaderMap) {
+  for (auto &x : shaderMap) {
     ShaderProgram *shader = x.first;
-    const auto objectVector = x.second;
+    const auto &objectVector = x.second;
     shader->useProgram();
 
     setLights(world, shader, originalModelView, lightMask);
@@ -264,9 +264,10 @@ void Drawer::drawObject(const Object *object, ShaderProgram &shader,
                         const glm::mat4 &originalShadowModelView,
                         const glm::mat4 &shadowProjection) const {
   setColors(object, shader);
-  glBindTexture(GL_TEXTURE_2D, textureMap.at(object));
-
-  shader.setUniform("texture", 0);
+  if(shader.getName() == "phong") {
+    glBindTexture(GL_TEXTURE_2D, textureMap.at(object));
+    shader.setUniform("texture", 0);
+  }
   setOrientation(object, shader, originalModelView, projection,
                  originalShadowModelView, shadowProjection);
 

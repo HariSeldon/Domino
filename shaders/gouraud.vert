@@ -1,9 +1,13 @@
-//#version 330
+#version 330
 
-varying out vec4 color;
-uniform mat4 projectionMatrix;
+uniform mat4 mvpMatrix;
 uniform mat4 modelViewMatrix;
 uniform mat3 normalMatrix;
+
+in vec3 vertexPosition;
+in vec3 vertexNormal;
+
+out vec4 color;
 
 struct MaterialInfo {
   vec4 emission;
@@ -63,12 +67,12 @@ vec4 shade(vec3 position, vec3 normal, vec3 lightDirection,
 
 void main() {
   // Position.
-  vec4 position = modelViewMatrix * gl_Vertex;
+  vec4 position = modelViewMatrix * vec4(vertexPosition, 1.);
   vec3 worldPosition = position.xyz;
-  gl_Position = projectionMatrix * position;  
+  gl_Position = mvpMatrix * vec4(vertexPosition, 1.);
 
   // Normal.
-  vec3 normal = normalize(normalMatrix * gl_Normal);
+  vec3 normal = normalize(normalMatrix * vertexNormal);
 
   // Light position: already in camera space.
   vec3 lightPosition = light.position.xyz;

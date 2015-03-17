@@ -4,14 +4,13 @@
 
 #include "Box.h"
 #include "Light.h"
+#include "LightBulb.h"
 #include "MathUtils.h"
 #include "Mesh.h"
 #include "Mirror.h"
 #include "Object.h"
 #include "Plane.h"
 #include "SysDefines.h"
-
-#include <iostream>
 
 #include <LinearMath/btVector3.h>
 
@@ -41,7 +40,15 @@ void World::addObject(Object *object) {
 }
 
 // -----------------------------------------------------------------------------
-void World::addLight(Light *light) {
+void World::addLightBulb(LightBulb *lightBulb) {
+  objects.push_back(lightBulb);
+  engine.addRigidBody(lightBulb->getRigidBody());
+  bulbs.push_back(lightBulb);
+  lights.push_back(lightBulb->getLight());
+}
+
+// -----------------------------------------------------------------------------
+void World::addDirectionalLight(DirectionalLight *light) {
   lights.push_back(light);
 }
 
@@ -58,6 +65,14 @@ void World::stepSimulation() {
     object->getRigidBody()->getMotionState()->getWorldTransform(transform);
     object->setTransform(transform);
   });
+
+  // Traverse over the light bulbs.
+  std::for_each(begin(bulbs), end(bulbs), [](LightBulb *bulb) {
+    btTransform transform;
+    bulb->getRigidBody()->getMotionState()->getWorldTransform(transform);
+    btVector3 position = transform.getOrigin();
+    bulb->getLight()->setPosition({position.x(), position.y(), position.z()});
+  });
 }
 
 // -----------------------------------------------------------------------------
@@ -69,7 +84,10 @@ const glm::vec4 &World::getAmbientColor() const { return ambientColor; }
 void World::setAmbientColor(const glm::vec4 &color) { ambientColor = color; }
 
 // -----------------------------------------------------------------------------
-int World::getLightsNumber() const { return lights.size(); }
+int World::getLightsNumber() const {
+  return lights.size();
+//  return positionalLights.size() + directionalLights.size();
+}
 
 // -----------------------------------------------------------------------------
 Mirror *World::getMirror() { return mirror; }
