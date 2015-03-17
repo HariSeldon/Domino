@@ -86,7 +86,6 @@ void World::setAmbientColor(const glm::vec4 &color) { ambientColor = color; }
 // -----------------------------------------------------------------------------
 int World::getLightsNumber() const {
   return lights.size();
-//  return positionalLights.size() + directionalLights.size();
 }
 
 // -----------------------------------------------------------------------------

@@ -21,9 +21,6 @@ public:
 
 public:
   // World setup.
-//  inline void addPositionalLight(PositionalLight *light) {
-//    world->addPositionalLight(light);
-//  }
   inline void addDirectionalLight(DirectionalLight *light) {
     world->addDirectionalLight(light);
   }
@@ -47,7 +44,6 @@ public:
   }
 
   inline void addShader(const Object *object, const std::string shaderFile) {
-//    shaderFileMap.insert(std::make_pair(object, shaderFile));
     shaderFileMap[shaderFile].push_back(object);
   }
 
