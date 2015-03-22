@@ -9,21 +9,19 @@
 
 class LightBuilder;
 class PositionalLight;
+class ObjParser;
 
 class LightBulb : public Object {
 private:
   LightBulb(const btTransform &transform, const btScalar mass,
-            btVector3 &inertia, const btScalar side);
+            btVector3 &inertia);
 
 public:
-  btScalar getSide() const;
-  void setSide(btScalar side);
-
   PositionalLight* getLight() const;
 
 private:
-  void setupFaces(btScalar side);
   void setLight(PositionalLight *light);
+  void fillMesh(const ObjParser &objParser);
  
 private:
   PositionalLight *light;
@@ -36,11 +34,9 @@ class LightBulbBuilder : public ObjectBuilder<LightBulbBuilder> {
 public:
   LightBulbBuilder();
 
-  LightBulbBuilder &setSide(btScalar side);
   LightBulbBuilder &setLight(PositionalLight *light);
   LightBulb *create();
 
 private:
-  btScalar side;
   PositionalLight *light;
 };

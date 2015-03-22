@@ -42,6 +42,13 @@ public:
                    const glm::mat4 &originalShadowModelView,
                    const glm::mat4 &shadowProjection,
                    int lightMask) const;
+  void drawLightBulbs(ShaderProgram *shader,
+                      const std::vector<const Object *> &objects,
+                      const glm::mat4 &originalModelView,
+                      const glm::mat4 &projection,
+                      const glm::mat4 &originalShadowModelView,
+                      const glm::mat4 &shadowProjection) const;
+
   void drawObject(const Object *object, ShaderProgram &shader,
                   const glm::mat4 &originalModelView,
                   const glm::mat4 &projection,
@@ -60,7 +67,7 @@ private:
   GLuint setupTextureVBO(const Object *object, const ShaderProgram &shader);
 
 private:
-  // Mapping between world objects and shaders.
+  // Mapping between shaders and world objects.
   std::map<ShaderProgram *, std::vector<const Object*>> shaderMap;
   // Mapping between world objects and VAOs.
   std::unordered_map<const Object *, GLuint> vaoWorldMap;
@@ -74,4 +81,16 @@ private:
   // Ids of VBOs associated with the VAOs. These are kept so I know what to delete
   // to free the memory.
   std::vector<GLuint> vboIds;
+
+  // Temporary stuff.
+  GLuint sceneFBOId;
+  GLuint sceneTexture;
+
+  GLuint lightBulbFBOId;
+  GLuint lightBulbTexture;
+
+  GLuint dboId;
+
+  ShaderProgram *canvasShader;
+  GLuint canvasId;
 };

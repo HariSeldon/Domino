@@ -98,18 +98,19 @@ void ObjParser::parseTexture(const std::vector<std::string> &words) {
 }
 
 void ObjParser::parseFace(const std::vector<std::string> &words) {
+  // Check how many components the words have.
+  boost::char_separator<char> slashSeparator("/", "",
+                                             boost::keep_empty_tokens);
   for (auto word : words) {
-    boost::char_separator<char> slashSeparator("/", "",
-                                               boost::keep_empty_tokens);
     boost::tokenizer<boost::char_separator<char> > tokens(word, slashSeparator);
     std::vector<std::string> values;
     values.reserve(3);
     std::copy(tokens.begin(), tokens.end(),
-              std::back_inserter<std::vector<std::string> >(values));
+              std::back_inserter<std::vector<std::string>>(values));
 
     int vertexIndex = stoi(values[0]);
     int normalIndex = stoi(values[2]);
-    int textureIndex = 0;
+    int textureIndex = -1;
     if (!values[1].empty())
       textureIndex = stoi(values[1]);
 

@@ -35,6 +35,9 @@ void setOrientation(const Object *object, ShaderProgram &shader,
 void setOrientationForShadow(const Object *object, ShaderProgram &shader,
                              const glm::mat4 &originalModelView,
                              const glm::mat4 &projection);
+// Returns the fboId and the textureId.
+std::pair<GLuint, GLuint> generateFBOColor();
+GLuint createDBO(GLuint fboId);
 
 //-----------------------------------------------------------------------------
 void Drawer::initGPUObjects(
@@ -75,6 +78,39 @@ void Drawer::initGPUObjects(
                     {vertexVBOId, indexVBOId, normalVBOId, textureVBOId});
     }
   }
+
+  // Setup canvas.
+  canvasShader =
+      new ShaderProgram("canvas", "canvas.vert", "canvas.frag");
+  glGenVertexArrays(1, &canvasId);
+  glBindVertexArray(canvasId);
+
+  // Setup vertices.
+  std::vector<glm::vec2> canvasPoints = {{-1, 1}, {1, 1}, {1, -1}, {-1, -1}};
+  GLuint canvasVertexVBOId = 0;
+  glGenBuffers(1, &canvasVertexVBOId);
+  glBindBuffer(GL_ARRAY_BUFFER, canvasVertexVBOId);
+  glBufferData(GL_ARRAY_BUFFER, canvasPoints.size() * sizeof(glm::vec2),
+               canvasPoints.data(), GL_STATIC_DRAW);
+  canvasShader->setAttribute("vertexPosition", 2, GL_FLOAT);
+  
+  // Setup indices.
+  std::vector<unsigned int> canvasIndices = {0, 1, 2, 2, 3, 0};
+  GLuint canvasIndexVBOId = 0;
+  glGenBuffers(1, &canvasIndexVBOId);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, canvasIndexVBOId);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, canvasIndices.size() * sizeof(unsigned int),
+               canvasIndices.data(), GL_STATIC_DRAW);
+
+  glBindVertexArray(0);
+  vboIds.insert(vboIds.end(), {canvasVertexVBOId, canvasIndexVBOId});
+  
+
+  // Extract the lightBulb shader program.
+  // See if there are any lightBulbs, if not, specialize the draw function so to have a single, pass.
+  // If not fallback to the case in which use 2 passes with opencl.
+  // I think this can be implemented with the Strategy Pattern.
+
 }
 
 //-----------------------------------------------------------------------------
@@ -129,6 +165,19 @@ void Drawer::initTextures(const World &world) {
       SDL_FreeSurface(texSurface);
     }
   });
+
+  auto lightBulbData = generateFBOColor(); 
+  lightBulbFBOId = std::get<0>(lightBulbData);
+  lightBulbTexture = std::get<1>(lightBulbData);
+
+  auto sceneData = generateFBOColor(); 
+  sceneFBOId = std::get<0>(sceneData);
+  sceneTexture = std::get<1>(sceneData);
+  
+  assert(lightBulbFBOId != sceneFBOId);
+  assert(lightBulbTexture != sceneTexture);
+
+  dboId = createDBO(sceneFBOId);
 }
 
 //-----------------------------------------------------------------------------
@@ -226,6 +275,9 @@ Drawer::~Drawer() {
 
   if (vboIds.size() > 0)
     glDeleteBuffers(vboIds.size(), vboIds.data());
+
+  // FIXME Remember to delete all the frame buffers.
+
 }
 
 //-----------------------------------------------------------------------------
@@ -234,8 +286,35 @@ void Drawer::drawObjects(const World *world, const glm::mat4 &originalModelView,
                          const glm::mat4 &originalShadowModelView,
                          const glm::mat4 &shadowProjection,
                          int lightMask) const {
+
+//  auto lightBulbIter = std::find_if(
+//      shaderMap.begin(), shaderMap.end(),
+//      [](const std::pair<ShaderProgram *, std::vector<const Object *>> &x) {
+//        return x.first->getName() == "lightBulb";
+//      });
+//
+//  return;
+//
+//
+//
+
+  glBindFramebuffer(GL_FRAMEBUFFER, sceneFBOId);
+  checkOpenGLError("Drawer: drawObjects-glBindFrameBuffer");
+  glViewport(0, 0, 1280, 800);
+  
+  glBindTexture(GL_TEXTURE_2D, sceneTexture);
+  checkOpenGLError("Drawer: drawObjects-glBindTexture");
+
+  glClearColor(0.1, 0.2, 0.7, 1);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  // Iterate all the other shaders.
   for (auto &x : shaderMap) {
     ShaderProgram *shader = x.first;
+
+    if(shader->getName() == "lightBulb")
+      continue;
+
     const auto &objectVector = x.second;
     shader->useProgram();
 
@@ -244,7 +323,73 @@ void Drawer::drawObjects(const World *world, const glm::mat4 &originalModelView,
       drawObject(object, *shader, originalModelView, projection,
                  originalShadowModelView, shadowProjection);
     }
-  };
+  }
+
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+  // Get the LightBulb shader. 
+  for (auto &iter : shaderMap) {
+    ShaderProgram *shader = iter.first;
+    if(shader->getName() == "lightBulb") {
+      shader->useProgram();
+      drawLightBulbs(shader, iter.second, originalModelView, projection,
+                     originalShadowModelView, shadowProjection);
+      break;
+    }
+  }
+
+  // Merge the frame buffer with the lightBulb texture.
+
+  // Second pass.
+  canvasShader->useProgram();
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, lightBulbTexture);
+  canvasShader->setUniform("firstTexture", 0);
+
+  glActiveTexture(GL_TEXTURE1);
+  glBindTexture(GL_TEXTURE_2D, sceneTexture);
+  canvasShader->setUniform("secondTexture", 1);
+
+  glBindVertexArray(canvasId);
+  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+  glBindVertexArray(0);
+  glActiveTexture(GL_TEXTURE1);
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+//-----------------------------------------------------------------------------
+void Drawer::drawLightBulbs(ShaderProgram *shader,
+                            const std::vector<const Object *> &objects,
+                            const glm::mat4 &originalModelView,
+                            const glm::mat4 &projection,
+                            const glm::mat4 &originalShadowModelView,
+                            const glm::mat4 &shadowProjection) const {
+  glBindFramebuffer(GL_FRAMEBUFFER, lightBulbFBOId);
+  checkOpenGLError("Drawer: drawLightBulbs-glBindFrameBuffer");
+
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                            GL_RENDERBUFFER, dboId);
+  checkOpenGLError("Drawer: drawLightBulbs-glFramebufferRenderbuffer");
+
+  glViewport(0, 0, 1280, 800);
+  
+  glBindTexture(GL_TEXTURE_2D, lightBulbTexture);
+  checkOpenGLError("Drawer: drawLightBulbs-glBindTexture");
+
+  glClearColor(0, 0, 0, 1);
+  glClear(GL_COLOR_BUFFER_BIT);
+
+  // Draw!
+  for (const auto &object : objects) {
+    drawObject(object, *shader, originalModelView, projection,
+               originalShadowModelView, shadowProjection);
+  }
+
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 //-----------------------------------------------------------------------------
@@ -332,4 +477,69 @@ void setOrientationForShadow(const Object *object, ShaderProgram &shader,
   glm::mat4 modelView = glm::make_mat4x4(transform);
   glm::mat4 mvp = projection * originalModelView * modelView;
   shader.setUniform("mvpMatrix", mvp);
+}
+
+//------------------------------------------------------------------------------
+std::pair<GLuint, GLuint> generateFBOColor() {
+  GLuint fboId = 0;
+  GLuint textureId = 0;
+
+  // Init lightBulb Texture.
+  glGenFramebuffers(1, &fboId);
+  checkOpenGLError("generateFBOColor: glGenRenderbuffers");
+
+  glGenTextures(1, &textureId);
+  checkOpenGLError("generateFBOColor: glGenTextures");
+
+  glBindTexture(GL_TEXTURE_2D, textureId);
+  checkOpenGLError("generateFBOColor: glBindTexture");
+
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1280, 800, 0,
+//               GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+               GL_RGBA, GL_FLOAT, nullptr);
+  checkOpenGLError("generateFBOColor: glTexImage2D");
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  checkOpenGLError("generateFBOColor: glTexParameteri");
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  checkOpenGLError("generateFBOColor: glTexParameteri");
+
+  glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+  checkOpenGLError("generateFBOColor: attachTexture-glBindBuffer");
+  glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureId, 0);
+  checkOpenGLError("generateFBOColor: attachTexture-glFramebufferTexture");
+
+  GLenum drawBuffers = { GL_COLOR_ATTACHMENT0 };
+  glDrawBuffers(1, &drawBuffers);
+  checkOpenGLError("generateFBOColor: glDrawBuffers");
+
+  assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE &&
+         "Error setting frame buffer");
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);  
+
+  return std::make_pair(fboId, textureId);
+}
+
+//------------------------------------------------------------------------------
+GLuint createDBO(GLuint fboId) {
+  GLuint dboId = 0;
+  glGenRenderbuffers(1, &dboId);
+  checkOpenGLError("glGenRenderbuffers");
+
+  glBindRenderbuffer(GL_RENDERBUFFER, dboId);
+  checkOpenGLError("glBindRenderbuffer");
+
+  // Define the size of the render buffer.
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1280, 800);
+  checkOpenGLError("glRenderbufferStorage");
+
+  glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+  checkOpenGLError("glBindFramebuffer");
+  // Attach the render buffer to the currently bound framebuffer.
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                            GL_RENDERBUFFER, dboId);
+  checkOpenGLError("glFramebufferRenderbuffer");
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glBindRenderbuffer(GL_RENDERBUFFER, 0);
+  return dboId;
 }

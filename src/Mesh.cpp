@@ -59,12 +59,16 @@ void Mesh::fillMesh(const ObjParser &parser) {
       indices.push_back(iterator->second);
     } else {
       glm::vec3 vertex = parserPoints[std::get<0>(faceIndices) - 1];
-      glm::vec2 textureCoo = parserTextureCoos[std::get<1>(faceIndices) - 1];
-      glm::vec3 normal = parserNormals[std::get<2>(faceIndices) - 1];
-
       points.push_back(vertex);
+
+      if(std::get<1>(faceIndices) != -1) {
+        glm::vec2 textureCoo = parserTextureCoos[std::get<1>(faceIndices) - 1];
+        textureCoos.push_back(textureCoo);
+      }
+
+      glm::vec3 normal = parserNormals[std::get<2>(faceIndices) - 1];
       normals.push_back(normal);
-      textureCoos.push_back(textureCoo);
+
       indices.push_back(counter);
       indexMap[faceIndices] = counter;
       counter++;

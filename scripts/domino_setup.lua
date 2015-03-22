@@ -365,7 +365,7 @@ function addLightBulb(bulb)
     bulb.textureFile = "";
   end
   if bulb.shader == nil then
-    bulb.shader = "phong";
+    bulb.shader = "lightBulb";
   end
 
   engine:_addLightBulb(bulb.side,

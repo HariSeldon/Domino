@@ -11,7 +11,6 @@ class Mesh : public Object {
 private:
   Mesh(const btTransform &transform, const btScalar mass, btVector3 &inertia,
        const std::string &meshFile);
-  void parseX3DFile(const std::string &meshFile);
   void parseObjFile(const std::string &meshFile);
   void fillMesh(const ObjParser &objParser);
 

@@ -29,7 +29,7 @@ SceneManager::SceneManager(const glm::ivec2 &screenSize,
   lightMask = (2 << (world->getLightsNumber() - 1)) - 1;
   setupProjection(screenSize);
   initGPU(container);
-  glm::vec4 backgroundColor = container->getBackgroundColor();
+  backgroundColor = container->getBackgroundColor();
   glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z,
                backgroundColor.w);
   checkOpenGLError("GLInitializer: glClearColor");
@@ -45,6 +45,7 @@ void SceneManager::setupProjection(const glm::ivec2 &screenSize) {
 
 // -----------------------------------------------------------------------------
 void SceneManager::initGPU(SceneContainer *container) {
+  // The drawing function depends on the objects in the scene.
   drawer.initGPUObjects(container->getShaderMap(), *world);
   drawer.initGPUShadowObjects(shadowManager.getShader(), *world);
   if (Mirror *mirror = world->getMirror()) {
@@ -78,6 +79,10 @@ void SceneManager::drawWorld(const glm::mat4 &modelView) {
   glm::mat4 shadowProjection =
       glm::ortho<float>(-side, side, -5, side / 1.6, 0, 2.5 * side);
 
+  // FIXME this is redundant, it is necessary if we use two passes for the
+  // rendering.
+  glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z,
+               backgroundColor.w);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   drawer.drawObjects(world, modelView, projection, shadowView, shadowProjection,

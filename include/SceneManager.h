@@ -67,6 +67,7 @@ private:
 
   Camera* camera;
 
+  glm::vec4 backgroundColor;
   float currentYRotation;
   float currentXRotation;
   float currentOffset;

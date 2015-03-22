@@ -199,11 +199,8 @@ int addLightBulb(lua_State *luaState) {
       lightBulbBuilder.setTransform(
                            btTransform(rotation, btVector3(positionX, positionY,
                                                            positionZ)))
-          .setAmbientColor({0, 0, 0, 1})
-          .setDiffuseColor({0, 0, 0, 1})
-          .setSpecularColor({0, 0, 0, 1})
+          .setMass(mass)
           .setLight(light)
-          .setSide(1.0f)
           .setTextureFile(textureFile)
           .create();
 
