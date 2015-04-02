@@ -18,8 +18,8 @@ Camera::Camera(const glm::vec4 position, const glm::vec2 orientation,
     : position(position), orientation(orientation), viewAngle(viewAngle),
       zNear(zNear), zFar(zFar), currentTransform(buildTransform()) {}
 
-// ----------------------------------------------------------------------------- 
-void Camera::assign(const glm::vec4 position,  const glm::vec2 orientation,
+// -----------------------------------------------------------------------------
+void Camera::assign(const glm::vec4 position, const glm::vec2 orientation,
                     float viewAngle, float zNear, float zFar) {
   this->position = position;
   this->orientation = orientation;
@@ -28,12 +28,12 @@ void Camera::assign(const glm::vec4 position,  const glm::vec2 orientation,
   this->zFar = zFar;
 }
 
-// ----------------------------------------------------------------------------- 
+// -----------------------------------------------------------------------------
 void Camera::moveForward() { move(Camera::STEP); }
 
 void Camera::moveBackward() { move(-Camera::STEP); }
 
-// ----------------------------------------------------------------------------- 
+// -----------------------------------------------------------------------------
 void Camera::move(float step) {
   currentTransform = buildTransform();
   // Translate in the new coordinate system.
@@ -41,28 +41,24 @@ void Camera::move(float step) {
   position = currentTransform[3];
 }
 
-// ----------------------------------------------------------------------------- 
+// -----------------------------------------------------------------------------
 // Change the current orientation angles.
 void Camera::rotate(const glm::vec2 offset) {
-  orientation += glm::vec2(Camera::ROTATION_FACTOR, Camera::ROTATION_FACTOR) * offset;
+  orientation +=
+      glm::vec2(Camera::ROTATION_FACTOR, Camera::ROTATION_FACTOR) * offset;
 }
 
-// ----------------------------------------------------------------------------- 
-void Camera::rotateLeft() {
-  orientation.y += Camera::FIXED_ROTATION_ANGLE;
-}
+// -----------------------------------------------------------------------------
+void Camera::rotateLeft() { orientation.y += Camera::FIXED_ROTATION_ANGLE; }
 
-// ----------------------------------------------------------------------------- 
-void Camera::rotateRight() {
-  orientation.y -= Camera::FIXED_ROTATION_ANGLE;
-}
+// -----------------------------------------------------------------------------
+void Camera::rotateRight() { orientation.y -= Camera::FIXED_ROTATION_ANGLE; }
 
-// ----------------------------------------------------------------------------- 
+// -----------------------------------------------------------------------------
 glm::mat4 Camera::applyView() {
   // Compute center.
-  glm::mat4 centerMatrix = currentTransform;
-  centerMatrix = glm::translate(centerMatrix, glm::vec3(0.f, 0.f, 1.f));
-
+  glm::mat4 centerMatrix =
+      glm::translate(currentTransform, glm::vec3(0.f, 0.f, 1.f));
   // The fourth column of the center matrix contains the position of the center.
   glm::vec4 center = centerMatrix[3];
   // The second column of the center matrix contains the up vector.
@@ -70,13 +66,13 @@ glm::mat4 Camera::applyView() {
   return glm::lookAt(glm::vec3(position), glm::vec3(center), glm::vec3(up));
 }
 
-// ----------------------------------------------------------------------------- 
+// -----------------------------------------------------------------------------
 void Camera::dump() {
   std::cout << glm::to_string(position) << " " << glm::to_string(orientation)
             << std::endl;
 }
 
-// ----------------------------------------------------------------------------- 
+// -----------------------------------------------------------------------------
 glm::mat4 Camera::buildTransform() {
   glm::vec2 sine = glm::sin(orientation);
   glm::vec2 cosine = glm::cos(orientation);
@@ -86,6 +82,6 @@ glm::mat4 Camera::buildTransform() {
   float cx = cosine.x;
   float sx = sine.x;
 
-  return { cy,      0,   -sy,     0, sx * sy,    cx,         sx * cy,    0,
-           cx * sy, -sx, cx * cy, 0, position.x, position.y, position.z, 1 };
+  return {cy,      0,   -sy,     0, sx * sy,    cx,         sx * cy,    0,
+          cx * sy, -sx, cx * cy, 0, position.x, position.y, position.z, 1};
 }
