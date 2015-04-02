@@ -38,9 +38,7 @@ void Camera::move(float step) {
   currentTransform = buildTransform();
   // Translate in the new coordinate system.
   currentTransform = glm::translate(currentTransform, glm::vec3(0, 0, step));
-  // Get the new center.
-  // The center is the result of applying the transformation to the origin.
-  position = currentTransform * glm::vec4(0.f, 0.f, 0.f, 1.f);
+  position = currentTransform[3];
 }
 
 // ----------------------------------------------------------------------------- 
@@ -64,14 +62,12 @@ glm::mat4 Camera::applyView() {
   // Compute center.
   glm::mat4 centerMatrix = currentTransform;
   centerMatrix = glm::translate(centerMatrix, glm::vec3(0.f, 0.f, 1.f));
-  glm::vec4 center = centerMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
 
+  // The fourth column of the center matrix contains the position of the center.
+  glm::vec4 center = centerMatrix[3];
   // The second column of the center matrix contains the up vector.
   glm::vec4 up = centerMatrix[1];
-  glm::mat4 lookAtMatrix =
-      glm::lookAt(glm::vec3(position), glm::vec3(center), glm::vec3(up));
-
-  return lookAtMatrix;
+  return glm::lookAt(glm::vec3(position), glm::vec3(center), glm::vec3(up));
 }
 
 // ----------------------------------------------------------------------------- 
