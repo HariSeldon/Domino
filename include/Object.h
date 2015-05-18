@@ -65,31 +65,45 @@ public:
 
   const float* getTextureCoos() const;
   
-  int getTrigsNumber() const;
-  int getIndicesNumber() const;
+  inline int getTrigsNumber() const {
+    return indices.size() / 3;
+  }
+  inline int getIndicesNumber() const {
+    return indices.size();
+  }
 
-  const glm::vec4 &getAmbientColor() const;
+  inline const glm::vec4 &getAmbientColor() const {
+    return ambientColor;
+  }
   void setAmbientColor(const glm::vec4 &ambientColor);
 
-  const glm::vec4 &getDiffuseColor() const;
+  inline const glm::vec4 &getDiffuseColor() const {
+    return diffuseColor;
+  }
   void setDiffuseColor(const glm::vec4 &color);
 
-  const glm::vec4 &getSpecularColor() const;
+  inline const glm::vec4 &getSpecularColor() const {
+    return specularColor;
+  }
   void setSpecularColor(const glm::vec4 &color);
 
-  float getShininess() const;
+  inline float getShininess() const {
+    return shininess;
+  }
   void setShininess(float shininess);
 
-  btScalar getMass() const;
+  inline btScalar getMass() const { return mass; }
   void setMass(btScalar mass);
 
-  const btVector3& getInertia() const;
+  inline const btVector3& getInertia() const { return inertia; }
   void setInertia(const btVector3& inertia);
 
   btCollisionShape* getCollisionShape() const;
   void setCollisionShape(btCollisionShape* collisionShape);
 
-  btRigidBody* getRigidBody() const;
+  inline btRigidBody* getRigidBody() const {
+    return rigidBody;
+  }
   void setRigidBody(btRigidBody* rigidBody);
 
   btDefaultMotionState* getMotionState() const;
@@ -100,9 +114,13 @@ public:
   void setConstructionInfo(btRigidBody::btRigidBodyConstructionInfo* 
                            constructionInfo);
 
-  void getOpenGLMatrix(btScalar* matrix) const;
+  inline void getOpenGLMatrix(btScalar* matrix) const {
+    transform.getOpenGLMatrix(matrix);
+  }
 
-  const std::string &getTextureFile() const;
+  const std::string &getTextureFile() const {
+    return textureFile;
+  }
 };
 
 //-----------------------------------------------------------------------------

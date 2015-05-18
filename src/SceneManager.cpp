@@ -46,12 +46,12 @@ void SceneManager::setupProjection(const glm::ivec2 &screenSize) {
 // -----------------------------------------------------------------------------
 void SceneManager::initGPU(SceneContainer *container) {
   // The drawing function depends on the objects in the scene.
-  drawer.initGPUObjects(container->getShaderMap(), *world);
-  drawer.initGPUShadowObjects(shadowManager.getShader(), *world);
-  if (Mirror *mirror = world->getMirror()) {
-    ShaderProgram &mirrorShader = mirror->getShaderProgram();
-    drawer.initMirror(mirrorShader, mirror);
-  }
+  drawer.initGPUObjects(container->getShaderMap());
+  //drawer.initGPUShadowObjects(shadowManager.getShader(), *world);
+  //if (Mirror *mirror = world->getMirror()) {
+  //  ShaderProgram &mirrorShader = mirror->getShaderProgram();
+  //  drawer.initMirror(mirrorShader, mirror);
+  //}
   drawer.initTextures(*world);
 }
 
@@ -85,19 +85,19 @@ void SceneManager::drawWorld(const glm::mat4 &modelView) {
                backgroundColor.w);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  drawer.drawObjects(world, modelView, projection, shadowView, shadowProjection,
-                     lightMask);
+  drawer.drawWorld(world, modelView, projection, shadowView, shadowProjection,
+                   lightMask);
 }
 
 // -----------------------------------------------------------------------------
-void SceneManager::drawMirror(const glm::mat4 &modelView) {
-  if (Mirror *mirror = world->getMirror()) {
-    ShaderProgram &mirrorShader = mirror->getShaderProgram();
-    mirrorShader.useProgram();
-    mirrorShader.setUniform("projectionMatrix", projection);
-    mirrorShader.setUniform("texture", 0);
-    // drawer.drawObject(mirror, mirrorShader, modelView, projection);
-  }
+void SceneManager::drawMirror(const glm::mat4 &) {
+//  if (Mirror *mirror = world->getMirror()) {
+//    ShaderProgram &mirrorShader = mirror->getShaderProgram();
+//    mirrorShader.useProgram();
+//    //mirrorShader.setUniform("projectionMatrix", projection);
+//    //mirrorShader.setUniform("texture", 0);
+////    drawer.drawObject(mirror, mirrorShader, modelView, projection);
+//  }
 }
 
 // -----------------------------------------------------------------------------

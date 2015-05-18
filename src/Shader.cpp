@@ -2,7 +2,7 @@
 
 #include <GL/glew.h>
 
-#include <stdexcept>
+#include <iostream>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -23,8 +23,7 @@ Shader::Shader(const std::string &filePath, GLenum type) : type(type) {
   checkErrors(shaderID, fileName);
 }
 
-Shader::~Shader() { 
-  glDeleteShader(shaderID); }
+Shader::~Shader() { glDeleteShader(shaderID); }
 
 GLenum Shader::getType() const { return type; }
 
@@ -42,9 +41,8 @@ FragmentShader::FragmentShader(const std::string &filePath)
 
 // -----------------------------------------------------------------------------
 void checkErrors(GLuint shaderId, const std::string &fileName) {
-  if (!glIsShader(shaderId)) {
-    throw std::runtime_error("Error creating shader from file: " + fileName);
-  }
+  if (!glIsShader(shaderId))
+    std::cout << "Error creating shader from file: " + fileName + "\n";
 
   int maxLength = 0;
   int errorLength = 0;
@@ -52,8 +50,6 @@ void checkErrors(GLuint shaderId, const std::string &fileName) {
   std::vector<char> errorMessage(maxLength);
   glGetShaderInfoLog(shaderId, maxLength, &errorLength, errorMessage.data());
 
-  if (errorLength > 0) {
-    throw std::runtime_error("Error compiling " + fileName + "\n" +
-                             errorMessage.data());
-  }
+  if (errorLength > 0)
+    std::cout << "Error compiling " + fileName + "\n" + errorMessage.data();
 }

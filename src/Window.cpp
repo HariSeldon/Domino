@@ -151,7 +151,6 @@ Uint32 eventHandler(Uint32 interval, void *windowPtr) {
 
   window->updateCurrentCameraPosition();
   // This makes the update of the scene independent of the frame-rate.
-  // It also causes a race condidtion. 
   scene->stepSimulation(); 
   return interval;
 }

@@ -33,7 +33,7 @@ static luaL_Reg ScriptEngineMetatable[] = {
     {"_setGravity", setGravity},
     {nullptr, nullptr}};
 
-ScriptEngine *NewScriptEngine(lua_State *L) {
+ScriptEngine *NewScriptEngine(lua_State *) {
   return new ScriptEngine(tmpContainer);
 }
 
@@ -150,33 +150,32 @@ int setCamera(lua_State *luaState) {
 // -----------------------------------------------------------------------------
 int addLightBulb(lua_State *luaState) {
   ScriptEngine *engine = luaW_check<ScriptEngine>(luaState, 1);
-  float side = static_cast<float>(luaL_checknumber(luaState, 2));
-  float mass = static_cast<float>(luaL_checknumber(luaState, 3));
-  float positionX = static_cast<float>(luaL_checknumber(luaState, 4));
-  float positionY = static_cast<float>(luaL_checknumber(luaState, 5));
-  float positionZ = static_cast<float>(luaL_checknumber(luaState, 6));
-  float rotationX = static_cast<float>(luaL_checknumber(luaState, 7));
-  float rotationY = static_cast<float>(luaL_checknumber(luaState, 8));
-  float rotationZ = static_cast<float>(luaL_checknumber(luaState, 9));
-  float ambientColorR = static_cast<float>(luaL_checknumber(luaState, 10));
-  float ambientColorG = static_cast<float>(luaL_checknumber(luaState, 11));
-  float ambientColorB = static_cast<float>(luaL_checknumber(luaState, 12));
-  float ambientColorA = static_cast<float>(luaL_checknumber(luaState, 13));
-  float diffuseColorR = static_cast<float>(luaL_checknumber(luaState, 14));
-  float diffuseColorG = static_cast<float>(luaL_checknumber(luaState, 15));
-  float diffuseColorB = static_cast<float>(luaL_checknumber(luaState, 16));
-  float diffuseColorA = static_cast<float>(luaL_checknumber(luaState, 17));
-  float specularColorR = static_cast<float>(luaL_checknumber(luaState, 18));
-  float specularColorG = static_cast<float>(luaL_checknumber(luaState, 19));
-  float specularColorB = static_cast<float>(luaL_checknumber(luaState, 20));
-  float specularColorA = static_cast<float>(luaL_checknumber(luaState, 21));
+  float mass = static_cast<float>(luaL_checknumber(luaState, 2));
+  float positionX = static_cast<float>(luaL_checknumber(luaState, 3));
+  float positionY = static_cast<float>(luaL_checknumber(luaState, 4));
+  float positionZ = static_cast<float>(luaL_checknumber(luaState, 5));
+  float rotationX = static_cast<float>(luaL_checknumber(luaState, 6));
+  float rotationY = static_cast<float>(luaL_checknumber(luaState, 7));
+  float rotationZ = static_cast<float>(luaL_checknumber(luaState, 8));
+  float ambientColorR = static_cast<float>(luaL_checknumber(luaState, 9));
+  float ambientColorG = static_cast<float>(luaL_checknumber(luaState, 10));
+  float ambientColorB = static_cast<float>(luaL_checknumber(luaState, 11));
+  float ambientColorA = static_cast<float>(luaL_checknumber(luaState, 12));
+  float diffuseColorR = static_cast<float>(luaL_checknumber(luaState, 13));
+  float diffuseColorG = static_cast<float>(luaL_checknumber(luaState, 14));
+  float diffuseColorB = static_cast<float>(luaL_checknumber(luaState, 15));
+  float diffuseColorA = static_cast<float>(luaL_checknumber(luaState, 16));
+  float specularColorR = static_cast<float>(luaL_checknumber(luaState, 17));
+  float specularColorG = static_cast<float>(luaL_checknumber(luaState, 18));
+  float specularColorB = static_cast<float>(luaL_checknumber(luaState, 19));
+  float specularColorA = static_cast<float>(luaL_checknumber(luaState, 20));
   float constantAttenuation =
-      static_cast<float>(luaL_checknumber(luaState, 22));
-  float linearAttenuation = static_cast<float>(luaL_checknumber(luaState, 23));
+      static_cast<float>(luaL_checknumber(luaState, 21));
+  float linearAttenuation = static_cast<float>(luaL_checknumber(luaState, 22));
   float quadraticAttenuation =
-      static_cast<float>(luaL_checknumber(luaState, 24));
-  const char *textureFile = luaL_checkstring(luaState, 25);
-  const char *shaderFile = luaL_checkstring(luaState, 26);
+      static_cast<float>(luaL_checknumber(luaState, 23));
+  const char *textureFile = luaL_checkstring(luaState, 24);
+  const char *shaderFile = luaL_checkstring(luaState, 25);
 
   LightBuilder lightBuilder;
   PositionalLight *light =
@@ -244,7 +243,7 @@ int addDirectionalLight(lua_State *luaState) {
 }
 
 // -----------------------------------------------------------------------------
-int addSpotLight(lua_State *luaState) {
+int addSpotLight(lua_State *) {
 //  ScriptEngine *engine = luaW_check<ScriptEngine>(luaState, 1);
 //  float positionX = static_cast<float>(luaL_checknumber(luaState, 2));
 //  float positionY = static_cast<float>(luaL_checknumber(luaState, 3));
@@ -434,6 +433,6 @@ int addMesh(lua_State *luaState) {
 }
 
 // -----------------------------------------------------------------------------
-int addSphere(lua_State *luaState) {
+int addSphere(lua_State *) {
   return 0;
 }

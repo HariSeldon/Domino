@@ -37,8 +37,6 @@ void LightBulb::fillMesh(const ObjParser &parser) {
 
   std::map<ObjParser::FaceIndices, int> indexMap;
 
-  const int indexNumber = parserIndices.size();
-
   indices.reserve(parserIndices.size());
   points.reserve(parserIndices.size() / 2);
   normals.reserve(parserIndices.size() / 2);

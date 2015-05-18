@@ -328,11 +328,6 @@ end
 
 --------------------------------------------------------------------------------
 function addLightBulb(bulb)
-  -- Mandatory parameters.
-  if bulb.side == nil then
-    error("Lightbulb side missing");
-  end
-
   -- Optional parameters.
   if bulb.mass == nil then
     bulb.mass = 0;
@@ -368,8 +363,7 @@ function addLightBulb(bulb)
     bulb.shader = "lightBulb";
   end
 
-  engine:_addLightBulb(bulb.side,
-                       bulb.mass,
+  engine:_addLightBulb(bulb.mass,
                        bulb.position.x,
                        bulb.position.y,
                        bulb.position.z,

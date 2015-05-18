@@ -5,7 +5,6 @@
 #include <iostream>
 #include <memory>
 #include <sstream>
-#include <stdexcept>
 #include <vector>
 
 #include <GL/glew.h>
@@ -38,7 +37,7 @@ std::string getFileContent(const std::string &filePath) {
   if (fileStream.is_open()) {
     return readStream(fileStream);
   } else {
-    throw std::runtime_error("Cannot open: " + filePath);
+    std::cout << "Cannot open: " + filePath << "\n";
   }
 }
 

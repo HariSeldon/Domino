@@ -23,6 +23,7 @@ class ShadowManager;
 class SceneManager {
 public:
   static constexpr int FONT_HEIGHT = 20;
+  static constexpr int MAX_LIGHTS_NUMBER = 4;
   static const std::string FONT_FILE;
 
 public:
@@ -58,14 +59,13 @@ private:
 
 private:
   World* world;
+  Camera* camera;
 
-  Drawer drawer;
   TextManager textManager;
+  Drawer drawer;
   ShadowManager shadowManager;
 
   glm::mat4 projection;
-
-  Camera* camera;
 
   glm::vec4 backgroundColor;
   float currentYRotation;

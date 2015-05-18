@@ -35,7 +35,6 @@ private:
 public:
   void addObject(Object *object);
   void addLightBulb(LightBulb *lightBulb);
-//  void addPositionalLight(PositionalLight *light);
   void addDirectionalLight(DirectionalLight *light);
   void stepSimulation();
 

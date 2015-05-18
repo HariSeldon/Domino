@@ -17,8 +17,8 @@ const std::string Mirror::MIRROR_FRAGMENT_SHADER = "mirror.frag";
 
 Mirror::Mirror(btTransform &transform, btScalar mass, btVector3 &inertia,
                const btScalar &side)
-    : Object(transform, mass, inertia), fboId(0), dboId(0), mirrorTexture(0),
-      shader("mirror", MIRROR_VERTEX_SHADER, MIRROR_FRAGMENT_SHADER) {
+    : Object(transform, mass, inertia), fboId(0), dboId(0), mirrorTexture(0) {
+      //shader("mirror", MIRROR_VERTEX_SHADER, MIRROR_FRAGMENT_SHADER) 
   computePoints(side);
   setupBulletShape();
 
@@ -138,7 +138,7 @@ void Mirror::enableMirror() const {
 void Mirror::disableMirror() const { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
 
 //-----------------------------------------------------------------------------
-ShaderProgram &Mirror::getShaderProgram() { return shader; }
+//ShaderProgram &Mirror::getShaderProgram() { return shader; }
 
 //-----------------------------------------------------------------------------
 glm::mat4 Mirror::getModelView() const {

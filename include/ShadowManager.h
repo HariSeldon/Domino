@@ -14,7 +14,7 @@ public:
 public:
   void enableShadow() const;
   void disableShadow() const;
-  ShaderProgram &getShader();
+//  ShaderProgram &getShader();
   GLuint getTexture() const;
 
 private:
@@ -25,7 +25,7 @@ private:
 private:
   GLuint fboId;
   GLuint shadowTexture;
-  ShaderProgram shadowShader;
+//  ShaderProgram shadowShader;
   static const std::string SHADOW_VERTEX_SHADER;
   static const std::string SHADOW_FRAGMENT_SHADER;
 }; 

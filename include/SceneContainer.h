@@ -59,8 +59,8 @@ public:
   }
 
 private:
-  World *world;
   Camera *camera;
+  World *world;
 //  std::map<const Object *, const std::string> shaderFileMap;
   std::map<const std::string, std::vector<const Object*>> shaderFileMap;
   glm::vec4 backgroundColor;

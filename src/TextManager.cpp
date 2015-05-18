@@ -5,13 +5,12 @@
 
 #include <algorithm>
 #include <functional>
-#include <iostream>
 
 // -----------------------------------------------------------------------------
 TextManager::TextManager(const std::string &fileName, int fontHeight,
                          const glm::ivec2 &screenSize)
     : atlas(fileName, fontHeight),
-      textShader(ShaderProgram("text", "text.vert", "text.frag")),
+      textShader("text.vert", "text.frag"),
       color({ 1, 1, 1, 1 }), vScale(2 / (float)screenSize.y),
       hScale(2 / (float)screenSize.x) {
   glGenVertexArrays(1, &vaoId);
@@ -94,8 +93,8 @@ void TextManager::renderText() {
   glBindTexture(GL_TEXTURE_2D, atlas.getTextureId());
 
   // FIXME: Check this 0.
-  textShader.setUniform("texture", 0);
-  textShader.setUniform("color", color);
+  textShader.setUniform(TextShader::texture, 0);
+  textShader.setUniform(TextShader::color, color);
 
   glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
   glBindVertexArray(0);

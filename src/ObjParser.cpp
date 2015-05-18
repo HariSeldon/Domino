@@ -58,7 +58,7 @@ void ObjParser::parseObjLine(const std::string &line) {
 
   std::vector<std::string> words;
   std::copy(tokens.begin(), tokens.end(),
-            std::back_inserter<std::vector<std::string> >(words));
+            std::back_inserter<std::vector<std::string>>(words));
 
   const std::string &firstWord = words[0];
 

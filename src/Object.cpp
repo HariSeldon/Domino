@@ -44,25 +44,15 @@ const float *Object::getTextureCoos() const {
   return reinterpret_cast<const float *>(textureCoos.data());
 }
 
-int Object::getTrigsNumber() const { return indices.size() / 3; }
-int Object::getIndicesNumber() const { return indices.size(); }
-
-btScalar Object::getMass() const { return mass; }
 void Object::setMass(btScalar mass) { this->mass = mass; }
 
-const btVector3 &Object::getInertia() const { return inertia; }
 void Object::setInertia(const btVector3 &inertia) { this->inertia = inertia; }
 
-const glm::vec4 &Object::getAmbientColor() const { return ambientColor; }
 void Object::setAmbientColor(const glm::vec4 &color) { ambientColor = color; }
 
-const glm::vec4 &Object::getDiffuseColor() const { return diffuseColor; }
 void Object::setDiffuseColor(const glm::vec4 &color) { diffuseColor = color; }
 
-const glm::vec4 &Object::getSpecularColor() const { return specularColor; }
 void Object::setSpecularColor(const glm::vec4 &color) { specularColor = color; }
-
-float Object::getShininess() const { return shininess; }
 
 void Object::setShininess(float shininess) { this->shininess = shininess; }
 
@@ -71,7 +61,6 @@ void Object::setCollisionShape(btCollisionShape *collisionShape) {
   this->collisionShape = collisionShape;
 }
 
-btRigidBody *Object::getRigidBody() const { return rigidBody; }
 void Object::setRigidBody(btRigidBody *rigidBody) {
   this->rigidBody = rigidBody;
 }
@@ -87,14 +76,6 @@ btRigidBody::btRigidBodyConstructionInfo *Object::getConstructionInfo() const {
 void Object::setConstructionInfo(
     btRigidBody::btRigidBodyConstructionInfo *constructionInfo) {
   this->constructionInfo = constructionInfo;
-}
-
-void Object::getOpenGLMatrix(btScalar *matrix) const {
-  transform.getOpenGLMatrix(matrix);
-}
-
-const std::string &Object::getTextureFile() const {
-  return textureFile;
 }
 
 //-----------------------------------------------------------------------------

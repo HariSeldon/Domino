@@ -1,6 +1,7 @@
 cmake_minimum_required (VERSION 2.8.9)
 set(CMAKE_C_COMPILER "clang")
 set(CMAKE_CXX_COMPILER "clang++")
+set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
 set(PROJECT_NAME Domino)
 set(EXE_NAME domino)
@@ -44,14 +45,15 @@ configure_file(${CMAKE_SOURCE_DIR}/${INCLUDE_DIR}/SysDefines.h.cmake
 set(BULLET_INCLUDE_DIR "${BULLET_PATH}/src")
 set(LUA_INCLUDE_DIR "${LUA_PATH}/src")
 set(FREETYPE_INCLUDE_DIR "/usr/include/freetype2")
-include_directories(${EXT_PATH} ${INCLUDE_PATH} "${CMAKE_BINARY_DIR}/${INCLUDE_DIR}" )
+include_directories(${EXT_PATH} ${INCLUDE_PATH} "${CMAKE_BINARY_DIR}/${INCLUDE_DIR}")
 # Use system flag so to disable warnings when compiling using -Wall.
 include_directories(SYSTEM ${BULLET_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR} ${LUA_INCLUDE_DIR})
 
 # Set compilation options.
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -Wall -Wextra -pedantic")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -Wall -Wextra -pedantic")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -std=c++14")
 add_definitions("-g")
 # This is to remove GLM warning.
 add_definitions("-DGLM_FORCE_RADIANS")

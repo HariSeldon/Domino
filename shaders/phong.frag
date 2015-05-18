@@ -45,7 +45,7 @@ uniform int lightMask;
 
 uniform vec4 ambientColor;
 
-uniform float defaultSpotCutOff;
+const float DEFAULT_SPOT_CUTOFF = 180.f;
 
 // -----------------------------------------------------------------------------
 // Light-independent shading.
@@ -138,7 +138,7 @@ vec4 shadePositionalLight(vec3 position, vec3 normal, vec3 cameraDirection,
         1.0f / (constantAttenuation + (linearAttenuation * lightDistance) +
                 (quadraticAttenuation * lightDistance * lightDistance));
 
-    if (spotCutOff < defaultSpotCutOff) {
+    if (spotCutOff < DEFAULT_SPOT_CUTOFF) {
       float spotCosine = dot(normalize(spotDirection), -1.0f * lightDirection);
       float spotAttenuation = (spotCosine > spotCosCutOff) ?
                                   // Inside the cone.
@@ -173,16 +173,16 @@ void main() {
 
     LightInfo light = lights[lightIndex];
 
-    // Directional light.
-    if (light.position.w == 0.0f) {
-      finalFragmentColor += shadeDirectionalLight(position, normalizedNormal,
-                                                  cameraDirection, lightIndex);
-    }
-    // Positional light.
-    else {
+//    // Directional light.
+//    if (light.position.w == 0.0f) {
+//      finalFragmentColor += shadeDirectionalLight(position, normalizedNormal,
+//                                                  cameraDirection, lightIndex);
+//    }
+//    // Positional light.
+//    else {
       finalFragmentColor += shadePositionalLight(position, normalizedNormal,
                                                  cameraDirection, lightIndex);
-    }
+//    }
   }
 
   outputColor = finalFragmentColor;

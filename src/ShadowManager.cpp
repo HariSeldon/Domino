@@ -11,8 +11,8 @@ const std::string ShadowManager::SHADOW_FRAGMENT_SHADER = "shadow.frag";
 
 //-----------------------------------------------------------------------------
 ShadowManager::ShadowManager()
-    : fboId(0), shadowTexture(0),
-      shadowShader("shadow", SHADOW_VERTEX_SHADER, SHADOW_FRAGMENT_SHADER) {
+    : fboId(0), shadowTexture(0) {
+      //shadowShader("shadow", SHADOW_VERTEX_SHADER, SHADOW_FRAGMENT_SHADER)
   createFBO();
   createShadowTexture();
   attachTexture();
@@ -97,4 +97,4 @@ void ShadowManager::disableShadow() const {
 }
 
 //-----------------------------------------------------------------------------
-ShaderProgram &ShadowManager::getShader() { return shadowShader; }
+//ShaderProgram &ShadowManager::getShader() { return shadowShader; }

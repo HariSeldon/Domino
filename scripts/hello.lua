@@ -71,17 +71,37 @@ setBackgroundColor({r = 0.2, g = 0.4, b = 0.6, a = 1});
 --        position = {x = 0, y = 100, z = 0}, 
 --        orientation = {x = 0, y = 0, z = 0},
 --        mass = 0.01, textureFile = "checkerboard.png"});
-addBox({sides = {x = 2, y = 2, z = 2}, 
-        position = {x = 10, y = 5, z = 0}, 
-        mass = 0, textureFile = "checkerboard.png"});
+addLightBulb({side = 1, ambientColor = {r = 0.2, g = 0.2, b = 0.2, a = 1}, 
+              position = {x = 1, y = 1, z = 0}, 
+              mass = 10, constantAttenuation = 0.1, linearAttenuation = 0.1});
 addLightBulb({side = 1, 
-              position = {x = 1, y = 10, z = 0}, 
-              mass = 10, constantAttenuation = 0.1, linearAttenuation = 0.2});
+              position = {x = 0, y = 2, z = 0}, 
+              mass = 0, constantAttenuation = 0.1, linearAttenuation = 0.1});
 addLightBulb({side = 1, 
-              position = {x = 10, y = 10, z = 10}, 
-              mass = 10, constantAttenuation = 0.1, linearAttenuation = 0.2});
+              position = {x = -10, y = 3, z = -10}, 
+              mass = 10, constantAttenuation = 0.1, linearAttenuation = 0.1});
 addPlane({side = 60, textureFile = "default.png"});
---addMesh({objFile = "barrel.obj", position = {x = 0, y = 2, z = 0}, mass = 10});
+
+for index = 1,20 do
+  addMesh({objFile = "barrel.obj", position = {x = -30 + index * 3, y = 2, z = -30}, mass = 0});
+end
+for index = 1,20 do
+  addMesh({objFile = "barrel.obj", position = {x = -30 + index * 3, y = 2, z = 30}, mass = 0});
+end
+for index = 1,20 do
+  addMesh({objFile = "barrel.obj", position = {x = 30, y = 2, z = -30 + index * 3}, mass = 0});
+end
+for index = 1,20 do
+  addMesh({objFile = "barrel.obj", position = {x = -30, y = 2, z = -30 + index * 3}, mass = 0});
+end
+
+for index = 1,30 do 
+  addMesh({objFile = "barrel.obj", position = {x = 0, y = index * 10, z = index % 2}, mass = 10});
+end
+for index = 1,30 do 
+  addMesh({objFile = "kufel.obj", position = {x = 0, y = index * 10, z = index % 2}, mass = 10});
+end
+
 --addMesh({objFile = "torch.obj", position = {x = 0, y = 0, z = 0}, mass = 10, shader = "gouraud"});
 --addMesh({objFile = "barrel.obj", position = {x = -10, y = 20, z = 0}, mass = 10});
 --addMesh({objFile = "barrel.obj", position = {x = -10, y = 30, z = 0}, mass = 10});

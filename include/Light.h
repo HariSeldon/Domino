@@ -1,10 +1,10 @@
 #pragma once
 
-#include "ShaderProgram.h"
-
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
+
+class LightedObjectShader;
 
 // -----------------------------------------------------------------------------
 class Light {
@@ -19,11 +19,12 @@ public:
   static constexpr float DEFAULT_CONSTANT_ATTENUATION = 1.0f;
   static constexpr float DEFAULT_LINEAR_ATTENUATION = 0.0f;
   static constexpr float DEFAULT_QUADRATIC_ATTENUATION = 0.0f;
-  
-public:
-  virtual ~Light() {};
 
-  virtual void draw(ShaderProgram &shaderProgram, const glm::mat4 &modelView) const;
+public:
+  virtual ~Light(){};
+
+  virtual void setUniforms(const LightedObjectShader &shader,
+                           const glm::mat4 &modelView) const;
 
   void setDiffuseColor(const glm::vec4 &color);
   const glm::vec4 &getDiffuseColor() const;
@@ -32,7 +33,7 @@ public:
   const glm::vec4 &getAmbientColor() const;
 
   void setSpecularColor(const glm::vec4 &color);
-  const glm::vec4 &getSpecularColor() const;  
+  const glm::vec4 &getSpecularColor() const;
 
 protected:
   int number;
@@ -40,36 +41,37 @@ protected:
   glm::vec4 diffuseColor;
   glm::vec4 specularColor;
 
-friend class LightBuilder;
+  friend class LightBuilder;
 };
 
 // -----------------------------------------------------------------------------
 class DirectionalLight : public Light {
 private:
-  DirectionalLight(const glm::vec3& direction);
+  DirectionalLight(const glm::vec3 &direction);
 
 public:
-  virtual ~DirectionalLight() {};
+  virtual ~DirectionalLight(){};
 
-  void draw(ShaderProgram &shaderProgram, const glm::mat4 &modelView) const;
-  void setDirection(const glm::vec3& direction);
+  void setUniforms(const LightedObjectShader &shader,
+                   const glm::mat4 &modelView) const override;
+  void setDirection(const glm::vec3 &direction);
   const glm::vec4 &getDirection();
 
 private:
   glm::vec4 direction;
 
-friend class LightBuilder;
+  friend class LightBuilder;
 };
 
 // -----------------------------------------------------------------------------
 class PositionalLight : public Light {
 protected:
-  PositionalLight(const glm::vec3& position);
+  PositionalLight(const glm::vec3 &position);
 
 public:
-  virtual ~PositionalLight() {};
+  virtual ~PositionalLight(){};
 
-  void setPosition(const glm::vec3& position);
+  void setPosition(const glm::vec3 &position);
   const glm::vec4 &getPosition();
 
   void setConstantAttenuation(float attenuation);
@@ -81,7 +83,8 @@ public:
   void setQuadraticAttenuation(float attenuation);
   float getQuadraticAttenuation();
 
-  void draw(ShaderProgram &shaderProgram, const glm::mat4 &modelView) const;
+  void setUniforms(const LightedObjectShader &shader,
+                   const glm::mat4 &modelView) const override;
 
 protected:
   glm::vec4 position;
@@ -89,18 +92,18 @@ protected:
   float linearAttenuation;
   float quadraticAttenuation;
 
-friend class LightBuilder;
+  friend class LightBuilder;
 };
 
 // -----------------------------------------------------------------------------
 class SpotLight : public PositionalLight {
 private:
-  SpotLight(const glm::vec3& position, const glm::vec3& direction);
+  SpotLight(const glm::vec3 &position, const glm::vec3 &direction);
 
 public:
   virtual ~SpotLight() {}
 
-  void setDirection(const glm::vec3& direction);
+  void setDirection(const glm::vec3 &direction);
   const glm::vec4 &getDirection();
 
   void setCutOff(float cutOff);
@@ -109,14 +112,15 @@ public:
   void setExponent(float exponent);
   float getExponent();
 
-  void draw(ShaderProgram &shaderProgram, const glm::mat4 &modelView) const;
+  void setUniforms(const LightedObjectShader &shader,
+                   const glm::mat4 &modelView) const override;
 
 private:
   glm::vec4 direction;
   float cutOff;
   float exponent;
- 
-friend class LightBuilder; 
+
+  friend class LightBuilder;
 };
 
 // -----------------------------------------------------------------------------
@@ -125,26 +129,26 @@ public:
   LightBuilder();
 
 public:
-  LightBuilder& setPosition(const glm::vec3& position);
-  LightBuilder& setDirection(const glm::vec3& direction);
+  LightBuilder &setPosition(const glm::vec3 &position);
+  LightBuilder &setDirection(const glm::vec3 &direction);
 
-  LightBuilder& setAmbientColor(const glm::vec4& color);
-  LightBuilder& setDiffuseColor(const glm::vec4& color);
-  LightBuilder& setSpecularColor(const glm::vec4& color);
+  LightBuilder &setAmbientColor(const glm::vec4 &color);
+  LightBuilder &setDiffuseColor(const glm::vec4 &color);
+  LightBuilder &setSpecularColor(const glm::vec4 &color);
 
-  LightBuilder& setCutOff(float cutOff);
-  LightBuilder& setSpotExponent(float spotExponent);
-  LightBuilder& setConstantAttenuation(float attenuation);
-  LightBuilder& setLinearAttenuation(float attenuation);
-  LightBuilder& setQuadraticAttenuation(float attenuation);
+  LightBuilder &setCutOff(float cutOff);
+  LightBuilder &setSpotExponent(float spotExponent);
+  LightBuilder &setConstantAttenuation(float attenuation);
+  LightBuilder &setLinearAttenuation(float attenuation);
+  LightBuilder &setQuadraticAttenuation(float attenuation);
 
-  DirectionalLight* createDirectional(); 
-  PositionalLight* createPositional();
-  SpotLight* createSpot();
+  DirectionalLight *createDirectional();
+  PositionalLight *createPositional();
+  SpotLight *createSpot();
 
 private:
   void setup();
-  void createHelper(Light* light);
+  void createHelper(Light *light);
 
 private:
   int counter;

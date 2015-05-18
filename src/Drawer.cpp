@@ -2,11 +2,11 @@
 
 #include "Box.h"
 #include "Light.h"
+#include "LightedObjectShader.h"
 #include "MathUtils.h"
 #include "Mirror.h"
 #include "Object.h"
 #include "Plane.h"
-#include "ShaderProgram.h"
 #include "SysDefines.h"
 #include "World.h"
 
@@ -26,154 +26,208 @@
 #include "SDL2/SDL_pixels.h"
 
 //-----------------------------------------------------------------------------
-void setColors(const Object *object, ShaderProgram &shader);
-void setOrientation(const Object *object, ShaderProgram &shader,
+void setColors(const Object *object, const PhongShader &shader);
+void setOrientation(const Object *object, const PhongShader &shader,
                     const glm::mat4 &originalModelView,
                     const glm::mat4 &projection,
                     const glm::mat4 &originalShadowModelView,
                     const glm::mat4 &shadowProjection);
-void setOrientationForShadow(const Object *object, ShaderProgram &shader,
+void setLightBulbOrientation(const Object *object, const LightBulbShader &shader,
+                             const glm::mat4 &originalModelView, 
+                             const glm::mat4 &projection);
+void setOrientationForShadow(const Object *object, const ShaderProgram &shader,
                              const glm::mat4 &originalModelView,
                              const glm::mat4 &projection);
+glm::mat4 getObjectModelView(const Object *object,
+                             const glm::mat4 &originalModelView);
 // Returns the fboId and the textureId.
 std::pair<GLuint, GLuint> generateFBOColor();
 GLuint createDBO(GLuint fboId);
 
 //-----------------------------------------------------------------------------
-void Drawer::initGPUObjects(
-    const std::map<const std::string, std::vector<const Object *>> &shaderFileMap,
-    const World &world) {
+Drawer::Drawer()
+    : lightBulbShader("lightBulb.vert", "lightBulb.frag"),
+      phongShader("phong.vert", "phong.frag") {}
 
-  for (auto x : shaderFileMap) {
+//-----------------------------------------------------------------------------
+void Drawer::initGPUObjects(const std::map<
+    const std::string, std::vector<const Object *>> &shaderNameMap) {
+  
+  fillObjectsVectors(shaderNameMap);
+  createGPUBuffers();
+
+// The following set up shaders and objects for multi-pass rendering.
+// We don't do this for the moment.
+//
+//  blurShader = new ShaderProgram("blur", "blur.vert", "blur.frag");
+//
+//  // Setup canvas.
+//  canvasShader = new ShaderProgram("canvas", "canvas.vert", "canvas.frag");
+//  glGenVertexArrays(1, &canvasId);
+//  glBindVertexArray(canvasId);
+//
+//  // Setup vertices.
+//  std::vector<glm::vec2> canvasPoints = {{-1, 1}, {1, 1}, {1, -1}, {-1, -1}};
+//  GLuint canvasVertexVBOId = 0;
+//  glGenBuffers(1, &canvasVertexVBOId);
+//  glBindBuffer(GL_ARRAY_BUFFER, canvasVertexVBOId);
+//  glBufferData(GL_ARRAY_BUFFER, canvasPoints.size() * sizeof(glm::vec2),
+//               canvasPoints.data(), GL_STATIC_DRAW);
+//  canvasShader->setAttribute("vertexPosition", 2, GL_FLOAT);
+//
+//  // Setup indices.
+//  std::vector<unsigned int> canvasIndices = {0, 1, 2, 2, 3, 0};
+//  GLuint canvasIndexVBOId = 0;
+//  glGenBuffers(1, &canvasIndexVBOId);
+//  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, canvasIndexVBOId);
+//  glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+//               canvasIndices.size() * sizeof(unsigned int),
+//               canvasIndices.data(), GL_STATIC_DRAW);
+//
+//  glBindVertexArray(0);
+//  vboIds.insert(vboIds.end(), {canvasVertexVBOId, canvasIndexVBOId});
+}
+
+//-----------------------------------------------------------------------------
+void Drawer::fillObjectsVectors(const std::map<
+    const std::string, std::vector<const Object *>> &shaderNameMap) {
+  for (const auto &x : shaderNameMap) {
     const std::string shaderName = x.first;
     auto objectVector = x.second;
 
-    ShaderProgram *program =
-        new ShaderProgram(shaderName, shaderName + ".vert", shaderName + ".frag");
+    if(shaderName == "phong") {
+      phongObjects = objectVector;
+    }
 
-    shaderMap[program] = objectVector;
-  }
-
-  for (auto x : shaderMap) {
-    const ShaderProgram *shader = x.first;
-    const auto objectVector = x.second;
-
-    for (const auto &object : objectVector) {
-
-      GLuint vaoId = 0;
-      // Create VAO.
-      glGenVertexArrays(1, &vaoId);
-      glBindVertexArray(vaoId);
-
-      GLuint vertexVBOId = setupVertexVBO(object, *shader);
-      GLuint indexVBOId = setupIndexVBO(object);
-      GLuint normalVBOId = setupNormalVBO(object, *shader);
-      GLuint textureVBOId = setupTextureVBO(object, *shader);
-
-      // Unbind.
-      glBindVertexArray(0);
-
-      vaoWorldMap.insert(std::pair<const Object *, GLuint>(object, vaoId));
-      vboIds.insert(vboIds.end(),
-                    {vertexVBOId, indexVBOId, normalVBOId, textureVBOId});
+    if(shaderName  == "lightBulb") {
+      lightBulbs = objectVector;
     }
   }
+}
 
-  // Setup canvas.
-  canvasShader =
-      new ShaderProgram("canvas", "canvas.vert", "canvas.frag");
-  glGenVertexArrays(1, &canvasId);
-  glBindVertexArray(canvasId);
+//-----------------------------------------------------------------------------
+void Drawer::createGPUBuffers() {
+  createLightBulbsGPUBuffers();
+  createPhongObjectsGPUBuffers();
+}
 
-  // Setup vertices.
-  std::vector<glm::vec2> canvasPoints = {{-1, 1}, {1, 1}, {1, -1}, {-1, -1}};
-  GLuint canvasVertexVBOId = 0;
-  glGenBuffers(1, &canvasVertexVBOId);
-  glBindBuffer(GL_ARRAY_BUFFER, canvasVertexVBOId);
-  glBufferData(GL_ARRAY_BUFFER, canvasPoints.size() * sizeof(glm::vec2),
-               canvasPoints.data(), GL_STATIC_DRAW);
-  canvasShader->setAttribute("vertexPosition", 2, GL_FLOAT);
-  
-  // Setup indices.
-  std::vector<unsigned int> canvasIndices = {0, 1, 2, 2, 3, 0};
-  GLuint canvasIndexVBOId = 0;
-  glGenBuffers(1, &canvasIndexVBOId);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, canvasIndexVBOId);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, canvasIndices.size() * sizeof(unsigned int),
-               canvasIndices.data(), GL_STATIC_DRAW);
+//-----------------------------------------------------------------------------
+void Drawer::createLightBulbsGPUBuffers() {
+  std::for_each(
+      lightBulbs.begin(), lightBulbs.end(),
+      [this](const Object *object) { createLightBulbGPUBuffers(object); });
+}
 
+//-----------------------------------------------------------------------------
+void Drawer::createPhongObjectsGPUBuffers() {
+  std::for_each(
+      phongObjects.begin(), phongObjects.end(),
+      [this](const Object *object) { createPhongObjectGPUBuffers(object); });
+}
+
+//-----------------------------------------------------------------------------
+void Drawer::createLightBulbGPUBuffers(const Object *object) {
+  GLuint vaoId = 0;
+  // Create VAO.
+  glGenVertexArrays(1, &vaoId);
+  glBindVertexArray(vaoId);
+
+  GLuint vertexVBOId = setupVertexVBO(object, lightBulbShader);
+  GLuint indexVBOId = setupIndexVBO(object);
+
+  // Unbind.
   glBindVertexArray(0);
-  vboIds.insert(vboIds.end(), {canvasVertexVBOId, canvasIndexVBOId});
-  
 
-  // Extract the lightBulb shader program.
-  // See if there are any lightBulbs, if not, specialize the draw function so to have a single, pass.
-  // If not fallback to the case in which use 2 passes with opencl.
-  // I think this can be implemented with the Strategy Pattern.
+  vaoWorldMap.insert(std::pair<const Object *, GLuint>(object, vaoId));
+  vboIds.insert(vboIds.end(), {vertexVBOId, indexVBOId});
+}
 
+//-----------------------------------------------------------------------------
+void Drawer::createPhongObjectGPUBuffers(const Object *object) {
+  GLuint vaoId = 0;
+  // Create VAO.
+  glGenVertexArrays(1, &vaoId);
+  glBindVertexArray(vaoId);
+
+  GLuint vertexVBOId = setupVertexVBO(object, phongShader);
+  GLuint indexVBOId = setupIndexVBO(object);
+  GLuint normalVBOId = setupNormalVBO(object, phongShader);
+  GLuint textureVBOId = setupTextureVBO(object, phongShader);
+
+  // Unbind.
+  glBindVertexArray(0);
+
+  vaoWorldMap.insert(std::pair<const Object *, GLuint>(object, vaoId));
+  vboIds.insert(vboIds.end(),
+                {vertexVBOId, indexVBOId, normalVBOId, textureVBOId});
 }
 
 //-----------------------------------------------------------------------------
 void Drawer::initTextures(const World &world) {
   // Load textures.
-  std::for_each(constBeginObjects(world), constEndObjects(world),
-                [&](const Object *object) {
-    const std::string &textureFile = object->getTextureFile();
-    if (!textureFile.empty()) {
-      SDL_Surface *texSurface = IMG_Load(textureFile.c_str());
-      if (texSurface) {
-        GLuint currentTexture = 0;
-        // Create the texture object.
-        glGenTextures(1, &currentTexture);
-        checkOpenGLError("Drawer: glGenTextures");
+  std::for_each(
+      constBeginObjects(world), constEndObjects(world),
+      [&](const Object *object) {
+        const std::string &textureFile = object->getTextureFile();
+        if (!textureFile.empty()) {
+          SDL_Surface *texSurface = IMG_Load(textureFile.c_str());
+          if (texSurface) {
+            GLuint currentTexture = 0;
+            // Create the texture object.
+            glGenTextures(1, &currentTexture);
+            checkOpenGLError("Drawer: glGenTextures");
 
-        glBindTexture(GL_TEXTURE_2D, currentTexture);
-        checkOpenGLError("Drawer: glBindTexture");
+            glBindTexture(GL_TEXTURE_2D, currentTexture);
+            checkOpenGLError("Drawer: glBindTexture");
 
-        GLint format = 0;
-        switch (texSurface->format->BytesPerPixel) {
-        case 3:
-          format = GL_RGB;
-          break;
-        case 4:
-          format = GL_RGBA;
-          break;
-        default:
-          std::cerr << "Unknown texture format.\n";
-          exit(1);
-        };
+            GLint format = 0;
+            switch (texSurface->format->BytesPerPixel) {
+            case 3:
+              format = GL_RGB;
+              break;
+            case 4:
+              format = GL_RGBA;
+              break;
+            default:
+              std::cerr << "Unknown texture format.\n";
+              exit(1);
+            };
 
-        glTexImage2D(GL_TEXTURE_2D, 0, format, texSurface->w, texSurface->h, 0,
-                     format, GL_UNSIGNED_BYTE, texSurface->pixels);
-        checkOpenGLError("Drawer: glTexImage2D");
+            glTexImage2D(GL_TEXTURE_2D, 0, format, texSurface->w, texSurface->h,
+                         0, format, GL_UNSIGNED_BYTE, texSurface->pixels);
+            checkOpenGLError("Drawer: glTexImage2D");
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-        checkOpenGLError("Drawer: glTexParameteri");
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-        checkOpenGLError("Drawer: glTexParameteri");
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        checkOpenGLError("Drawer: glTexParameteri");
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        checkOpenGLError("Drawer: glTexParameteri");
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            checkOpenGLError("Drawer: glTexParameteri");
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            checkOpenGLError("Drawer: glTexParameteri");
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            checkOpenGLError("Drawer: glTexParameteri");
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            checkOpenGLError("Drawer: glTexParameteri");
 
-        glGenerateMipmap(GL_TEXTURE_2D);
+            glGenerateMipmap(GL_TEXTURE_2D);
 
-        glBindTexture(GL_TEXTURE_2D, 0);
+            glBindTexture(GL_TEXTURE_2D, 0);
 
-        textureMap[object] = currentTexture;
-      }
-      SDL_FreeSurface(texSurface);
-    }
-  });
+            textureMap[object] = currentTexture;
+          }
+          SDL_FreeSurface(texSurface);
+        }
+      });
 
-  auto lightBulbData = generateFBOColor(); 
+  auto lightBulbData = generateFBOColor();
   lightBulbFBOId = std::get<0>(lightBulbData);
   lightBulbTexture = std::get<1>(lightBulbData);
 
-  auto sceneData = generateFBOColor(); 
+  auto blurredLightBulbData = generateFBOColor();
+  blurredLightBulbFBOId = std::get<0>(blurredLightBulbData);
+  blurredLightBulbTexture = std::get<1>(blurredLightBulbData);
+
+  auto sceneData = generateFBOColor();
   sceneFBOId = std::get<0>(sceneData);
   sceneTexture = std::get<1>(sceneData);
-  
+
   assert(lightBulbFBOId != sceneFBOId);
   assert(lightBulbTexture != sceneTexture);
 
@@ -183,24 +237,25 @@ void Drawer::initTextures(const World &world) {
 //-----------------------------------------------------------------------------
 void Drawer::initGPUShadowObjects(const ShaderProgram &shadowShader,
                                   const World &world) {
-  for (auto mapIter : vaoWorldMap) {
-    const Object *object = mapIter.first;
-
-    GLuint vaoId = 0;
-
-    glGenVertexArrays(1, &vaoId);
-    glBindVertexArray(vaoId);
-
-    // Bind the vertex buffer to the vao.
-    // I should not need this.
-    GLuint vertexVBOId = setupVertexVBO(object, shadowShader);
-    GLuint indexVBOId = setupIndexVBO(object);
-
-    glBindVertexArray(0);
-
-    vaoShadowMap.insert(std::pair<const Object *, GLuint>(object, vaoId));
-    vboIds.push_back(indexVBOId);
-  }
+// TODO.
+//  for (auto mapIter : vaoWorldMap) {
+//    const Object *object = mapIter.first;
+//
+//    GLuint vaoId = 0;
+//
+//    glGenVertexArrays(1, &vaoId);
+//    glBindVertexArray(vaoId);
+//
+//    // Bind the vertex buffer to the vao.
+//    // I should not need this.
+//    GLuint vertexVBOId = setupVertexVBO(object, &shadowShader);
+//    GLuint indexVBOId = setupIndexVBO(object);
+//
+//    glBindVertexArray(0);
+//
+//    vaoShadowMap.insert(std::pair<const Object *, GLuint>(object, vaoId));
+//    vboIds.push_back(indexVBOId);
+//  }
 }
 
 //-----------------------------------------------------------------------------
@@ -277,151 +332,218 @@ Drawer::~Drawer() {
     glDeleteBuffers(vboIds.size(), vboIds.data());
 
   // FIXME Remember to delete all the frame buffers.
-
 }
 
 //-----------------------------------------------------------------------------
-void Drawer::drawObjects(const World *world, const glm::mat4 &originalModelView,
+void Drawer::drawWorld(const World *world, const glm::mat4 &originalModelView,
                          const glm::mat4 &projection,
                          const glm::mat4 &originalShadowModelView,
                          const glm::mat4 &shadowProjection,
                          int lightMask) const {
 
-//  auto lightBulbIter = std::find_if(
-//      shaderMap.begin(), shaderMap.end(),
-//      [](const std::pair<ShaderProgram *, std::vector<const Object *>> &x) {
-//        return x.first->getName() == "lightBulb";
-//      });
+  // Render all phong objects.
+  phongShader.useProgram();
+  setPhongLights(world, phongShader, originalModelView, lightMask);
+  for (const auto &obj : phongObjects) {
+    drawPhongObject(obj, originalModelView, projection, originalShadowModelView,
+                    shadowProjection);
+  }
+
+  // Render all the lightbulbs.
+  lightBulbShader.useProgram();
+  for (const auto &bulb : lightBulbs) {
+    drawLightBulb(bulb, originalModelView, projection);
+  }
+
+
+////  auto lightBulbIter = std::find_if(
+////      shaderMap.begin(), shaderMap.end(),
+////      [](const std::pair<ShaderProgram *, std::vector<const Object *>> &x)
+///{
+////        return x.first->getName() == "lightBulb";
+////      });
+////
+////  return;
 //
-//  return;
+////  glBindFramebuffer(GL_FRAMEBUFFER, sceneFBOId);
+////  checkOpenGLError("Drawer: drawObjects-glBindFrameBuffer");
+////  glViewport(0, 0, 1280, 800);
+////
+////  glBindTexture(GL_TEXTURE_2D, sceneTexture);
+////  checkOpenGLError("Drawer: drawObjects-glBindTexture");
+////
+//  glClearColor(0.1, 0.2, 0.7, 1);
+//  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 //
 //
+////  glClear(GL_DEPTH_BUFFER_BIT);
+////  glEnable(GL_STENCIL_TEST);
+////  glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+////  glDepthMask(GL_FALSE);
+////  glStencilFunc(GL_NEVER, 1, 0xFF);
+////  glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP);
+////  glStencilMask(0xFF);
+////
+////  glClear(GL_STENCIL_BUFFER_BIT);
+////
+////  // Draw stencil square.
+////
+////  basicShader->useProgram();
+////  glBindVertexArray(canvasId);
+////  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+////  glBindVertexArray(0);
+////
+////  glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+////  glDepthMask(GL_TRUE);
+////  glStencilMask(0x00);
+//////  glStencilFunc(GL_EQUAL, 0, 0xFF);
+////
+////  glStencilFunc(GL_EQUAL, 1, 0xFF);
 //
+//  // Iterate all the other shaders.
+//  for (auto &x : shaderMap) {
+//    ShaderProgram *shader = x.first;
+//
+//    if(shader->getName() == "lightBulb")
+//      continue;
+//
+//    const auto &objectVector = x.second;
+//    shader->useProgram();
+//
+//    setLights(world, shader, originalModelView, lightMask);
+//    for (const auto &object : objectVector) {
+//      drawObject(object, *shader, originalModelView, projection,
+//                 originalShadowModelView, shadowProjection);
+//    }
+//  }
+//
+////  glDisable(GL_STENCIL_TEST);
+//
+////  glBindTexture(GL_TEXTURE_2D, 0);
+////  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+////
+////  // Get the LightBulb shader.
+////  for (auto &iter : shaderMap) {
+////    ShaderProgram *shader = iter.first;
+////    if(shader->getName() == "lightBulb") {
+////      shader->useProgram();
+////      drawLightBulbs(shader, iter.second, originalModelView, projection,
+////                     originalShadowModelView, shadowProjection);
+////      break;
+////    }
+////  }
+////
+////  // Merge the frame buffer with the lightBulb texture.
+////
+////  // Second pass.
+////  canvasShader->useProgram();
+////  glActiveTexture(GL_TEXTURE0);
+//////  glBindTexture(GL_TEXTURE_2D, lightBulbTexture);
+////  glBindTexture(GL_TEXTURE_2D, blurredLightBulbTexture);
+////  canvasShader->setUniform("firstTexture", 0);
+////
+////  glActiveTexture(GL_TEXTURE1);
+////  glBindTexture(GL_TEXTURE_2D, sceneTexture);
+////  canvasShader->setUniform("secondTexture", 1);
+////
+////  glBindVertexArray(canvasId);
+////  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+////  glBindVertexArray(0);
+////  glActiveTexture(GL_TEXTURE1);
+////  glBindTexture(GL_TEXTURE_2D, 0);
+////  glActiveTexture(GL_TEXTURE0);
+////  glBindTexture(GL_TEXTURE_2D, 0);
+}
 
-  glBindFramebuffer(GL_FRAMEBUFFER, sceneFBOId);
-  checkOpenGLError("Drawer: drawObjects-glBindFrameBuffer");
-  glViewport(0, 0, 1280, 800);
-  
-  glBindTexture(GL_TEXTURE_2D, sceneTexture);
-  checkOpenGLError("Drawer: drawObjects-glBindTexture");
+////-----------------------------------------------------------------------------
+//void Drawer::drawLightBulbs(ShaderProgram *shader,
+//                            const std::vector<const Object *> &objects,
+//                            const glm::mat4 &originalModelView,
+//                            const glm::mat4 &projection,
+//                            const glm::mat4 &originalShadowModelView,
+//                            const glm::mat4 &shadowProjection) const {
+//  glBindFramebuffer(GL_FRAMEBUFFER, lightBulbFBOId);
+//  checkOpenGLError("Drawer: drawLightBulbs-glBindFrameBuffer");
+//
+//  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+//                            GL_RENDERBUFFER, dboId);
+//  checkOpenGLError("Drawer: drawLightBulbs-glFramebufferRenderbuffer");
+//
+//  glViewport(0, 0, 1280, 800);
+//
+//  glBindTexture(GL_TEXTURE_2D, lightBulbTexture);
+//  checkOpenGLError("Drawer: drawLightBulbs-glBindTexture");
+//
+//  glClearColor(0, 0, 0, 1);
+//  glClear(GL_COLOR_BUFFER_BIT);
+//
+//  // Draw!
+//  for (const auto &object : objects) {
+//    drawObject(object, *shader, originalModelView, projection,
+//               originalShadowModelView, shadowProjection);
+//  }
+//  glBindTexture(GL_TEXTURE_2D, 0);
+//  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//
+//  // Blur!
+//  glBindFramebuffer(GL_FRAMEBUFFER, blurredLightBulbFBOId);
+//  checkOpenGLError("Drawer: drawLightBulbs-glBindFrameBuffer");
+//
+//  glViewport(0, 0, 1280, 800);
+//
+//  glBindTexture(GL_TEXTURE_2D, lightBulbTexture);
+//  blurShader->useProgram();
+//  //  canvasShader->setUniform("inputTexture", 0);
+//  glBindVertexArray(canvasId);
+//  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+//
+//  glBindVertexArray(0);
+//  glBindTexture(GL_TEXTURE_2D, 0);
+//  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//}
 
-  glClearColor(0.1, 0.2, 0.7, 1);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//-----------------------------------------------------------------------------
+void Drawer::setPhongLights(const World *world, const PhongShader &shader,
+                            const glm::mat4 &modelView, int lightMask) {
+  shader.setUniform(PhongShader::ambientColor, world->getAmbientColor());
+  shader.setUniform(PhongShader::lightsNumber, world->getLightsNumber());
+  shader.setUniform(PhongShader::lightMask, lightMask);
+  std::for_each(
+      constBeginLights(*world), constEndLights(*world),
+      [&](const Light *light) { light->setUniforms(shader, modelView); });
+}
 
-  // Iterate all the other shaders.
-  for (auto &x : shaderMap) {
-    ShaderProgram *shader = x.first;
-
-    if(shader->getName() == "lightBulb")
-      continue;
-
-    const auto &objectVector = x.second;
-    shader->useProgram();
-
-    setLights(world, shader, originalModelView, lightMask);
-    for (const auto &object : objectVector) {
-      drawObject(object, *shader, originalModelView, projection,
+//-----------------------------------------------------------------------------
+void Drawer::drawPhongObject(const Object *object,
+                             const glm::mat4 &originalModelView,
+                             const glm::mat4 &projection,
+                             const glm::mat4 &originalShadowModelView,
+                             const glm::mat4 &shadowProjection) const {
+  setColors(object, phongShader);
+  setOrientation(object, phongShader, originalModelView, projection,
                  originalShadowModelView, shadowProjection);
-    }
-  }
-
-  glBindTexture(GL_TEXTURE_2D, 0);
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-  // Get the LightBulb shader. 
-  for (auto &iter : shaderMap) {
-    ShaderProgram *shader = iter.first;
-    if(shader->getName() == "lightBulb") {
-      shader->useProgram();
-      drawLightBulbs(shader, iter.second, originalModelView, projection,
-                     originalShadowModelView, shadowProjection);
-      break;
-    }
-  }
-
-  // Merge the frame buffer with the lightBulb texture.
-
-  // Second pass.
-  canvasShader->useProgram();
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, lightBulbTexture);
-  canvasShader->setUniform("firstTexture", 0);
-
-  glActiveTexture(GL_TEXTURE1);
-  glBindTexture(GL_TEXTURE_2D, sceneTexture);
-  canvasShader->setUniform("secondTexture", 1);
-
-  glBindVertexArray(canvasId);
-  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-  glBindVertexArray(0);
-  glActiveTexture(GL_TEXTURE1);
-  glBindTexture(GL_TEXTURE_2D, 0);
-  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, textureMap.at(object));
+  phongShader.setUniform(PhongShader::texture, 0);
+  invokeDrawCall(object);
   glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 //-----------------------------------------------------------------------------
-void Drawer::drawLightBulbs(ShaderProgram *shader,
-                            const std::vector<const Object *> &objects,
-                            const glm::mat4 &originalModelView,
-                            const glm::mat4 &projection,
-                            const glm::mat4 &originalShadowModelView,
-                            const glm::mat4 &shadowProjection) const {
-  glBindFramebuffer(GL_FRAMEBUFFER, lightBulbFBOId);
-  checkOpenGLError("Drawer: drawLightBulbs-glBindFrameBuffer");
-
-  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                            GL_RENDERBUFFER, dboId);
-  checkOpenGLError("Drawer: drawLightBulbs-glFramebufferRenderbuffer");
-
-  glViewport(0, 0, 1280, 800);
-  
-  glBindTexture(GL_TEXTURE_2D, lightBulbTexture);
-  checkOpenGLError("Drawer: drawLightBulbs-glBindTexture");
-
-  glClearColor(0, 0, 0, 1);
-  glClear(GL_COLOR_BUFFER_BIT);
-
-  // Draw!
-  for (const auto &object : objects) {
-    drawObject(object, *shader, originalModelView, projection,
-               originalShadowModelView, shadowProjection);
-  }
-
-  glBindTexture(GL_TEXTURE_2D, 0);
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+void Drawer::drawLightBulb(const Object *lightBulb,
+                           const glm::mat4 &originalModelView,
+                           const glm::mat4 &projection) const {
+  setLightBulbOrientation(lightBulb, lightBulbShader, originalModelView,
+                          projection);
+  invokeDrawCall(lightBulb);
 }
 
 //-----------------------------------------------------------------------------
-void Drawer::setLights(const World *world, ShaderProgram *shader,
-                       const glm::mat4 &modelView, int lightMask) const {
-  shader->setUniform("ambientColor", world->getAmbientColor());
-  shader->setUniform("lightsNumber", world->getLightsNumber());
-  shader->setUniform("lightMask", lightMask);
-  std::for_each(constBeginLights(*world), constEndLights(*world),
-                [&](const Light *light) { light->draw(*shader, modelView); });
-}
-
-//-----------------------------------------------------------------------------
-void Drawer::drawObject(const Object *object, ShaderProgram &shader,
-                        const glm::mat4 &originalModelView,
-                        const glm::mat4 &projection,
-                        const glm::mat4 &originalShadowModelView,
-                        const glm::mat4 &shadowProjection) const {
-  setColors(object, shader);
-  if(shader.getName() == "phong") {
-    glBindTexture(GL_TEXTURE_2D, textureMap.at(object));
-    shader.setUniform("texture", 0);
-  }
-  setOrientation(object, shader, originalModelView, projection,
-                 originalShadowModelView, shadowProjection);
-
+void Drawer::invokeDrawCall(const Object *object) const {
   GLuint vao = vaoWorldMap.at(object);
   glBindVertexArray(vao);
   glDrawElements(GL_TRIANGLES, object->getIndicesNumber(), GL_UNSIGNED_INT,
                  nullptr);
   glBindVertexArray(0);
-  glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 //------------------------------------------------------------------------------
@@ -438,45 +560,61 @@ void Drawer::drawObjectForShadow(const Object *object, ShaderProgram &shader,
 }
 
 //------------------------------------------------------------------------------
-void setColors(const Object *object, ShaderProgram &shader) {
-  shader.setUniform("material.ambient", object->getAmbientColor());
-  shader.setUniform("material.diffuse", object->getDiffuseColor());
-  shader.setUniform("material.specular", object->getSpecularColor());
-  shader.setUniform("material.shininess", object->getShininess());
+void setColors(const Object *object, const PhongShader &shader) {
+  shader.setUniform(PhongShader::materialAmbient, object->getAmbientColor());
+  // The diffuse color is replaces by a texture.
+  shader.setUniform(PhongShader::materialSpecular, object->getSpecularColor());
+  shader.setUniform(PhongShader::materialShininess, object->getShininess());
 }
 
 //------------------------------------------------------------------------------
-void setOrientation(const Object *object, ShaderProgram &shader,
+void setOrientation(const Object *object, const PhongShader &shader,
                     const glm::mat4 &originalModelView,
                     const glm::mat4 &projection,
                     const glm::mat4 &originalShadowModelView,
                     const glm::mat4 &shadowProjection) {
-  btScalar transform[16];
-  object->getOpenGLMatrix(transform);
-  glm::mat4 modelView = glm::make_mat4x4(transform);
+//  glm::mat4 biasMatrix(0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5,
+//                       0.0, 0.5, 0.5, 0.5, 1.0);
+//  glm::mat4 shadowMVP =
+//      biasMatrix * shadowProjection * originalShadowModelView * modelView;
 
-  glm::mat4 biasMatrix(0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5,
-                       0.0, 0.5, 0.5, 0.5, 1.0);
-  glm::mat4 shadowMVP =
-      biasMatrix * shadowProjection * originalShadowModelView * modelView;
-  modelView = originalModelView * modelView;
+  auto modelView = getObjectModelView(object, originalModelView);
 
-  shader.setUniform("mvpMatrix", projection * modelView);
-  shader.setUniform("modelViewMatrix", modelView);
-  shader.setUniform("normalMatrix",
-                    glm::inverseTranspose(glm::mat3(modelView)));
-  shader.setUniform("mvpShadowMatrix", shadowMVP);
+  shader.setUniform(PhongShader::mvpMatrix, projection * modelView);
+  shader.setUniform(PhongShader::modelViewMatrix, modelView);
+  shader.setUniform(PhongShader::normalMatrix,
+                     glm::inverseTranspose(glm::mat3(modelView)));
+//  shader->setUniform("mvpShadowMatrix", shadowMVP);
 }
 
 //------------------------------------------------------------------------------
-void setOrientationForShadow(const Object *object, ShaderProgram &shader,
-                             const glm::mat4 &originalModelView,
+void setLightBulbOrientation(const Object *object, const LightBulbShader &shader,
+                             const glm::mat4 &originalModelView, 
                              const glm::mat4 &projection) {
+  auto modelView = getObjectModelView(object, originalModelView);
+  shader.setUniform(PhongShader::mvpMatrix, projection * modelView);
+}
+
+//------------------------------------------------------------------------------
+inline glm::mat4 getObjectModelView(const Object *object,
+                                    const glm::mat4 &originalModelView) {
+
   btScalar transform[16];
   object->getOpenGLMatrix(transform);
   glm::mat4 modelView = glm::make_mat4x4(transform);
-  glm::mat4 mvp = projection * originalModelView * modelView;
-  shader.setUniform("mvpMatrix", mvp);
+  return originalModelView * modelView;
+} 
+
+//------------------------------------------------------------------------------
+void setOrientationForShadow(const Object *object, const ShaderProgram &shader,
+                             const glm::mat4 &originalModelView,
+                             const glm::mat4 &projection) {
+// TODO
+//  btScalar transform[16];
+//  object->getOpenGLMatrix(transform);
+//  glm::mat4 modelView = glm::make_mat4x4(transform);
+//  glm::mat4 mvp = projection * originalModelView * modelView;
+//  shader.setUniform(LightedObjectShader::mvpMatrix, mvp);
 }
 
 //------------------------------------------------------------------------------
@@ -494,9 +632,8 @@ std::pair<GLuint, GLuint> generateFBOColor() {
   glBindTexture(GL_TEXTURE_2D, textureId);
   checkOpenGLError("generateFBOColor: glBindTexture");
 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1280, 800, 0,
-//               GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-               GL_RGBA, GL_FLOAT, nullptr);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1280, 800, 0, GL_RGBA, GL_FLOAT,
+               nullptr);
   checkOpenGLError("generateFBOColor: glTexImage2D");
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -506,18 +643,19 @@ std::pair<GLuint, GLuint> generateFBOColor() {
 
   glBindFramebuffer(GL_FRAMEBUFFER, fboId);
   checkOpenGLError("generateFBOColor: attachTexture-glBindBuffer");
-  glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureId, 0);
+  glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                         GL_TEXTURE_2D, textureId, 0);
   checkOpenGLError("generateFBOColor: attachTexture-glFramebufferTexture");
 
-  GLenum drawBuffers = { GL_COLOR_ATTACHMENT0 };
+  GLenum drawBuffers = {GL_COLOR_ATTACHMENT0};
   glDrawBuffers(1, &drawBuffers);
   checkOpenGLError("generateFBOColor: glDrawBuffers");
 
   assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE &&
          "Error setting frame buffer");
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);  
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-  return std::make_pair(fboId, textureId);
+  return {fboId, textureId};
 }
 
 //------------------------------------------------------------------------------
