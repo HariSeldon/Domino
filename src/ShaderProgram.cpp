@@ -65,8 +65,6 @@ template void ShaderProgram::setUniform(int nameIndex,
                                         const float &value) const;
 template void ShaderProgram::setUniform(int nameIndex, const int &value) const;
 template void ShaderProgram::setUniform(int nameIndex,
-                                        const unsigned char &value) const;
-template void ShaderProgram::setUniform(int nameIndex,
                                         const unsigned int &value) const;
 template void ShaderProgram::setUniform(int nameIndex,
                                         const glm::vec4 &value) const;

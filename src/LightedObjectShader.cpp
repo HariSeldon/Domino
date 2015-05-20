@@ -48,9 +48,6 @@ template void LightedObjectShader::setLightUniform(int lightIndex,
                                                    const int &value) const;
 template void
 LightedObjectShader::setLightUniform(int lightIndex, int nameIndex,
-                                     const unsigned char &value) const;
-template void
-LightedObjectShader::setLightUniform(int lightIndex, int nameIndex,
                                      const unsigned int &value) const;
 template void
 LightedObjectShader::setLightUniform(int lightIndex, int nameIndex,
