@@ -82,25 +82,25 @@ addLightBulb({side = 1,
               mass = 10, constantAttenuation = 0.1, linearAttenuation = 0.1});
 addPlane({side = 60, textureFile = "default.png"});
 
-for index = 1,20 do
-  addMesh({objFile = "barrel.obj", position = {x = -30 + index * 3, y = 2, z = -30}, mass = 0});
-end
-for index = 1,20 do
-  addMesh({objFile = "barrel.obj", position = {x = -30 + index * 3, y = 2, z = 30}, mass = 0});
-end
-for index = 1,20 do
-  addMesh({objFile = "barrel.obj", position = {x = 30, y = 2, z = -30 + index * 3}, mass = 0});
-end
-for index = 1,20 do
-  addMesh({objFile = "barrel.obj", position = {x = -30, y = 2, z = -30 + index * 3}, mass = 0});
-end
+-- for index = 1,20 do
+--   addMesh({objFile = "barrel.obj", position = {x = -30 + index * 3, y = 2, z = -30}, mass = 0});
+-- end
+-- for index = 1,20 do
+--   addMesh({objFile = "barrel.obj", position = {x = -30 + index * 3, y = 2, z = 30}, mass = 0});
+-- end
+-- for index = 1,20 do
+--   addMesh({objFile = "barrel.obj", position = {x = 30, y = 2, z = -30 + index * 3}, mass = 0});
+-- end
+-- for index = 1,20 do
+--   addMesh({objFile = "barrel.obj", position = {x = -30, y = 2, z = -30 + index * 3}, mass = 0});
+-- end
 
-for index = 1,30 do 
-  addMesh({objFile = "barrel.obj", position = {x = 0, y = index * 10, z = index % 2}, mass = 10});
-end
-for index = 1,30 do 
-  addMesh({objFile = "kufel.obj", position = {x = 0, y = index * 10, z = index % 2}, mass = 10});
-end
+--for index = 1,30 do 
+--  addMesh({objFile = "barrel.obj", position = {x = 0, y = index * 10, z = index % 2}, mass = 10});
+--end
+--for index = 1,30 do 
+--  addMesh({objFile = "kufel.obj", position = {x = 0, y = index * 10, z = index % 2}, mass = 10});
+--end
 
 --addMesh({objFile = "torch.obj", position = {x = 0, y = 0, z = 0}, mass = 10, shader = "gouraud"});
 --addMesh({objFile = "barrel.obj", position = {x = -10, y = 20, z = 0}, mass = 10});
