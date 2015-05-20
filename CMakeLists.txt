@@ -49,6 +49,12 @@ include_directories(${EXT_PATH} ${INCLUDE_PATH} "${CMAKE_BINARY_DIR}/${INCLUDE_D
 # Use system flag so to disable warnings when compiling using -Wall.
 include_directories(SYSTEM ${BULLET_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR} ${LUA_INCLUDE_DIR})
 
+if( "${CMAKE_BUILD_TYPE}" STREQUAL "" )
+  set(CMAKE_BUILD_TYPE "Debug")
+endif("${CMAKE_BUILD_TYPE}" STREQUAL "")
+
+message(STATUS "CMake build type: " ${CMAKE_BUILD_TYPE})
+
 # Set compilation options.
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
