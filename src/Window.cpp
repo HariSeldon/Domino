@@ -88,7 +88,6 @@ void Window::renderingLoop() {
 
     ++frameCounter;
     SDL_GL_SwapWindow(sdlWindow);
-    SDL_Delay(Window::DISPLAY_DELAY);
   }
 }
 
