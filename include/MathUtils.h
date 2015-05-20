@@ -18,7 +18,6 @@ inline glm::vec3 computeNormal(const glm::vec3 &first, const glm::vec3 &second,
 }
 
 btScalar clampToDegrees(btScalar value);
-btScalar degreesToRadiants(btScalar degrees);
 int signum(btScalar x);
 
 // Dump functions.

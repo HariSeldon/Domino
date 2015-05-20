@@ -27,7 +27,9 @@ public:
   ~Window();
 
 public:
-  void setScene(SceneManager *sceneManager);
+  inline void setScene(std::unique_ptr<SceneManager> sceneManager) {
+    scene = std::move(sceneManager);
+  }
   void startRendering();
   void stopRendering();
 
@@ -35,15 +37,17 @@ private:
   void initSDLWindow();
   void attachTimers();
   void renderingLoop();
-  void updateCameraPosition();
+  void updateCurrentCameraPosition();
   void setupProjection(); 
-  SceneManager* getScene();
+  inline SceneManager* getScene() {
+    return scene.get();
+  }
 
 private:
   SDL_Window *sdlWindow;
   SDL_GLContext context;
 
-  SceneManager* scene;
+  std::unique_ptr<SceneManager> scene;
 
   SDL_TimerID eventTimerId;
   SDL_TimerID fpsTimerId;
@@ -52,8 +56,6 @@ private:
 
   bool running; 
 
-  std::atomic_int currentYRotation;
-  std::atomic_int currentXRotation;
   std::mutex cameraMutex;
 
   std::atomic_int frameCounter;

@@ -48,7 +48,7 @@ void CharacterAtlas::computeTextureSize(FT_Face fontFace) {
     width += glyph->bitmap.width + 1;
     // The height of the texture is going to be the height of the tallest
     // character.
-    height = std::max(height, glyph->bitmap.rows);
+    height = std::max(height, static_cast<int>(glyph->bitmap.rows));
   }
 }
 
@@ -61,7 +61,7 @@ void CharacterAtlas::createTexture() {
   checkOpenGLError("CharacterAtlas: glBindTexture");
 
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED,
-               GL_UNSIGNED_BYTE, 0);
+               GL_UNSIGNED_BYTE, nullptr);
   checkOpenGLError("CharacterAtlas glTexImage2D");
 
   // 1 Byte alignment.

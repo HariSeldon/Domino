@@ -49,4 +49,7 @@ void GLInitializer::initGL() {
   checkOpenGLError("GLInitializer: glEnable-GL_BLEND");
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   checkOpenGLError("GLInitializer: glBlendFunc-GL_SRC_ALPHA");
+  glFrontFace(GL_CCW);
+  checkOpenGLError("GLInitializer: glFrontFace");
+
 }

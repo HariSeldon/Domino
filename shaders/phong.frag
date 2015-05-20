@@ -1,7 +1,10 @@
 #version 330
 
+uniform sampler2D texture;
+
 in vec3 position;
 in vec3 normal;
+in vec2 textureCoordinates;
 
 // Don't use functions glBindFragDataLocation and glGetFragDataLocation
 // Rely on the default behaviour: output is associated to location 0.
@@ -42,7 +45,7 @@ uniform int lightMask;
 
 uniform vec4 ambientColor;
 
-uniform float defaultSpotCutOff;
+const float DEFAULT_SPOT_CUTOFF = 180.f;
 
 // -----------------------------------------------------------------------------
 // Light-independent shading.
@@ -59,7 +62,7 @@ vec4 shadeDirectionalLight(vec3 position, vec3 normal, vec3 cameraDirection,
                            int lightIndex) {
   // Get material properties.
   vec4 ambientMaterialColor = material.ambient;
-  vec4 diffuseMaterialColor = material.diffuse;
+  vec4 diffuseMaterialColor = texture2D(texture, textureCoordinates);
   vec4 specularMaterialColor = material.specular;
   float shininess = material.shininess;
 
@@ -93,7 +96,8 @@ vec4 shadePositionalLight(vec3 position, vec3 normal, vec3 cameraDirection,
                           int lightIndex) {
   // Get material properties.
   vec4 ambientMaterialColor = material.ambient;
-  vec4 diffuseMaterialColor = material.diffuse;
+  //vec4 diffuseMaterialColor = material.diffuse;
+  vec4 diffuseMaterialColor = texture2D(texture, textureCoordinates);
   vec4 specularMaterialColor = material.specular;
   float shininess = material.shininess;
 
@@ -134,7 +138,7 @@ vec4 shadePositionalLight(vec3 position, vec3 normal, vec3 cameraDirection,
         1.0f / (constantAttenuation + (linearAttenuation * lightDistance) +
                 (quadraticAttenuation * lightDistance * lightDistance));
 
-    if (spotCutOff < defaultSpotCutOff) {
+    if (spotCutOff < DEFAULT_SPOT_CUTOFF) {
       float spotCosine = dot(normalize(spotDirection), -1.0f * lightDirection);
       float spotAttenuation = (spotCosine > spotCosCutOff) ?
                                   // Inside the cone.
@@ -163,10 +167,9 @@ void main() {
   vec4 finalFragmentColor = shadeAmbientColor();
 
   for (int lightIndex = 0; lightIndex < lightsNumber; ++lightIndex) {
-    // FIXME: find a better way.
-    if ((lightMask >> lightIndex) % 2 == 0) {
+    if ( int((1 << lightIndex) & lightMask) == 0) {
       continue;
-    }
+    } 
 
     LightInfo light = lights[lightIndex];
 

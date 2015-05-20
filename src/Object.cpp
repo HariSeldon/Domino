@@ -2,18 +2,26 @@
 
 #include "Box.h"
 #include "Drawer.h"
+#include "LightBulb.h"
 #include "MathUtils.h"
 #include "Mirror.h"
 #include "Mesh.h"
 #include "Plane.h"
 #include "ShaderProgram.h"
+#include "SysDefines.h"
 
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 
 #include <utility>
 
-Object::Object(btTransform &transform, btScalar mass, btVector3 &inertia)
+const glm::vec3 Object::DEFAULT_POSITION = {0.f, 0.f, 0.f};
+const glm::vec3 Object::DEFAULT_ROTATION = {0.f, 0.f, 0.f};
+const glm::vec4 Object::DEFAULT_AMBIENT_COLOR = {0.f, 0.f, 0.f, 1.f};
+const glm::vec4 Object::DEFAULT_DIFFUSE_COLOR = {0.f, 0.f, 0.f, 1.f};
+const glm::vec4 Object::DEFAULT_SPECULAR_COLOR = {0.f, 0.f, 0.f, 1.f};
+
+Object::Object(const btTransform &transform, btScalar mass, btVector3 &inertia)
     : Entity(transform), mass(mass), inertia(inertia) {}
 
 Object::~Object() {
@@ -36,25 +44,15 @@ const float *Object::getTextureCoos() const {
   return reinterpret_cast<const float *>(textureCoos.data());
 }
 
-int Object::getTrigsNumber() const { return indices.size() / 3; }
-int Object::getIndicesNumber() const { return indices.size(); }
-
-btScalar Object::getMass() const { return mass; }
 void Object::setMass(btScalar mass) { this->mass = mass; }
 
-const btVector3 &Object::getInertia() const { return inertia; }
 void Object::setInertia(const btVector3 &inertia) { this->inertia = inertia; }
 
-const glm::vec4 &Object::getAmbientColor() const { return ambientColor; }
 void Object::setAmbientColor(const glm::vec4 &color) { ambientColor = color; }
 
-const glm::vec4 &Object::getDiffuseColor() const { return diffuseColor; }
 void Object::setDiffuseColor(const glm::vec4 &color) { diffuseColor = color; }
 
-const glm::vec4 &Object::getSpecularColor() const { return specularColor; }
 void Object::setSpecularColor(const glm::vec4 &color) { specularColor = color; }
-
-float Object::getShininess() const { return shininess; }
 
 void Object::setShininess(float shininess) { this->shininess = shininess; }
 
@@ -63,7 +61,6 @@ void Object::setCollisionShape(btCollisionShape *collisionShape) {
   this->collisionShape = collisionShape;
 }
 
-btRigidBody *Object::getRigidBody() const { return rigidBody; }
 void Object::setRigidBody(btRigidBody *rigidBody) {
   this->rigidBody = rigidBody;
 }
@@ -79,10 +76,6 @@ btRigidBody::btRigidBodyConstructionInfo *Object::getConstructionInfo() const {
 void Object::setConstructionInfo(
     btRigidBody::btRigidBodyConstructionInfo *constructionInfo) {
   this->constructionInfo = constructionInfo;
-}
-
-void Object::getOpenGLMatrix(btScalar *matrix) const {
-  transform.getOpenGLMatrix(matrix);
 }
 
 //-----------------------------------------------------------------------------
@@ -136,6 +129,12 @@ Subtype &ObjectBuilder<Subtype>::setShininess(float shininess) {
 }
 
 template <class Subtype>
+Subtype &ObjectBuilder<Subtype>::setTextureFile(std::string textureFile) {
+  this->textureFile = TEXTURE_PATH + textureFile;
+  return static_cast<Subtype &>(*this);
+}
+
+template <class Subtype>
 void ObjectBuilder<Subtype>::setColors(Object *object) {
   object->setAmbientColor(ambientColor);
   object->setDiffuseColor(diffuseColor);
@@ -147,3 +146,4 @@ template class ObjectBuilder<PlaneBuilder>;
 template class ObjectBuilder<BoxBuilder>;
 template class ObjectBuilder<MirrorBuilder>;
 template class ObjectBuilder<MeshBuilder>;
+template class ObjectBuilder<LightBulbBuilder>;

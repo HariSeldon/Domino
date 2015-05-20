@@ -2,6 +2,7 @@
 
 #include "Shader.h"
 #include "SysDefines.h"
+#include "SysUtils.h"
 
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
@@ -12,14 +13,12 @@
 #include <cassert>
 #include <cstdlib>
 #include <sstream>
+#include <string>
 #include <vector>
 #include <iostream>
 
 int queryUniformsNumber(GLuint programID);
-int queryUniformLocation(GLuint programID, const char *uniformName);
 std::vector<int> queryUniformNamesLength(GLuint programID);
-template <typename type>
-void setUniformValue(GLint location, const type &value);
 
 int queryAttributesNumber(GLuint programID);
 int queryAttributeLocation(GLuint programID, const char *attributeName);
@@ -36,11 +35,16 @@ ShaderProgram::ShaderProgram(const std::string &vertexShaderFileName,
   glAttachShader(programID, vertexShader->getID());
   glAttachShader(programID, fragmentShader->getID());
   glLinkProgram(programID);
+
+  GLint output;
+  glGetProgramiv(programID, GL_LINK_STATUS, &output);
+  assert(output == GL_TRUE);
+
   checkErrors(programID);
-  fillUniformMap();
   fillAttributeMap();
 }
 
+// -----------------------------------------------------------------------------
 ShaderProgram::~ShaderProgram() {
   glUseProgram(0);
   delete vertexShader;
@@ -48,94 +52,97 @@ ShaderProgram::~ShaderProgram() {
   glDeleteProgram(programID);
 }
 
-GLuint ShaderProgram::getProgramId() const { return programID; }
-
-void ShaderProgram::useProgram() const { glUseProgram(programID); }
-
 // #############################################################################
 // Uniform management.
-int ShaderProgram::getUniformLocation(const std::string &uniformName) const {
-  return uniformLocationsMap.at(uniformName);
-}
-
-GLint queryUniformLocation(GLuint programID, const char *uniformName) {
+GLint ShaderProgram::queryUniformLocation(GLuint programID,
+                                          const char *uniformName) {
   GLint location = glGetUniformLocation(programID, uniformName);
   assert(location != -1 && "Error querying uniform location");
   return location;
 }
 
-template void ShaderProgram::setUniform(const std::string &name,
-                                        const float &value);
-template void ShaderProgram::setUniform(const std::string &name,
-                                        const int &value);
-template void ShaderProgram::setUniform(const std::string &name,
-                                        const unsigned char &value);
-template void ShaderProgram::setUniform(const std::string &name,
-                                        const unsigned int &value);
-template void ShaderProgram::setUniform(const std::string &name,
-                                        const glm::vec4 &value);
-template void ShaderProgram::setUniform(const std::string &name,
-                                        const glm::vec3 &value);
-template void ShaderProgram::setUniform(const std::string &name,
-                                        const glm::mat4 &value);
-template void ShaderProgram::setUniform(const std::string &name,
-                                        const glm::mat3 &value);
+template void ShaderProgram::setUniform(int nameIndex,
+                                        const float &value) const;
+template void ShaderProgram::setUniform(int nameIndex, const int &value) const;
+template void ShaderProgram::setUniform(int nameIndex,
+                                        const unsigned int &value) const;
+template void ShaderProgram::setUniform(int nameIndex,
+                                        const glm::vec4 &value) const;
+template void ShaderProgram::setUniform(int nameIndex,
+                                        const glm::vec3 &value) const;
+template void ShaderProgram::setUniform(int nameIndex,
+                                        const glm::mat4 &value) const;
+template void ShaderProgram::setUniform(int nameIndex,
+                                        const glm::mat3 &value) const;
+
 template <typename type>
-void ShaderProgram::setUniform(const std::string &name, const type &value) {
-  auto iter = uniformLocationsMap.find(name);
-  if (iter == uniformLocationsMap.end()) 
-    return;
-  setUniformValue<type>(uniformLocationsMap[name], value);
+void ShaderProgram::setUniform(int nameIndex, const type &value) const {
+  setUniformValue<type>(uniformLocations[nameIndex], value);
 }
 
 template <typename type>
-void setUniformValue(GLint, const type &) {
+void ShaderProgram::setUniformValue(GLint, const type &) const {
   return;
 }
 
-template <> void setUniformValue(GLint location, const unsigned int &value) {
+template <>
+void ShaderProgram::setUniformValue(GLint location, const unsigned int &value) const {
   glUniform1i(location, value);
+  checkOpenGLError("set Uniform with location: " + std::to_string(location));
 }
 
-template <> void setUniformValue(GLint location, const int &value) {
+template <>
+void ShaderProgram::setUniformValue(GLint location, const int &value) const {
   glUniform1i(location, value);
+  checkOpenGLError("set Uniform with location: " + std::to_string(location));
 }
 
-template <> void setUniformValue(GLint location, const float &value) {
+template <>
+void ShaderProgram::setUniformValue(GLint location, const float &value) const {
   glUniform1f(location, value);
+  checkOpenGLError("set Uniform with location: " + std::to_string(location));
 }
 
-template <> void setUniformValue(GLint location, const glm::vec3 &vector) {
+template <>
+void ShaderProgram::setUniformValue(GLint location, const glm::vec3 &vector) const {
   glUniform3f(location, vector.x, vector.y, vector.z);
+  checkOpenGLError("set Uniform with location: " + std::to_string(location));
 }
 
-template <> void setUniformValue(GLint location, const glm::vec4 &vector) {
+template <>
+void ShaderProgram::setUniformValue(GLint location, const glm::vec4 &vector) const {
   glUniform4f(location, vector.x, vector.y, vector.z, vector.w);
+  checkOpenGLError("set Uniform with location: " + std::to_string(location));
 }
 
-template <> void setUniformValue(GLint location, const glm::mat4 &matrix) {
+template <>
+void ShaderProgram::setUniformValue(GLint location, const glm::mat4 &matrix) const {
   glUniformMatrix4fv(location, 1, GL_FALSE, &matrix[0][0]);
+  checkOpenGLError("set Uniform with location: " + std::to_string(location));
 }
 
-template <> void setUniformValue(GLint location, const glm::mat3 &matrix) {
+template <>
+void ShaderProgram::setUniformValue(GLint location, const glm::mat3 &matrix) const {
   glUniformMatrix3fv(location, 1, GL_FALSE, &matrix[0][0]);
+  checkOpenGLError("set Uniform with location: " + std::to_string(location));
 }
 
-void ShaderProgram::fillUniformMap() {
-  std::vector<int> sizes = queryUniformNamesLength(programID);
-  GLenum type = 0;
-  GLint arraySize = 0;
-  for (size_t index = 0; index < sizes.size(); ++index) {
-    GLsizei actualSize = 0;
-    std::vector<GLchar> nameRawData(sizes[index]);
-    glGetActiveUniform(programID, index, nameRawData.size(), &actualSize,
-                       &arraySize, &type, nameRawData.data());
-    std::string name(nameRawData.data(), actualSize);
-    GLint uniformLocation = queryUniformLocation(programID, name.c_str());
-    uniformLocationsMap[name] = static_cast<int>(uniformLocation);
+// -----------------------------------------------------------------------------
+// This could return a vector.
+std::vector<int> ShaderProgram::createUniformTable(
+    const std::vector<std::string> &uniformNames) const {
+  int numberOfUniforms = uniformNames.size();
+  std::vector<int> uniformLocations(numberOfUniforms);
+  for (int index = 0; index < numberOfUniforms; ++index) {
+    GLint uniformLocation =
+        queryUniformLocation(programID, uniformNames[index].c_str());
+    uniformLocations[index] = uniformLocation;
   }
+
+  return uniformLocations;
 }
 
+// -----------------------------------------------------------------------------
 int queryUniformsNumber(GLuint programID) {
   GLint uniformsNumber = -1;
   glGetProgramiv(programID, GL_ACTIVE_UNIFORMS, &uniformsNumber);
@@ -144,6 +151,7 @@ int queryUniformsNumber(GLuint programID) {
   return static_cast<int>(uniformsNumber);
 }
 
+// -----------------------------------------------------------------------------
 std::vector<int> queryUniformNamesLength(GLuint programID) {
   int uniformsNumber = queryUniformsNumber(programID);
   // Uniform indices to be queries.
@@ -165,35 +173,43 @@ int ShaderProgram::getAttributeLocation(const std::string &name) const {
   return attributeLocationsMap.at(name);
 }
 
-void ShaderProgram::setAttribute(const std::string &name, int size, GLenum type) const {
-  int location = 0;
-  try {
-    location = attributeLocationsMap.at(name);
-  } catch (std::out_of_range &exception) {
-    std::cout << "Cannot set attibute: " << name << "\n";
-    return;
-  }
-
+// -----------------------------------------------------------------------------
+void ShaderProgram::setAttribute(const std::string &name, int size,
+                                 GLenum type) const {
+  int location = attributeLocationsMap.at(name);
   glVertexAttribPointer(location, size, type, GL_FALSE, 0, nullptr);
   glEnableVertexAttribArray(location);
 }
 
+// -----------------------------------------------------------------------------
 void ShaderProgram::fillAttributeMap() {
-  int attributesNumber = queryAttributesNumber(programID);
-  const int ATTRIBUTE_NAME_MAX_SIZE = 256;
+  const auto ATTRIBUTE_NAME_MAX_SIZE = 256;
   std::vector<GLchar> nameRawData(ATTRIBUTE_NAME_MAX_SIZE);
   GLint arraySize = 0;
   GLenum type = 0;
-  for (int index = 0; index < attributesNumber; ++index) {
+  auto attributesNumber = queryAttributesNumber(programID);
+  for (auto index = 0; index < attributesNumber; ++index) {
     GLsizei actualSize = 0;
     glGetActiveAttrib(programID, index, nameRawData.size(), &actualSize,
                       &arraySize, &type, &nameRawData[0]);
     std::string name(nameRawData.data(), actualSize);
-    int location = queryAttributeLocation(programID, name.c_str());
+    auto location = queryAttributeLocation(programID, name.c_str());
     attributeLocationsMap[name] = location;
   }
 }
 
+// -----------------------------------------------------------------------------
+void ShaderProgram::printUniformLocations(const std::vector<std::string> &names,
+                                          const std::vector<int> &locations) const {
+  assert(locations.size() % names.size() == 0);
+  std::cout << "-------------------------------------------------\n";
+  for (auto index = 0u; index < locations.size(); ++index) {
+    std::cout << names[index % names.size()] << " " << locations[index] << "\n";
+  }
+  std::cout << "-------------------------------------------------\n";
+}
+
+// -----------------------------------------------------------------------------
 int queryAttributesNumber(GLuint programID) {
   GLint attributesNumber = -1;
   glGetProgramiv(programID, GL_ACTIVE_ATTRIBUTES, &attributesNumber);
@@ -202,16 +218,18 @@ int queryAttributesNumber(GLuint programID) {
   return static_cast<int>(attributesNumber);
 }
 
+// -----------------------------------------------------------------------------
 int queryAttributeLocation(GLuint programID, const char *attributeName) {
   GLint location = glGetAttribLocation(programID, attributeName);
   assert(location != -1 && "Error querying attribute location");
   return location;
 }
 
+// -----------------------------------------------------------------------------
 void checkErrors(GLuint programID) {
-  if (!glIsProgram(programID)) {
-    throw std::runtime_error("Error in creating shader program");
-  }
+  if (!glIsProgram(programID))
+    std::cout << "Error in creating shader program"
+              << "\n";
 
   int errorLength = 0;
   int maxLength = 0;
@@ -219,8 +237,7 @@ void checkErrors(GLuint programID) {
   std::vector<char> errorMessage(maxLength);
   glGetProgramInfoLog(programID, maxLength, &errorLength, errorMessage.data());
 
-  if (errorLength > 0) {
-    throw std::runtime_error("Error in shader program:\n" +
-                             std::string(errorMessage.data()));
-  }
+  if (errorLength > 0)
+    std::cout << "Error in shader program:\n"
+              << std::string(errorMessage.data()) << "\n";
 }

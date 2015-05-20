@@ -1,17 +1,34 @@
+#include "GLInitializer.h"
+#include "SceneContainer.h"
+#include "SceneManager.h"
+#include "ScriptEngine.h"
 #include "Window.h"
 
-#include "GLInitializer.h"
-#include "SceneManager.h"
+#include <memory>
 
-int main(int, char**) {
+#include <glm/ext.hpp>
+
+extern SceneContainer *tmpContainer;
+
+int main(int, char **) {
+  auto container = new SceneContainer();
+  tmpContainer = container;
+
+  // Fill the container with the script.
+  runScript("hello.lua");
+
+  // Init GL.
   glm::ivec2 screenSize = GLInitializer::initSDL();
+  
+  std::cout << "Size: " << glm::to_string(screenSize) << "\n";
+
   Window window;
   GLInitializer::initGL();
 
-  SceneManager *sceneManager = new SceneManager(screenSize);
-  // The ownership of the pointer will be taken by window.
-  // FIXME: replace this with a smart pointer.
-  window.setScene(sceneManager);
+  auto sceneManager = std::unique_ptr<SceneManager>(
+      new SceneManager(screenSize, container));
+
+  window.setScene(std::move(sceneManager));
   window.startRendering();
   return 0;
 }

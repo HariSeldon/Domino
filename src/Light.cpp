@@ -1,16 +1,18 @@
 #include "Light.h"
 
-#include <string>
+#include "LightedObjectShader.h"
 
 #include <glm/glm.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/vec4.hpp>
 
-const glm::vec4 Light::DEFAULT_AMBIENT_COLOR = { 0.f, 0.f, 0.f, 1.f };
-const glm::vec4 Light::DEFAULT_DIFFUSE_COLOR = { 1.f, 1.f, 1.f, 1.f };
-const glm::vec4 Light::DEFAULT_SPECULAR_COLOR = { 0.f, 0.f, 0.f, 1.f };
-const glm::vec3 Light::DEFAULT_SPOT_DIRECTION = { 0.f, 0.f, -1.f };
-const glm::vec3 Light::DEFAULT_SPOT_POSITION = { 0.f, 0.f, 0.f };
+#include <string>
+
+const glm::vec4 Light::DEFAULT_AMBIENT_COLOR = {0.f, 0.f, 0.f, 1.f};
+const glm::vec4 Light::DEFAULT_DIFFUSE_COLOR = {1.f, 1.f, 1.f, 1.f};
+const glm::vec4 Light::DEFAULT_SPECULAR_COLOR = {0.f, 0.f, 0.f, 1.f};
+const glm::vec3 Light::DEFAULT_DIRECTION = {0.f, 0.f, -1.f};
+const glm::vec3 Light::DEFAULT_POSITION = {0.f, 0.f, 0.f};
 const float Light::DEFAULT_SPOT_CUTOFF = 180.0f;
 
 // -----------------------------------------------------------------------------
@@ -26,15 +28,14 @@ void Light::setSpecularColor(const glm::vec4 &color) { specularColor = color; }
 
 const glm::vec4 &Light::getSpecularColor() const { return specularColor; }
 
-void Light::draw(ShaderProgram &shaderProgram,
-                 const glm::mat4 &) const {
-  shaderProgram.setUniform("lights[" + std::to_string(number) + "].ambient",
-                           ambientColor);
-  shaderProgram.setUniform("lights[" + std::to_string(number) + "].diffuse",
-                           diffuseColor);
-  shaderProgram.setUniform("lights[" + std::to_string(number) + "].specular",
-                           specularColor);
-  shaderProgram.setUniform("defaultSpotCutOff", Light::DEFAULT_SPOT_CUTOFF);
+void Light::setUniforms(const LightedObjectShader &shader,
+                        const glm::mat4 &) const {
+  shader.setLightUniform(number, LightedObjectShader::lightAmbient,
+                        ambientColor);
+  shader.setLightUniform(number, LightedObjectShader::lightDiffuse,
+                        diffuseColor);
+  shader.setLightUniform(number, LightedObjectShader::lightSpecular,
+                          specularColor);
 }
 
 // -----------------------------------------------------------------------------
@@ -48,8 +49,8 @@ void DirectionalLight::setDirection(const glm::vec3 &direction) {
 
 const glm::vec4 &DirectionalLight::getDirection() { return direction; }
 
-void DirectionalLight::draw(ShaderProgram &shaderProgram,
-                            const glm::mat4 &modelView) const {
+void DirectionalLight::setUniforms(const LightedObjectShader &shader,
+                                   const glm::mat4 &modelView) const {
   glm::mat4 modelViewRotation(modelView);
   modelViewRotation[3][0] = 0.0f;
   modelViewRotation[3][1] = 0.0f;
@@ -58,9 +59,9 @@ void DirectionalLight::draw(ShaderProgram &shaderProgram,
   glm::vec4 screenSpaceDirection = modelViewRotation * direction;
   glm::normalize(screenSpaceDirection);
 
-  Light::draw(shaderProgram, modelView);
-  shaderProgram.setUniform("lights[" + std::to_string(number) + "].position",
-                           screenSpaceDirection);
+  Light::setUniforms(shader, modelView);
+  shader.setLightUniform(number, LightedObjectShader::lightPosition,
+                          screenSpaceDirection);
 }
 
 // -----------------------------------------------------------------------------
@@ -94,22 +95,22 @@ float PositionalLight::getQuadraticAttenuation() {
   return quadraticAttenuation;
 }
 
-void PositionalLight::draw(ShaderProgram &shaderProgram,
-                           const glm::mat4 &modelView) const {
-  Light::draw(shaderProgram, modelView);
-  shaderProgram.setUniform("lights[" + std::to_string(number) +
-                               "].constantAttenuation",
-                           constantAttenuation);
-  shaderProgram.setUniform("lights[" + std::to_string(number) +
-                               "].linearAttenuation",
-                           linearAttenuation);
-  shaderProgram.setUniform("lights[" + std::to_string(number) +
-                               "].quadraticAttenuation",
-                           quadraticAttenuation);
-  shaderProgram.setUniform("lights[" + std::to_string(number) + "].spotCutOff",
-                           180.0f);
-  shaderProgram.setUniform("lights[" + std::to_string(number) + "].position",
-                           modelView * position);
+void PositionalLight::setUniforms(const LightedObjectShader &shader,
+                                  const glm::mat4 &modelView) const {
+  Light::setUniforms(shader, modelView);
+  shader.setLightUniform(number, LightedObjectShader::lightConstantAttenuation,
+                        constantAttenuation);
+  shader.setLightUniform(number, LightedObjectShader::lightLinearAttenuation,
+
+                        linearAttenuation);
+  shader.setLightUniform(number,
+                        LightedObjectShader::lightQuadraticAttenuation,
+                        quadraticAttenuation);
+  shader.setLightUniform(number,
+                        LightedObjectShader::lightSpotCutOff,
+                        Light::DEFAULT_SPOT_CUTOFF);
+  shader.setLightUniform(number, LightedObjectShader::lightPosition,
+                          modelView * position);
 }
 
 // -----------------------------------------------------------------------------
@@ -132,8 +133,8 @@ void SpotLight::setExponent(float exponent) { this->exponent = exponent; }
 
 float SpotLight::getExponent() { return exponent; }
 
-void SpotLight::draw(ShaderProgram &shaderProgram,
-                     const glm::mat4 &modelView) const {
+void SpotLight::setUniforms(const LightedObjectShader &shader,
+                            const glm::mat4 &modelView) const {
   glm::mat4 modelViewRotation(modelView);
   modelViewRotation[3][0] = 0.0f;
   modelViewRotation[3][1] = 0.0f;
@@ -142,15 +143,14 @@ void SpotLight::draw(ShaderProgram &shaderProgram,
   glm::vec4 screenSpaceDirection = modelViewRotation * direction;
   glm::normalize(screenSpaceDirection);
 
-  PositionalLight::draw(shaderProgram, modelView);
-
-  shaderProgram.setUniform("lights[" + std::to_string(number) + "].spotCutOff",
-                           cutOff);
-  shaderProgram.setUniform(
-      "lights[" + std::to_string(number) + "].spotExponent", exponent);
-  shaderProgram.setUniform("lights[" + std::to_string(number) +
-                               "].spotDirection",
-                           glm::vec3(screenSpaceDirection));
+  PositionalLight::setUniforms(shader, modelView);
+  shader.setLightUniform(number, LightedObjectShader::lightSpotCutOff, cutOff);
+  shader.setLightUniform(number, LightedObjectShader::lightSpotCosCutOff,
+                         glm::cos(glm::radians(cutOff)));
+  shader.setLightUniform(number, LightedObjectShader::lightSpotExponent,
+                         exponent);
+  shader.setLightUniform(number, LightedObjectShader::lightSpotDirection,
+                          glm::vec3(screenSpaceDirection));
 }
 
 // -----------------------------------------------------------------------------
@@ -161,8 +161,8 @@ void LightBuilder::setup() {
   diffuseColor = Light::DEFAULT_DIFFUSE_COLOR;
   specularColor = Light::DEFAULT_SPECULAR_COLOR;
 
-  direction = Light::DEFAULT_SPOT_DIRECTION;
-  position = Light::DEFAULT_SPOT_POSITION;
+  direction = Light::DEFAULT_DIRECTION;
+  position = Light::DEFAULT_POSITION;
 
   constantAttenuation = Light::DEFAULT_CONSTANT_ATTENUATION;
   linearAttenuation = Light::DEFAULT_LINEAR_ATTENUATION;

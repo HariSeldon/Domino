@@ -9,8 +9,8 @@
 
 class Box : public Object {
 private:
-  Box(btTransform &transform, btScalar mass, btVector3 &inertia,
-      btVector3 &sides);
+  Box(const btTransform &transform, const btScalar mass, btVector3 &inertia,
+      const btVector3 &sides);
 
 public:
   btVector3 getSides() const;

@@ -1,6 +1,7 @@
 cmake_minimum_required (VERSION 2.8.9)
 set(CMAKE_C_COMPILER "clang")
 set(CMAKE_CXX_COMPILER "clang++")
+set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
 set(PROJECT_NAME Domino)
 set(EXE_NAME domino)
@@ -9,7 +10,15 @@ set(BIN_DIR "bin")
 set(INCLUDE_DIR "include")
 set(SHADER_DIR "shaders")
 set(TEXTURE_DIR "textures")
+set(MESH_DIR "meshes")
 set(FONT_DIR "fonts")
+set(EXT_DIR "ext")
+set(SCRIPT_DIR "scripts")
+set(GLM_DIR "glm")
+set(BULLET_DIR "bullet")
+set(LUA_DIR "lua")
+set(LUA_LIB "Lua")
+set(DOMINO_SETUP_LUA "domino_setup.lua")
 
 # Set project name.
 project(PROJECT_NAME)
@@ -20,7 +29,11 @@ set(INCLUDE_PATH ${PROJECT_SOURCE_DIR}/${INCLUDE_DIR})
 set(SHADER_PATH ${PROJECT_SOURCE_DIR}/${SHADER_DIR}/)
 set(TEXTURE_PATH ${PROJECT_SOURCE_DIR}/${TEXTURE_DIR}/)
 set(FONT_PATH ${PROJECT_SOURCE_DIR}/${FONT_DIR}/)
-set(UI_PATH ${PROJECT_SOURCE_DIR}/${UI_DIR})
+set(MESH_PATH ${PROJECT_SOURCE_DIR}/${MESH_DIR}/)
+set(EXT_PATH ${PROJECT_SOURCE_DIR}/${EXT_DIR}/)
+set(SCRIPT_PATH ${PROJECT_SOURCE_DIR}/${SCRIPT_DIR}/)
+set(BULLET_PATH ${EXT_PATH}/${BULLET_DIR}/)
+set(LUA_PATH ${EXT_PATH}/${LUA_DIR}/)
 
 # Files.
 file(GLOB SRC_FILES_LIST "${SRC_PATH}/*.cpp")
@@ -28,17 +41,28 @@ file(GLOB SRC_FILES_LIST "${SRC_PATH}/*.cpp")
 # Include files.
 # Include directories.
 configure_file(${CMAKE_SOURCE_DIR}/${INCLUDE_DIR}/SysDefines.h.cmake 
-               ${CMAKE_SOURCE_DIR}/${INCLUDE_DIR}/SysDefines.h)
-set(BULLET_INCLUDE_DIR "/usr/include/bullet")
+               ${CMAKE_BINARY_DIR}/${INCLUDE_DIR}/SysDefines.h)
+set(BULLET_INCLUDE_DIR "${BULLET_PATH}/src")
+set(LUA_INCLUDE_DIR "${LUA_PATH}/src")
 set(FREETYPE_INCLUDE_DIR "/usr/include/freetype2")
-include_directories(${INCLUDE_PATH} ${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${EXT_PATH} ${INCLUDE_PATH} "${CMAKE_BINARY_DIR}/${INCLUDE_DIR}")
 # Use system flag so to disable warnings when compiling using -Wall.
-include_directories(SYSTEM ${BULLET_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR})
+include_directories(SYSTEM ${BULLET_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR} ${LUA_INCLUDE_DIR})
+
+if( "${CMAKE_BUILD_TYPE}" STREQUAL "" )
+  set(CMAKE_BUILD_TYPE "Debug")
+endif("${CMAKE_BUILD_TYPE}" STREQUAL "")
+
+message(STATUS "CMake build type: " ${CMAKE_BUILD_TYPE})
 
 # Set compilation options.
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -Wall -Wextra -pedantic")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -Wall -Wextra -pedantic")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -std=c++14")
+add_definitions("-g")
+# This is to remove GLM warning.
+add_definitions("-DGLM_FORCE_RADIANS")
 
 # Add sources to executable.
 add_executable(${EXE_NAME} ${SRC_FILES_LIST})
@@ -48,112 +72,75 @@ install_targets("/${BIN_DIR}/" ${EXE_NAME})
 
 # ------------------------------------------------------------------------------
 # GL
-find_library(GL_LIBRARY_PATH GL
-             /usr/lib64
-             /usr/lib
-             /usr/local/lib64
-             /usr/local/lib
-             /opt/local/lib
+find_library(GL_LIB_PATH GL
              DOC "The GL library")
-if(EXISTS ${GL_LIBRARY_PATH})
+if(EXISTS ${GL_LIB_PATH})
   message(STATUS "Looking for GL: found")
-else(EXISTS ${GL_LIBRARY_PATH})
+else(EXISTS ${GL_LIB_PATH})
   message(FATAL_ERROR "Looking for GL: not found")
-endif(EXISTS ${GL_LIBRARY_PATH})
+endif(EXISTS ${GL_LIB_PATH})
 
-find_library(GLU_LIBRARY_PATH GLU
-             /usr/lib64
-             /usr/lib
-             /usr/local/lib64
-             /usr/local/lib
-             /opt/local/lib
+find_library(GLU_LIB_PATH GLU
              DOC "The GLU library")
-if(EXISTS ${GLU_LIBRARY_PATH})
+if(EXISTS ${GLU_LIB_PATH})
   message(STATUS "Looking for GLU: found")
-else(EXISTS ${GLU_LIBRARY_PATH})
+else(EXISTS ${GLU_LIB_PATH})
   message(FATAL_ERROR "Looking for GLU: not found")
-endif(EXISTS ${GLU_LIBRARY_PATH})
+endif(EXISTS ${GLU_LIB_PATH})
 
-find_library(GLEW_LIBRARY_PATH GLEW
-             /usr/lib64
-             /usr/lib
-             /usr/local/lib64
-             /usr/local/lib
-             /opt/local/lib
+find_library(GLEW_LIB_PATH GLEW
              DOC "The GLEW library")
-if(EXISTS ${GLEW_LIBRARY_PATH})
+if(EXISTS ${GLEW_LIB_PATH})
   message(STATUS "Looking for GLEW: found")
-else(EXISTS ${GLEW_LIBRARY_PATH})
+else(EXISTS ${GLEW_LIB_PATH})
   message(FATAL_ERROR "Looking for GLEW: not found")
-endif(EXISTS ${GLEW_LIBRARY_PATH})
+endif(EXISTS ${GLEW_LIB_PATH})
 
-find_library(SDL2_LIBRARY_PATH SDL2
-             /usr/lib64
-             /usr/lib
-             /usr/local/lib64
-             /usr/local/lib
-             /opt/local/lib
+find_library(SDL2_LIB_PATH SDL2
              DOC "The SDL2 library")
-if(EXISTS ${SDL2_LIBRARY_PATH})
+if(EXISTS ${SDL2_LIB_PATH})
   message(STATUS "Looking for SDL2: found")
-else(EXISTS ${SDL2_LIBRARY_PATH})
+else(EXISTS ${SDL2_LIB_PATH})
   message(FATAL_ERROR "Looking for SDL2: not found")
-endif(EXISTS ${SDL2_LIBRARY_PATH})
+endif(EXISTS ${SDL2_LIB_PATH})
 
-find_library(FREETYPE_LIBRARY_PATH freetype
-             /usr/lib64
-             /usr/lib
-             /usr/local/lib64
-             /usr/local/lib
-             /opt/local/lib
+
+find_library(SDL2_IMAGE_LIB_PATH SDL2_image
+             DOC "The SDL2 Image library")
+if(EXISTS ${SDL2_IMAGE_LIB_PATH})
+  message(STATUS "Looking for SDL2 Image: found")
+else(EXISTS ${SDL2_IMAGE_LIB_PATH})
+  message(FATAL_ERROR "Looking for SDL2 Image: not found")
+endif(EXISTS ${SDL2_IMAGE_LIB_PATH})
+
+find_library(FREETYPE_LIB_PATH freetype
              DOC "The freetype library")
-if(EXISTS ${FREETYPE_LIBRARY_PATH})
+if(EXISTS ${FREETYPE_LIB_PATH})
   message(STATUS "Looking for freetype: found")
-else(EXISTS ${FREETYPE_LIBRARY_PATH})
+else(EXISTS ${FREETYPE_LIB_PATH})
   message(FATAL_ERROR "Looking for freetype: not found")
-endif(EXISTS ${FREETYPE_LIBRARY_PATH})
+endif(EXISTS ${FREETYPE_LIB_PATH})
 
-target_link_libraries(${EXE_NAME} ${SDL2_LIBRARY_PATH} ${GLEW_LIBRARY_PATH} ${GLU_LIBRARY_PATH} ${GL_LIBRARY_PATH} ${FREETYPE_LIBRARY_PATH})
+target_link_libraries(${EXE_NAME} ${SDL2_LIB_PATH} 
+                                  ${SDL2_IMAGE_LIB_PATH} 
+                                  ${GLEW_LIB_PATH} 
+                                  ${GLU_LIB_PATH} 
+                                  ${GL_LIB_PATH} 
+                                  ${FREETYPE_LIB_PATH}) 
 
-# BulletCollision
-find_library(BULLET_COLLISION_LIBRARY_PATH BulletCollision
-             /usr/lib64
-             /usr/lib
-             /usr/local/lib64
-             /usr/local/lib
-             /opt/local/lib
-             DOC "The BulletCollision library")
-if(EXISTS ${BULLET_COLLISION_LIBRARY_PATH})
-  message(STATUS "Looking for BulletCollision: found")
-else(EXISTS ${BULLET_COLLISION_LIBRARY_PATH})
-  message(FATAL_ERROR "Looking for BulletCollision: not found")
-endif(EXISTS ${BULLET_COLLISION_LIBRARY_PATH})
+add_subdirectory(${BULLET_PATH})
+# Warning! Preserve this ordering for these static libraries.
+# Dynamics depends on Collision and they both depend on LinearMath.
+target_link_libraries(${EXE_NAME} BulletDynamics BulletCollision LinearMath)
 
-# BulletDynamics
-find_library(BULLET_DYNAMICS_LIBRARY_PATH BulletDynamics
-             /usr/lib64
-             /usr/lib
-             /usr/local/lib64
-             /usr/local/lib
-             /opt/local/lib
-             DOC "The BulleetDynamics library")
-if(EXISTS ${BULLET_DYNAMICS_LIBRARY_PATH})
-  message(STATUS "Looking for BulletDynamics: found")
-else(EXISTS ${BULLET_DYNAMICS_LIBRARY_PATH})
-  message(FATAL_ERROR "Looking for BulletDynamics: not found")
-endif(EXISTS ${BULLET_DYNAMICS_LIBRARY_PATH})
+add_subdirectory(${LUA_PATH})
+target_link_libraries(${EXE_NAME} ${LUA_LIB}
+                                  ${DL_LIB_PATH}
+                                  ${READ_LINE_LIB_PATH})
 
-# LinearMath
-find_library(LINEAR_MATH_LIBRARY_PATH LinearMath
-             /usr/lib64
-             /usr/lib
-             /usr/local/lib64
-             /usr/local/lib
-             /opt/local/lib
-             DOC "The LinearMath library")
-if(EXISTS ${LINEAR_MATH_LIBRARY_PATH})
-  message(STATUS "Looking for LinearMath: found")
-else(EXISTS ${LINEAR_MATH_LIBRARY_PATH})
-  message(FATAL_ERROR "Looking for LinearMath: not found")
-endif(EXISTS ${LINEAR_MATH_LIBRARY_PATH})
-target_link_libraries(${EXE_NAME} ${BULLET_DYNAMICS_LIBRARY_PATH} ${BULLET_COLLISION_LIBRARY_PATH} ${LINEAR_MATH_LIBRARY_PATH})
+# ------------------------------------------------------------------------------
+# Copy lua config file.
+add_custom_command(TARGET ${EXE_NAME}
+                   POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy ${SCRIPT_PATH}/${DOMINO_SETUP_LUA} 
+                   ${CMAKE_BINARY_DIR}/${DOMINO_SETUP_LUA})

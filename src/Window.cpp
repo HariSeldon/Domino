@@ -25,7 +25,7 @@ void abort(const std::string &message);
 Window::Window()
     : sdlWindow(nullptr), context(nullptr), scene(nullptr),
       eventTimerId(0), fpsTimerId(0), keyboardManager(this), running(true),
-      currentYRotation(0), currentXRotation(0), frameCounter(0)  {
+      frameCounter(0)  {
   initSDLWindow();
 }
 
@@ -48,7 +48,6 @@ void Window::initSDLWindow() {
 
 // -----------------------------------------------------------------------------
 Window::~Window() {
-  delete scene;
   SDL_RemoveTimer(eventTimerId);
   SDL_RemoveTimer(fpsTimerId);
   SDL_GL_DeleteContext(context);
@@ -84,26 +83,16 @@ void Window::renderingLoop() {
     if (!running)
       break;
 
+    scene->updateCameraPosition();
     scene->drawScene();
 
     ++frameCounter;
     SDL_GL_SwapWindow(sdlWindow);
-    SDL_Delay(Window::DISPLAY_DELAY);
   }
 }
 
 // -----------------------------------------------------------------------------
-void Window::setScene(SceneManager *scene) {
-  this->scene = scene;
-}
-
-// -----------------------------------------------------------------------------
-SceneManager* Window::getScene() {
-  return scene;
-}
-
-// -----------------------------------------------------------------------------
-void Window::updateCameraPosition() {
+void Window::updateCurrentCameraPosition() {
   unsigned char forward = keyboardManager.isForwardDown() << 3;
   unsigned char backward = keyboardManager.isBackwardDown() << 2;
   unsigned char left = keyboardManager.isLeftDown() << 1;
@@ -111,7 +100,7 @@ void Window::updateCameraPosition() {
 
   unsigned char mask = forward | backward | left | right;
 
-  scene->updateCameraPosition(mask);
+  scene->updateCurrentCameraPosition(mask);
 }
 
 // -----------------------------------------------------------------------------
@@ -146,7 +135,7 @@ Uint32 eventHandler(Uint32 interval, void *windowPtr) {
     case SDL_MOUSEMOTION: {
       int xDiff = event.motion.xrel;
       int yDiff = event.motion.yrel;
-      scene->updateCameraRotation({xDiff, yDiff});
+      scene->updateCurrentCameraRotation({xDiff, yDiff});
       break;
     }
 
@@ -159,7 +148,9 @@ Uint32 eventHandler(Uint32 interval, void *windowPtr) {
     }
   }
 
-  window->updateCameraPosition();
+  window->updateCurrentCameraPosition();
+  // This makes the update of the scene independent of the frame-rate.
+  scene->stepSimulation(); 
   return interval;
 }
 
@@ -179,5 +170,3 @@ void checkSDLError(const std::string &message) {
     SDL_ClearError();
   }
 }
-
-// FIXME: I have to add the stepping of the simulation.

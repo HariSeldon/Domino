@@ -23,9 +23,9 @@ public:
    
   GLuint getTextureId() const;
 
-  ShaderProgram *getShaderProgram(); 
+//  ShaderProgram &getShaderProgram(); 
 
-  glm::mat4 getModelView();
+  glm::mat4 getModelView() const;
 
 private:
   void computePoints(const btScalar &side);
@@ -39,9 +39,10 @@ private:
   GLuint fboId;
   GLuint dboId;
   GLuint mirrorTexture;
-  ShaderProgram *shader;
+//  ShaderProgram shader;
+  static const std::string MIRROR_VERTEX_SHADER;
+  static const std::string MIRROR_FRAGMENT_SHADER;
     
-
   friend class MirrorBuilder;
 };
 

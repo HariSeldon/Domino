@@ -2,4 +2,4 @@
 *.swo
 *.out
 *.files
-include/SysDefines.h
+*.pyc

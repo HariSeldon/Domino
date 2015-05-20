@@ -1,70 +1,78 @@
 #pragma once
 
 #include "Camera.h"
+#include "Drawer.h"
+#include "SceneContainer.h"
+#include "ShaderProgram.h"
+#include "ShadowManager.h"
 #include "TextManager.h"
+#include "World.h"
 
 #include <glm/fwd.hpp>
 #include <glm/mat4x4.hpp>
 
 #include <atomic>
-#include <mutex>
+#include <memory>
 #include <string>
 
-class Drawer;
+#include "SDL2/SDL_thread.h"
+
 class Mirror;
-class ShaderProgram;
-class World;
+class ShadowManager;
 
 class SceneManager {
 public:
-  static const float VIEW_ANGLE;
-  static const float Z_NEAR;
-  static const float Z_FAR;
-
-  static const glm::vec4 CLEAR_COLOR;
-
   static constexpr int FONT_HEIGHT = 20;
+  static constexpr int MAX_LIGHTS_NUMBER = 4;
   static const std::string FONT_FILE;
-  static const std::string MAIN_VERTEX_SHADER;
-  static const std::string MAIN_FRAGMENT_SHADER;
 
 public:
-  SceneManager(const glm::ivec2 &screenSize);
+  SceneManager(const glm::ivec2 &screenSize, SceneContainer *container);
   ~SceneManager();
 
 public:
   void drawScene();
 
-  void updateCameraPosition(unsigned char keyMask);
-  void updateCameraRotation(glm::ivec2 diff);
+  void updateCameraPosition();
+  void updateCurrentCameraPosition(unsigned char keyMask);
+  void updateCurrentCameraRotation(glm::vec2 diff);
 
   void setFps(int fps);
 
   int getLightMask() const;
   void updateLightMask(int lightMask);
 
+  void stepSimulation();
+
 private:
+  void initGPU(SceneContainer *container);
+  void initTextures();
   void setupProjection(const glm::ivec2 &screenSize);
   void drawWorld(const glm::mat4 &modelView);
-  void drawLights(const glm::mat4 &modelView);
-  void drawObjects(const glm::mat4 &modelView);
-  void drawMirror(Mirror *mirror, const glm::mat4 &modelView);
+  void drawShadowWorld(const glm::mat4 &modelView, const glm::mat4 &projection,
+                       ShaderProgram &shader);
+  void drawMirror(const glm::mat4 &modelView);
   void drawText();
+  void mirrorRenderingPass();
+  void shadowRenderingPass();
+  void screenRenderingPass();
 
 private:
   World* world;
-  Drawer *drawer;
-  ShaderProgram* shader;
-  TextManager* textManager;
+  Camera* camera;
+
+  TextManager textManager;
+  Drawer drawer;
+  ShadowManager shadowManager;
 
   glm::mat4 projection;
 
-  Camera camera;
+  glm::vec4 backgroundColor;
+  float currentYRotation;
+  float currentXRotation;
+  float currentOffset;
+  SDL_mutex *positionMutex;
 
   int fps;
   int lightMask;
-
-  std::atomic_int currentYRotation;
-  std::atomic_int currentXRotation;
-  std::mutex cameraMutex;
 };

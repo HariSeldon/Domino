@@ -12,9 +12,13 @@
 
 #include <iostream>
 
+const std::string Mirror::MIRROR_VERTEX_SHADER = "mirror.vert";
+const std::string Mirror::MIRROR_FRAGMENT_SHADER = "mirror.frag";
+
 Mirror::Mirror(btTransform &transform, btScalar mass, btVector3 &inertia,
                const btScalar &side)
     : Object(transform, mass, inertia), fboId(0), dboId(0), mirrorTexture(0) {
+      //shader("mirror", MIRROR_VERTEX_SHADER, MIRROR_FRAGMENT_SHADER) 
   computePoints(side);
   setupBulletShape();
 
@@ -22,8 +26,6 @@ Mirror::Mirror(btTransform &transform, btScalar mass, btVector3 &inertia,
   createDBO();
   createMirrorTexture();
   attachTexture();
-
-  shader = new ShaderProgram("mirror.vert", "mirror.frag");
 }
 
 //-----------------------------------------------------------------------------
@@ -95,7 +97,7 @@ void Mirror::createMirrorTexture() {
   checkOpenGLError("Mirror: glBindTexture");
 
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1280, 800, 0, GL_RGB, GL_UNSIGNED_BYTE,
-               0);
+               nullptr);
   checkOpenGLError("Mirror: glTexImage2D");
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -109,8 +111,9 @@ void Mirror::createMirrorTexture() {
 //-----------------------------------------------------------------------------
 void Mirror::attachTexture() {
   glBindTexture(GL_TEXTURE_2D, mirrorTexture);
-  glBindFramebuffer(GL_FRAMEBUFFER, fboId);
   checkOpenGLError("Mirror: glBindTexture");
+  glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+  checkOpenGLError("Mirror: glBindFramebuffer");
   glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mirrorTexture,
                        0);
   checkOpenGLError("Mirror: glFramebufferTexture");
@@ -135,10 +138,10 @@ void Mirror::enableMirror() const {
 void Mirror::disableMirror() const { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
 
 //-----------------------------------------------------------------------------
-ShaderProgram *Mirror::getShaderProgram() { return shader; }
+//ShaderProgram &Mirror::getShaderProgram() { return shader; }
 
 //-----------------------------------------------------------------------------
-glm::mat4 Mirror::getModelView() {
+glm::mat4 Mirror::getModelView() const {
   // Get the mirror transformation.
   btScalar oglTransform[16];
   getOpenGLMatrix(oglTransform);

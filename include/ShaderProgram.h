@@ -2,41 +2,65 @@
 
 #include <GL/glew.h>
 
-#include <unordered_map>
+#include "SysUtils.h"
+
+#include <cassert>
 #include <memory>
 #include <string>
-#include <stdexcept>
+#include <unordered_map>
+#include <vector>
 
 class VertexShader;
 class FragmentShader;
 
+enum class ShaderType {
+  shText, shPhong, shLightBulb
+};
+
 class ShaderProgram {
+public:
+  static std::vector<std::string> uniformNames;
+  static std::vector<std::string> lightUniformNames;
+
 public:
   ShaderProgram(const std::string &vertexShaderFileName,
                 const std::string &fragmentShaderFileName);
-  ~ShaderProgram();
+  virtual ~ShaderProgram();
 
 public:
-  GLuint getProgramId() const;
-  void useProgram() const;
-  
+  inline GLuint getProgramId() const {
+    return programID;
+  }
+  inline void useProgram() const {
+    glUseProgram(programID);
+    checkOpenGLError("ShaderProgram: useProgram-glUseProgram");
+  }
+
+  virtual ShaderType getType() const = 0 ;
+
   // Uniform management.
-  int getUniformLocation(const std::string &uniformName) const;
   template <typename type>
-  void setUniform(const std::string &name, const type &value);
+  void setUniform(int nameIndex, const type &value) const;
 
   // Attribute management.
   int getAttributeLocation(const std::string &name) const;
   void setAttribute(const std::string &name, int size, GLenum type) const;
 
-private:
-  void fillUniformMap();
+protected:
+  std::vector<int>
+  createUniformTable(const std::vector<std::string> &uniformNames) const;
   void fillAttributeMap();
+  static int queryUniformLocation(GLuint programID, const char *uniformName);
+  void printUniformLocations(const std::vector<std::string> &names,
+                             const std::vector<int> &locations) const;
+  template <typename type>
+    void setUniformValue(GLint location, const type &value) const;
 
-private:
+protected:
+  std::vector<int> uniformLocations;
+
   GLuint programID;
   VertexShader *vertexShader;
   FragmentShader *fragmentShader;
-  std::unordered_map<std::string, int> uniformLocationsMap;
   std::unordered_map<std::string, int> attributeLocationsMap;
 };

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CharacterAtlas.h"
-#include "ShaderProgram.h"
+#include "TextShader.h"
 
 #include <string>
 #include <vector>
@@ -28,7 +28,7 @@ private:
 
 private:
   CharacterAtlas atlas;
-  ShaderProgram textShader;
+  TextShader textShader;
   glm::vec4 color;
 
   // Maps the size of a pixel onto the screen size.

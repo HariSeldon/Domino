@@ -7,8 +7,8 @@
 
 template class ObjectBuilder<PlaneBuilder>;
 
-Plane::Plane(btTransform &transform, btScalar mass, btVector3 &inertia,
-             const btScalar &side)
+Plane::Plane(const btTransform &transform, const btScalar mass, btVector3 &inertia,
+             const btScalar side)
     : Object(transform, mass, inertia) {
   computePoints(side);
   collisionShape = new btStaticPlaneShape(
@@ -19,8 +19,8 @@ Plane::Plane(btTransform &transform, btScalar mass, btVector3 &inertia,
   rigidBody = new btRigidBody(*constructionInfo);
 }
 
-void Plane::computePoints(const btScalar &side) {
-  btScalar halfSide = side / 2;
+void Plane::computePoints(const btScalar side) {
+  const btScalar halfSide = side / 2;
 
   glm::vec3 first(-1.f * halfSide, 0.f, halfSide);
   glm::vec3 second(halfSide, 0.f, halfSide);
@@ -30,6 +30,8 @@ void Plane::computePoints(const btScalar &side) {
   points = { first, second, third, fourth };
 
   indices = { 0, 1, 2, 2, 3, 0 };
+
+  textureCoos = {{0, 1}, {1, 1}, {1, 0}, {0, 0}};
 
   glm::vec3 normal = computeNormal(first, second, third);
 
@@ -47,5 +49,6 @@ PlaneBuilder &PlaneBuilder::setSide(btScalar side) {
 Plane *PlaneBuilder::create() {
   Plane *plane = new Plane(transform, mass, inertia, side);
   ObjectBuilder::setColors(plane);
+  plane->textureFile = textureFile;
   return plane;
 }
