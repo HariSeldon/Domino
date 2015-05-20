@@ -65,6 +65,7 @@ SceneManager::~SceneManager() {
 
 // -----------------------------------------------------------------------------
 void SceneManager::drawScene() {
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   //mirrorRenderingPass();
   //shadowRenderingPass();
   screenRenderingPass();
@@ -81,10 +82,8 @@ void SceneManager::drawWorld(const glm::mat4 &modelView) {
 
   // FIXME this is redundant, it is necessary if we use two passes for the
   // rendering.
-  glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z,
-               backgroundColor.w);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+//  glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z,
+//               backgroundColor.w);
   drawer.drawWorld(world, modelView, projection, shadowView, shadowProjection,
                    lightMask);
 }
