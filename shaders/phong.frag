@@ -173,16 +173,16 @@ void main() {
 
     LightInfo light = lights[lightIndex];
 
-//    // Directional light.
-//    if (light.position.w == 0.0f) {
-//      finalFragmentColor += shadeDirectionalLight(position, normalizedNormal,
-//                                                  cameraDirection, lightIndex);
-//    }
-//    // Positional light.
-//    else {
+    // Directional light.
+    if (light.position.w == 0.0f) {
+      finalFragmentColor += shadeDirectionalLight(position, normalizedNormal,
+                                                  cameraDirection, lightIndex);
+    }
+    // Positional light.
+    else {
       finalFragmentColor += shadePositionalLight(position, normalizedNormal,
                                                  cameraDirection, lightIndex);
-//    }
+    }
   }
 
   outputColor = finalFragmentColor;
