@@ -80,7 +80,9 @@ private:
 
   void drawLightBulb(const Object *lightBulb,
                      const glm::mat4 &originalModelView,
-                     const glm::mat4 &projection) const;
+                     const glm::mat4 &projection,
+                     const int index,
+                     const int lightMask) const;
 
 private:
   //std::vector<const LightBulb *> lightBulbs;

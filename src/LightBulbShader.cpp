@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 
-std::vector<std::string> LightBulbShader::uniformNames{"mvpMatrix"};
+std::vector<std::string> LightBulbShader::uniformNames{"mvpMatrix", "lightMask", "lightIndex"};
 
 // -----------------------------------------------------------------------------
 LightBulbShader::LightBulbShader(const std::string &vertexShaderFileName,

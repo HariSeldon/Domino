@@ -351,10 +351,12 @@ void Drawer::drawWorld(const World *world, const glm::mat4 &originalModelView,
 
   // Render all the lightbulbs.
   lightBulbShader.useProgram();
+  int lightBulbCounter = 0;
   for (const auto &bulb : lightBulbs) {
-    drawLightBulb(bulb, originalModelView, projection);
+    drawLightBulb(bulb, originalModelView, projection, lightBulbCounter,
+                  lightMask);
+    ++lightBulbCounter;
   }
-
 
 ////  auto lightBulbIter = std::find_if(
 ////      shaderMap.begin(), shaderMap.end(),
@@ -531,9 +533,13 @@ void Drawer::drawPhongObject(const Object *object,
 //-----------------------------------------------------------------------------
 void Drawer::drawLightBulb(const Object *lightBulb,
                            const glm::mat4 &originalModelView,
-                           const glm::mat4 &projection) const {
+                           const glm::mat4 &projection, 
+                           const int index,
+                           const int lightMask) const {
   setLightBulbOrientation(lightBulb, lightBulbShader, originalModelView,
                           projection);
+  lightBulbShader.setUniform(LightBulbShader::lightMask, lightMask);
+  lightBulbShader.setUniform(LightBulbShader::lightIndex, index);
   invokeDrawCall(lightBulb);
 }
 
