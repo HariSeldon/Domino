@@ -156,11 +156,9 @@ vec4 shadePositionalLight(vec3 position, vec3 normal, vec3 cameraDirection,
 
 // -----------------------------------------------------------------------------
 void main() {
-  vec3 normalizedNormal = normalize(normal);
-
-  if (gl_FrontFacing == false) {
-    normalizedNormal = -normalizedNormal; 
-  }
+  vec3 normalizedNormal = (2 * int(gl_FrontFacing) - 1) * normalize(normal);
+// This is equivalent to: 
+// if(gl_FrontFacing == false) -> normalizedNormal = -normalizedNormal; 
 
   vec3 cameraDirection = normalize(-1.0 * position);
 
