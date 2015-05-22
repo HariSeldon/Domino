@@ -38,14 +38,15 @@ flags = [
 '-DGLM_FORCE_RADIANS',
 '-std=c++14',
 '-stdlib=libc++',
-'-I/home/hari/src/domino/ext',
-'-I/home/hari/src/domino/include',
-'-I/home/hari/build/domino/include',
-'-isystem', '/home/hari/src/domino/ext/bullet/src',
-'-isystem', '/usr/include/freetype2',
-'-isystem', '/home/hari/src/domino/ext/lua/src',
-'-isystem', '/usr/include'
-'-isystem', './include/c++/4.8/'
+'-x', 'c++',
+'-I/home/hari/src/domino/ext/',
+'-I/home/hari/src/domino/include/',
+'-I/home/hari/build/domino/include/',
+'-isystem', '/home/hari/src/domino/ext/bullet/src/',
+'-isystem', '/usr/include/freetype2/',
+'-isystem', '/home/hari/src/domino/ext/lua/src/',
+'-isystem', '/home/hari/root/include/c++/4.9.2/',
+'-isystem', '/home/hari/root/include/c++/4.9.2/x86_64-unknown-linux-gnu/'
 ]
 
 ## These are the compilation flags that will be used in case there's no
