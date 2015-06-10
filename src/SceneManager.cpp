@@ -85,7 +85,7 @@ void SceneManager::drawWorld(const glm::mat4 &modelView) {
 //  glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z,
 //               backgroundColor.w);
   drawer.drawWorld(world, modelView, projection, shadowView, shadowProjection,
-                   lightMask);
+                   lightMask, camera->getPosition());
 }
 
 // -----------------------------------------------------------------------------

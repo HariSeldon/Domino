@@ -8,8 +8,6 @@ class LightBulbShader : public ShaderProgram {
 public:
   enum UniformName {
     mvpMatrix = 0,
-    lightMask,
-    lightIndex
   };
 
 public:

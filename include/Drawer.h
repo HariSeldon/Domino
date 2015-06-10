@@ -40,13 +40,12 @@ public:
   void drawWorld(const World *world, const glm::mat4 &originalModelView,
                  const glm::mat4 &projection,
                  const glm::mat4 &originalShadowModelView,
-                 const glm::mat4 &shadowProjection, int lightMask) const;
+                 const glm::mat4 &shadowProjection, const int lightMask,
+                 const glm::vec4 &cameraPosition) const;
   void drawLightBulbs(ShaderProgram *shader,
                       const std::vector<const Object *> &objects,
                       const glm::mat4 &originalModelView,
-                      const glm::mat4 &projection,
-                      const glm::mat4 &originalShadowModelView,
-                      const glm::mat4 &shadowProjection) const;
+                      const glm::mat4 &projection) const;
 
   void drawObjectForShadow(const Object *object, ShaderProgram &shader,
                            const glm::mat4 &originalModelView,
@@ -70,7 +69,7 @@ private:
   void invokeDrawCall(const Object *object) const;
 
   static void setPhongLights(const World *world, const PhongShader &shader,
-                             const glm::mat4 &modelView, int lightMask);
+                             const glm::mat4 &modelView, const int lightMask);
 
   void drawPhongObject(const Object *object,
                        const glm::mat4 &originalModelView,
@@ -81,8 +80,7 @@ private:
   void drawLightBulb(const Object *lightBulb,
                      const glm::mat4 &originalModelView,
                      const glm::mat4 &projection,
-                     const int index,
-                     const int lightMask) const;
+                     const glm::vec4 &cameraPosition) const;
 
 private:
   //std::vector<const LightBulb *> lightBulbs;

@@ -34,7 +34,8 @@ void setOrientation(const Object *object, const PhongShader &shader,
                     const glm::mat4 &shadowProjection);
 void setLightBulbOrientation(const Object *object, const LightBulbShader &shader,
                              const glm::mat4 &originalModelView, 
-                             const glm::mat4 &projection);
+                             const glm::mat4 &projection,
+                             const glm::vec4 &cameraPosition);
 void setOrientationForShadow(const Object *object, const ShaderProgram &shader,
                              const glm::mat4 &originalModelView,
                              const glm::mat4 &projection);
@@ -339,7 +340,8 @@ void Drawer::drawWorld(const World *world, const glm::mat4 &originalModelView,
                          const glm::mat4 &projection,
                          const glm::mat4 &originalShadowModelView,
                          const glm::mat4 &shadowProjection,
-                         int lightMask) const {
+                         const int lightMask,
+                         const glm::vec4 &cameraPosition) const {
 
   // Render all phong objects.
   phongShader.useProgram();
@@ -352,10 +354,10 @@ void Drawer::drawWorld(const World *world, const glm::mat4 &originalModelView,
   // Render all the lightbulbs.
   lightBulbShader.useProgram();
   int lightBulbCounter = 0;
-  for (const auto &bulb : lightBulbs) {
-    drawLightBulb(bulb, originalModelView, projection, lightBulbCounter,
-                  lightMask);
-    ++lightBulbCounter;
+  for (auto index = 0u; index < lightBulbs.size(); ++index) {
+    if(((1 << index) & lightMask) == 0) 
+      continue;
+    drawLightBulb(lightBulbs[index], originalModelView, projection, cameraPosition);
   }
 
 ////  auto lightBulbIter = std::find_if(
@@ -506,7 +508,7 @@ void Drawer::drawWorld(const World *world, const glm::mat4 &originalModelView,
 
 //-----------------------------------------------------------------------------
 void Drawer::setPhongLights(const World *world, const PhongShader &shader,
-                            const glm::mat4 &modelView, int lightMask) {
+                            const glm::mat4 &modelView, const int lightMask) {
   shader.setUniform(PhongShader::ambientColor, world->getAmbientColor());
   shader.setUniform(PhongShader::lightsNumber, world->getLightsNumber());
   shader.setUniform(PhongShader::lightMask, lightMask);
@@ -533,13 +535,10 @@ void Drawer::drawPhongObject(const Object *object,
 //-----------------------------------------------------------------------------
 void Drawer::drawLightBulb(const Object *lightBulb,
                            const glm::mat4 &originalModelView,
-                           const glm::mat4 &projection, 
-                           const int index,
-                           const int lightMask) const {
+                           const glm::mat4 &projection,
+                           const glm::vec4 &cameraPosition) const { 
   setLightBulbOrientation(lightBulb, lightBulbShader, originalModelView,
-                          projection);
-  lightBulbShader.setUniform(LightBulbShader::lightMask, lightMask);
-  lightBulbShader.setUniform(LightBulbShader::lightIndex, index);
+                          projection, cameraPosition);
   invokeDrawCall(lightBulb);
 }
 
@@ -596,8 +595,27 @@ void setOrientation(const Object *object, const PhongShader &shader,
 //------------------------------------------------------------------------------
 void setLightBulbOrientation(const Object *object, const LightBulbShader &shader,
                              const glm::mat4 &originalModelView, 
-                             const glm::mat4 &projection) {
-  auto modelView = getObjectModelView(object, originalModelView);
+                             const glm::mat4 &projection,
+                             const glm::vec4 &cameraPosition) {
+  btScalar transform[16];
+  object->getOpenGLMatrix(transform);
+  auto modelView = glm::make_mat4x4(transform);
+  auto lightBulbPosition = modelView[3];
+  auto direction = glm::vec3(cameraPosition - lightBulbPosition);
+  // Rotation around axis X.
+  auto distanceXZ = glm::sqrt(direction.x * direction.x + direction.z * direction.z);
+  auto directionYZ = glm::normalize(glm::vec2(distanceXZ, direction.y));
+  // Rotation around axis Y.
+  auto directionXZ = glm::normalize(glm::vec2(direction.x, direction.z));
+  auto cy = directionXZ.y;
+  auto sy = directionXZ.x;
+  auto cx = directionYZ.x;
+  auto sx = -directionYZ.y;
+  
+  glm::mat4 yxRotation = {cy, 0, -sy, 0, sx * sy, cx, sx * cy, 0, cx * sy, -sx,
+                          cx * cy, 0, lightBulbPosition.x, lightBulbPosition.y,
+                          lightBulbPosition.z, 1};
+  modelView = originalModelView * yxRotation; 
   shader.setUniform(PhongShader::mvpMatrix, projection * modelView);
 }
 

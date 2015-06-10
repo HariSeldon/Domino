@@ -25,6 +25,8 @@ private:
  
 private:
   PositionalLight *light;
+  static constexpr auto POINTS_NUMBER = 30;
+  static constexpr auto ANGLE = 2 * M_PI / POINTS_NUMBER;
 
   friend class LightBulbBuilder;
 };
