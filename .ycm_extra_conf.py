@@ -32,9 +32,6 @@ import os
 import ycm_core
 
 flags = [
-'-Wall',
-'-Wextra',
-'-W'
 '-DGLM_FORCE_RADIANS',
 '-std=c++14',
 '-stdlib=libc++',
