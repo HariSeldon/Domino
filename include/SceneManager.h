@@ -67,7 +67,7 @@ private:
 
   glm::mat4 projection;
 
-  glm::vec4 backgroundColor;
+  const glm::vec4 BACKGROUND_COLOR;
   float currentYRotation;
   float currentXRotation;
   float currentOffset;

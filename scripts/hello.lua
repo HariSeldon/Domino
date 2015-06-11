@@ -67,10 +67,10 @@ setBackgroundColor({r = 0.2, g = 0.4, b = 0.6, a = 1});
 --        position = {x = 0, y = 0, z = 0}, 
 --        orientation = {x = 0, y = 0, z = 0},
 --        mass = 0, textureFile = "default.png"});
---addBox({sides = {x = 2, y = 2, z = 2}, 
---        position = {x = 0, y = 100, z = 0}, 
---        orientation = {x = 0, y = 0, z = 0},
---        mass = 0.01, textureFile = "checkerboard.png"});
+addBox({sides = {x = 2, y = 2, z = 2}, 
+        position = {x = 0, y = 7, z = 0}, 
+        orientation = {x = 0, y = 0, z = 0},
+        mass = 0.01, textureFile = "checkerboard.png"});
 addLightBulb({side = 1, ambientColor = {r = 0.2, g = 0.2, b = 0.2, a = 1}, 
               position = {x = 1, y = 1, z = 0}, 
               mass = 10, constantAttenuation = 0.1, linearAttenuation = 0.1});

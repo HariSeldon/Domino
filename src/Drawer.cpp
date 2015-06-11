@@ -59,8 +59,6 @@ void Drawer::initGPUObjects(const std::map<
   fillObjectsVectors(shaderNameMap);
   createGPUBuffers();
 
-//  blurShader = new ShaderProgram("blur", "blur.vert", "blur.frag");
-
   // Setup canvas.
   glGenVertexArrays(1, &canvasId);
   glBindVertexArray(canvasId);
@@ -219,16 +217,17 @@ void Drawer::initTextures(const World &world) {
   lightBulbFBOId = std::get<0>(lightBulbData);
   lightBulbTexture = std::get<1>(lightBulbData);
 
-  auto blurredLightBulbData = generateFBOColor();
-  blurredLightBulbFBOId = std::get<0>(blurredLightBulbData);
-  blurredLightBulbTexture = std::get<1>(blurredLightBulbData);
+  auto bulbData = generateFBOColor();
+  bulbFBOId = std::get<0>(bulbData);
+  bulbTexture = std::get<1>(bulbData);
+
+  auto finalLightBulbData = generateFBOColor();
+  blurredBulbFBOId = std::get<0>(finalLightBulbData);
+  blurredBulbTexture = std::get<1>(finalLightBulbData);
 
   auto sceneData = generateFBOColor();
   sceneFBOId = std::get<0>(sceneData);
   sceneTexture = std::get<1>(sceneData);
-
-  assert(lightBulbFBOId != sceneFBOId);
-  assert(lightBulbTexture != sceneTexture);
 
   dboId = createDBO(sceneFBOId);
 }
@@ -340,15 +339,24 @@ void Drawer::drawWorld(const World *world, const glm::mat4 &originalModelView,
                        const glm::mat4 &shadowProjection, const int lightMask,
                        const glm::vec4 &cameraPosition) const {
 
-  // Render all phong objects.
-  glBindFramebuffer(GL_FRAMEBUFFER, sceneFBOId);
-  checkOpenGLError("Drawer: drawObjects-glBindFrameBuffer");
-  glViewport(0, 0, 1280, 800);
+  drawPhongObjects(world, originalModelView, projection,
+                   originalShadowModelView, shadowProjection, lightMask);
+  drawLightBulbs(originalModelView, projection, cameraPosition, lightMask);
+//  blurLightBulbs(blurShader, blurredBulbFBOId, lightBulbTexture); 
+//  drawFinalImage();
+}
 
-  glBindTexture(GL_TEXTURE_2D, sceneTexture);
-  checkOpenGLError("Drawer: drawObjects-glBindTexture");
+//-----------------------------------------------------------------------------
+void Drawer::drawPhongObjects(const World *world,
+                              const glm::mat4 &originalModelView,
+                              const glm::mat4 &projection,
+                              const glm::mat4 &originalShadowModelView,
+                              const glm::mat4 &shadowProjection,
+                              const int lightMask) const {
+//  glBindFramebuffer(GL_FRAMEBUFFER, sceneFBOId);
+//  checkOpenGLError("Drawer: drawObjects-glBindFrameBuffer");
+//  glViewport(0, 0, 1280, 800);
 
-  glClearColor(0.1, 0.2, 0.7, 1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   phongShader.useProgram();
@@ -358,19 +366,23 @@ void Drawer::drawWorld(const World *world, const glm::mat4 &originalModelView,
                     shadowProjection);
   }
 
-  glBindTexture(GL_TEXTURE_2D, 0);
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
 
-  // Render all the lightbulbs.
-  glBindFramebuffer(GL_FRAMEBUFFER, lightBulbFBOId);
-  checkOpenGLError("Drawer: drawObjects-glBindFrameBuffer");
-  glViewport(0, 0, 1280, 800);
-
-  glBindTexture(GL_TEXTURE_2D, lightBulbTexture);
-  checkOpenGLError("Drawer: drawObjects-glBindTexture");
-
-  glClearColor(0.f, 0.f, 0.f, 1);
-  glClear(GL_COLOR_BUFFER_BIT);
+//-----------------------------------------------------------------------------
+void Drawer::drawLightBulbs(const glm::mat4 &originalModelView,
+                            const glm::mat4 &projection,
+                            const glm::vec4 &cameraPosition,
+                            const int lightMask) const {
+//  glBindFramebuffer(GL_FRAMEBUFFER, lightBulbFBOId);
+//  checkOpenGLError("Drawer: drawObjects-glBindFrameBuffer");
+//  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+//                            GL_RENDERBUFFER, dboId);
+//  checkOpenGLError("Drawer: drawObjects-glFramebufferRenderbuffer");
+//  glViewport(0, 0, 1280, 800);
+//
+//  glClearColor(0.f, 0.f, 0.f, 1);
+//  glClear(GL_COLOR_BUFFER_BIT);
 
   lightBulbShader.useProgram();
   int lightBulbCounter = 0;
@@ -381,33 +393,44 @@ void Drawer::drawWorld(const World *world, const glm::mat4 &originalModelView,
                   cameraPosition);
   }
 
-  glBindTexture(GL_TEXTURE_2D, 0);
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+//                            GL_RENDERBUFFER, 0);
+//  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
 
-  // Add blur.
-  glBindFramebuffer(GL_FRAMEBUFFER, blurredLightBulbFBOId);
+//-----------------------------------------------------------------------------
+void Drawer::blurLightBulbs(const BlurShader &blurShader, 
+                            const GLuint outputFrameBuffer,
+                            const GLuint inputTexture) const {
+  glBindFramebuffer(GL_FRAMEBUFFER, outputFrameBuffer);
   checkOpenGLError("Drawer: drawObjects-glBindFrameBuffer");
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                            GL_RENDERBUFFER, dboId);
+  checkOpenGLError("Drawer: drawObjects-glFramebufferRenderbuffer");
 
-  glBindTexture(GL_TEXTURE_2D, lightBulbTexture);
-  checkOpenGLError("Drawer: drawObjects-glBindTexture");
   glViewport(0, 0, 1280, 800);
 
   blurShader.useProgram();
-  glBindTexture(GL_TEXTURE_2D, lightBulbTexture);
+  glBindTexture(GL_TEXTURE_2D, inputTexture);
+  checkOpenGLError("Drawer: drawObjects-glBindTexture");
   
   glBindVertexArray(canvasId);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
   glBindTexture(GL_TEXTURE_2D, 0);
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                            GL_RENDERBUFFER, 0);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
 
+//-----------------------------------------------------------------------------
+void Drawer::drawFinalImage() const {
   // Second pass.
   canvasShader.useProgram();
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, sceneTexture);
   canvasShader.setUniform(CanvasShader::firstTexture, 0);
   glActiveTexture(GL_TEXTURE1);
-//  glBindTexture(GL_TEXTURE_2D, lightBulbTexture);
-  glBindTexture(GL_TEXTURE_2D, blurredLightBulbTexture);
+  glBindTexture(GL_TEXTURE_2D, blurredBulbTexture);
   canvasShader.setUniform(CanvasShader::secondTexture, 1);
 
   glBindVertexArray(canvasId);
@@ -418,152 +441,7 @@ void Drawer::drawWorld(const World *world, const glm::mat4 &originalModelView,
   glBindTexture(GL_TEXTURE_2D, 0);
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, 0);
-
-  ////  auto lightBulbIter = std::find_if(
-  ////      shaderMap.begin(), shaderMap.end(),
-  ////      [](const std::pair<ShaderProgram *, std::vector<const Object *>> &x)
-  ///{
-  ////        return x.first->getName() == "lightBulb";
-  ////      });
-  ////
-  ////  return;
-  //
-  ////  glBindFramebuffer(GL_FRAMEBUFFER, sceneFBOId);
-  ////  checkOpenGLError("Drawer: drawObjects-glBindFrameBuffer");
-  ////  glViewport(0, 0, 1280, 800);
-  ////
-  ////  glBindTexture(GL_TEXTURE_2D, sceneTexture);
-  ////  checkOpenGLError("Drawer: drawObjects-glBindTexture");
-  ////
-  //  glClearColor(0.1, 0.2, 0.7, 1);
-  //  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  //
-  //
-  ////  glClear(GL_DEPTH_BUFFER_BIT);
-  ////  glEnable(GL_STENCIL_TEST);
-  ////  glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-  ////  glDepthMask(GL_FALSE);
-  ////  glStencilFunc(GL_NEVER, 1, 0xFF);
-  ////  glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP);
-  ////  glStencilMask(0xFF);
-  ////
-  ////  glClear(GL_STENCIL_BUFFER_BIT);
-  ////
-  ////  // Draw stencil square.
-  ////
-  ////  basicShader->useProgram();
-  ////  glBindVertexArray(canvasId);
-  ////  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-  ////  glBindVertexArray(0);
-  ////
-  ////  glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-  ////  glDepthMask(GL_TRUE);
-  ////  glStencilMask(0x00);
-  //////  glStencilFunc(GL_EQUAL, 0, 0xFF);
-  ////
-  ////  glStencilFunc(GL_EQUAL, 1, 0xFF);
-  //
-  //  // Iterate all the other shaders.
-  //  for (auto &x : shaderMap) {
-  //    ShaderProgram *shader = x.first;
-  //
-  //    if(shader->getName() == "lightBulb")
-  //      continue;
-  //
-  //    const auto &objectVector = x.second;
-  //    shader->useProgram();
-  //
-  //    setLights(world, shader, originalModelView, lightMask);
-  //    for (const auto &object : objectVector) {
-  //      drawObject(object, *shader, originalModelView, projection,
-  //                 originalShadowModelView, shadowProjection);
-  //    }
-  //  }
-  //
-  ////  glDisable(GL_STENCIL_TEST);
-  //
-  ////  glBindTexture(GL_TEXTURE_2D, 0);
-  ////  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  ////
-  ////  // Get the LightBulb shader.
-  ////  for (auto &iter : shaderMap) {
-  ////    ShaderProgram *shader = iter.first;
-  ////    if(shader->getName() == "lightBulb") {
-  ////      shader->useProgram();
-  ////      drawLightBulbs(shader, iter.second, originalModelView, projection,
-  ////                     originalShadowModelView, shadowProjection);
-  ////      break;
-  ////    }
-  ////  }
-  ////
-  ////  // Merge the frame buffer with the lightBulb texture.
-  ////
-  ////  // Second pass.
-  ////  canvasShader.useProgram();
-  ////  glActiveTexture(GL_TEXTURE0);
-  //////  glBindTexture(GL_TEXTURE_2D, lightBulbTexture);
-  ////  glBindTexture(GL_TEXTURE_2D, blurredLightBulbTexture);
-  ////  canvasShader.setUniform("firstTexture", 0);
-  ////
-  ////  glActiveTexture(GL_TEXTURE1);
-  ////  glBindTexture(GL_TEXTURE_2D, sceneTexture);
-  ////  canvasShader.setUniform("secondTexture", 1);
-  ////
-  ////  glBindVertexArray(canvasId);
-  ////  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-  ////  glBindVertexArray(0);
-  ////  glActiveTexture(GL_TEXTURE1);
-  ////  glBindTexture(GL_TEXTURE_2D, 0);
-  ////  glActiveTexture(GL_TEXTURE0);
-  ////  glBindTexture(GL_TEXTURE_2D, 0);
 }
-
-////-----------------------------------------------------------------------------
-//void Drawer::drawLightBulbs(ShaderProgram *shader,
-//                            const std::vector<const Object *> &objects,
-//                            const glm::mat4 &originalModelView,
-//                            const glm::mat4 &projection,
-//                            const glm::mat4 &originalShadowModelView,
-//                            const glm::mat4 &shadowProjection) const {
-//  glBindFramebuffer(GL_FRAMEBUFFER, lightBulbFBOId);
-//  checkOpenGLError("Drawer: drawLightBulbs-glBindFrameBuffer");
-//
-//  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-//                            GL_RENDERBUFFER, dboId);
-//  checkOpenGLError("Drawer: drawLightBulbs-glFramebufferRenderbuffer");
-//
-//  glViewport(0, 0, 1280, 800);
-//
-//  glBindTexture(GL_TEXTURE_2D, lightBulbTexture);
-//  checkOpenGLError("Drawer: drawLightBulbs-glBindTexture");
-//
-//  glClearColor(0, 0, 0, 1);
-//  glClear(GL_COLOR_BUFFER_BIT);
-//
-//  // Draw!
-//  for (const auto &object : objects) {
-//    drawObject(object, *shader, originalModelView, projection,
-//               originalShadowModelView, shadowProjection);
-//  }
-//  glBindTexture(GL_TEXTURE_2D, 0);
-//  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//
-//  // Blur!
-//  glBindFramebuffer(GL_FRAMEBUFFER, blurredLightBulbFBOId);
-//  checkOpenGLError("Drawer: drawLightBulbs-glBindFrameBuffer");
-//
-//  glViewport(0, 0, 1280, 800);
-//
-//  glBindTexture(GL_TEXTURE_2D, lightBulbTexture);
-//  blurShader->useProgram();
-//  //  canvasShader->setUniform("inputTexture", 0);
-//  glBindVertexArray(canvasId);
-//  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-//
-//  glBindVertexArray(0);
-//  glBindTexture(GL_TEXTURE_2D, 0);
-//  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//}
 
 //-----------------------------------------------------------------------------
 void Drawer::setPhongLights(const World *world, const PhongShader &shader,

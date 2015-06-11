@@ -24,14 +24,12 @@ SceneManager::SceneManager(const glm::ivec2 &screenSize,
                            SceneContainer *container)
     : world(container->getWorld()), camera(container->getCamera()),
       textManager(TextManager(FONT_PATH + FONT_FILE, FONT_HEIGHT, screenSize)),
+      BACKGROUND_COLOR(container->getBackgroundColor()),
       currentYRotation(0.0), currentXRotation(0.0), currentOffset(0.0),
       positionMutex(SDL_CreateMutex()), fps(0) {
   lightMask = (2 << (world->getLightsNumber() - 1)) - 1;
   setupProjection(screenSize);
   initGPU(container);
-  backgroundColor = container->getBackgroundColor();
-  glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z,
-               backgroundColor.w);
   checkOpenGLError("GLInitializer: glClearColor");
 }
 
@@ -80,10 +78,8 @@ void SceneManager::drawWorld(const glm::mat4 &modelView) {
   glm::mat4 shadowProjection =
       glm::ortho<float>(-side, side, -5, side / 1.6, 0, 2.5 * side);
 
-  // FIXME this is redundant, it is necessary if we use two passes for the
-  // rendering.
-//  glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z,
-//               backgroundColor.w);
+  glClearColor(BACKGROUND_COLOR.x, BACKGROUND_COLOR.y, BACKGROUND_COLOR.z,
+               BACKGROUND_COLOR.w);
   drawer.drawWorld(world, modelView, projection, shadowView, shadowProjection,
                    lightMask, camera->getPosition());
 }

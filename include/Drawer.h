@@ -44,10 +44,6 @@ public:
                  const glm::mat4 &originalShadowModelView,
                  const glm::mat4 &shadowProjection, const int lightMask,
                  const glm::vec4 &cameraPosition) const;
-  void drawLightBulbs(ShaderProgram *shader,
-                      const std::vector<const Object *> &objects,
-                      const glm::mat4 &originalModelView,
-                      const glm::mat4 &projection) const;
 
   void drawObjectForShadow(const Object *object, ShaderProgram &shader,
                            const glm::mat4 &originalModelView,
@@ -70,6 +66,13 @@ private:
 
   void invokeDrawCall(const Object *object) const;
 
+  void drawPhongObjects(const World *world, 
+                        const glm::mat4 &originalModelView,
+                        const glm::mat4 &projection,
+                        const glm::mat4 &originalShadowModelView,
+                        const glm::mat4 &shadowProjection,
+                        const int lightMask) const;
+
   static void setPhongLights(const World *world, const PhongShader &shader,
                              const glm::mat4 &modelView, const int lightMask);
 
@@ -79,13 +82,22 @@ private:
                        const glm::mat4 &originalShadowModelView,
                        const glm::mat4 &shadowProjection) const;
 
+  void drawLightBulbs(const glm::mat4 &originalModelView,
+                      const glm::mat4 &projection,
+                      const glm::vec4 &cameraPosition,
+                      const int lightMask) const;
+
   void drawLightBulb(const Object *lightBulb,
                      const glm::mat4 &originalModelView,
                      const glm::mat4 &projection,
                      const glm::vec4 &cameraPosition) const;
 
+  void blurLightBulbs(const BlurShader &blurShader,
+                      const GLuint outputFrameBuffer,
+                      const GLuint inputTexture) const;
+  void drawFinalImage() const;
+
 private:
-  //std::vector<const LightBulb *> lightBulbs;
   std::vector<const Object *> lightBulbs;
   std::vector<const Object *> phongObjects;
 
@@ -95,7 +107,6 @@ private:
   BlurShader blurShader;
 
   // Mapping between shaders and world objects.
-//  std::map<ShaderProgram *, std::vector<const Object *>> shaderMap;
   // Mapping between world objects and VAOs.
   std::unordered_map<const Object *, GLuint> vaoWorldMap;
   // Mapping between world objects shadows and VAOs.
@@ -117,8 +128,11 @@ private:
   GLuint lightBulbFBOId;
   GLuint lightBulbTexture;
 
-  GLuint blurredLightBulbFBOId;
-  GLuint blurredLightBulbTexture;
+  GLuint bulbFBOId;
+  GLuint bulbTexture;
+
+  GLuint blurredBulbFBOId;
+  GLuint blurredBulbTexture;
 
   GLuint dboId;
 
