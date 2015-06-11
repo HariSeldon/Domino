@@ -242,6 +242,9 @@ function addPlane(plane)
   if plane.shader == nil then
     plane.shader = "phong";
   end
+  if plane.textureRepetitions == nil then
+    plane.textureRepetitions = 1;
+  end
 
   engine:_addPlane(plane.side,
                    plane.mass,
@@ -264,6 +267,7 @@ function addPlane(plane)
                    plane.specularColor.b,
                    plane.specularColor.a,
                    plane.textureFile,
+                   plane.textureRepetitions,
                    plane.shader);
 end
 

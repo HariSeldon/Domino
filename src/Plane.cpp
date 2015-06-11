@@ -8,8 +8,8 @@
 template class ObjectBuilder<PlaneBuilder>;
 
 Plane::Plane(const btTransform &transform, const btScalar mass, btVector3 &inertia,
-             const btScalar side)
-    : Object(transform, mass, inertia) {
+             const btScalar side, const int textureRepetitions)
+    : Object(transform, mass, inertia), textureRepetitions(textureRepetitions) {
   computePoints(side);
   collisionShape = new btStaticPlaneShape(
       btVector3(normals[0].x, normals[0].y, normals[0].z), btScalar(0));
@@ -31,7 +31,7 @@ void Plane::computePoints(const btScalar side) {
 
   indices = { 0, 1, 2, 2, 3, 0 };
 
-  textureCoos = {{0, 1}, {1, 1}, {1, 0}, {0, 0}};
+  textureCoos = {{0, textureRepetitions}, {textureRepetitions, textureRepetitions}, {textureRepetitions, 0}, {0, 0}};
 
   glm::vec3 normal = computeNormal(first, second, third);
 
@@ -46,8 +46,13 @@ PlaneBuilder &PlaneBuilder::setSide(btScalar side) {
   return *this;
 }
 
+PlaneBuilder &PlaneBuilder::setTextureRepetitions(const int repetitions) {
+  this->textureRepetitions = repetitions;
+  return *this;
+}
+
 Plane *PlaneBuilder::create() {
-  Plane *plane = new Plane(transform, mass, inertia, side);
+  Plane *plane = new Plane(transform, mass, inertia, side, textureRepetitions);
   ObjectBuilder::setColors(plane);
   plane->textureFile = textureFile;
   return plane;

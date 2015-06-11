@@ -80,7 +80,7 @@ addLightBulb({side = 1,
 addLightBulb({side = 1, 
               position = {x = -10, y = 3, z = -10}, 
               mass = 10, constantAttenuation = 0.1, linearAttenuation = 0.1});
-addPlane({side = 60, textureFile = "default.png"});
+addPlane({side = 60, textureFile = "grass.tif", textureRepetitions = 7});
 
 -- for index = 1,20 do
 --   addMesh({objFile = "barrel.obj", position = {x = -30 + index * 3, y = 2, z = -30}, mass = 0});

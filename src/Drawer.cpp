@@ -194,9 +194,9 @@ void Drawer::initTextures(const World &world) {
                          0, format, GL_UNSIGNED_BYTE, texSurface->pixels);
             checkOpenGLError("Drawer: glTexImage2D");
 
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             checkOpenGLError("Drawer: glTexParameteri");
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
             checkOpenGLError("Drawer: glTexParameteri");
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             checkOpenGLError("Drawer: glTexParameteri");

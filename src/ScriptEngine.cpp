@@ -315,7 +315,10 @@ int addPlane(lua_State *luaState) {
   float specularColorB = static_cast<float>(luaL_checknumber(luaState, 20));
   float specularColorA = static_cast<float>(luaL_checknumber(luaState, 21));
   const char *textureFile = luaL_checkstring(luaState, 22);
-  const char *shaderFile = luaL_checkstring(luaState, 23);
+  int textureRepetitions = static_cast<int>(luaL_checknumber(luaState, 23));
+  const char *shaderFile = luaL_checkstring(luaState, 24);
+
+  std::cout << "textureRepetitions: " << textureRepetitions << "\n";
 
   PlaneBuilder planeBuilder;
   btQuaternion rotation(rotationX, rotationY, rotationZ);
@@ -332,6 +335,7 @@ int addPlane(lua_State *luaState) {
           .setSpecularColor(
                {specularColorR, specularColorG, specularColorB, specularColorA})
           .setTextureFile(textureFile)
+          .setTextureRepetitions(textureRepetitions)
           .create();
 
   engine->container->addShader(plane, std::string(shaderFile));
