@@ -723,6 +723,10 @@ std::pair<GLuint, GLuint> generateFBOColor() {
   checkOpenGLError("generateFBOColor: glTexParameteri");
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   checkOpenGLError("generateFBOColor: glTexParameteri");
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  checkOpenGLError("generateFBOColor: glTexParameteri");
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  checkOpenGLError("generateFBOColor: glTexParameteri");
 
   glBindFramebuffer(GL_FRAMEBUFFER, fboId);
   checkOpenGLError("generateFBOColor: attachTexture-glBindBuffer");
