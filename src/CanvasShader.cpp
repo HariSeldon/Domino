@@ -1,13 +1,13 @@
-#include "LightBulbShader.h"
+#include "CanvasShader.h"
 
 #include <cassert>
 #include <string>
 
-std::vector<std::string> LightBulbShader::uniformNames{"mvpMatrix"};
+std::vector<std::string> CanvasShader::uniformNames{"firstTexture", "secondTexture"};
 
 // -----------------------------------------------------------------------------
-LightBulbShader::LightBulbShader(const std::string &vertexShaderFileName,
-                                 const std::string &fragmentShaderFileName)
+CanvasShader::CanvasShader(const std::string &vertexShaderFileName,
+                           const std::string &fragmentShaderFileName)
     : ShaderProgram(vertexShaderFileName, fragmentShaderFileName) {
   uniformLocations = createUniformTable(uniformNames);
   assert(uniformLocations.size() == uniformNames.size() &&

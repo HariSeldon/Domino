@@ -48,7 +48,9 @@ GLuint createDBO(GLuint fboId);
 //-----------------------------------------------------------------------------
 Drawer::Drawer()
     : lightBulbShader("lightBulb.vert", "lightBulb.frag"),
-      phongShader("phong.vert", "phong.frag") {}
+      phongShader("phong.vert", "phong.frag"), 
+      canvasShader("canvas.vert", "canvas.frag"),
+      blurShader("blur.vert", "blur.frag") {}
 
 //-----------------------------------------------------------------------------
 void Drawer::initGPUObjects(const std::map<
@@ -57,36 +59,32 @@ void Drawer::initGPUObjects(const std::map<
   fillObjectsVectors(shaderNameMap);
   createGPUBuffers();
 
-// The following set up shaders and objects for multi-pass rendering.
-// We don't do this for the moment.
-//
 //  blurShader = new ShaderProgram("blur", "blur.vert", "blur.frag");
-//
-//  // Setup canvas.
-//  canvasShader = new ShaderProgram("canvas", "canvas.vert", "canvas.frag");
-//  glGenVertexArrays(1, &canvasId);
-//  glBindVertexArray(canvasId);
-//
-//  // Setup vertices.
-//  std::vector<glm::vec2> canvasPoints = {{-1, 1}, {1, 1}, {1, -1}, {-1, -1}};
-//  GLuint canvasVertexVBOId = 0;
-//  glGenBuffers(1, &canvasVertexVBOId);
-//  glBindBuffer(GL_ARRAY_BUFFER, canvasVertexVBOId);
-//  glBufferData(GL_ARRAY_BUFFER, canvasPoints.size() * sizeof(glm::vec2),
-//               canvasPoints.data(), GL_STATIC_DRAW);
-//  canvasShader->setAttribute("vertexPosition", 2, GL_FLOAT);
-//
-//  // Setup indices.
-//  std::vector<unsigned int> canvasIndices = {0, 1, 2, 2, 3, 0};
-//  GLuint canvasIndexVBOId = 0;
-//  glGenBuffers(1, &canvasIndexVBOId);
-//  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, canvasIndexVBOId);
-//  glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-//               canvasIndices.size() * sizeof(unsigned int),
-//               canvasIndices.data(), GL_STATIC_DRAW);
-//
-//  glBindVertexArray(0);
-//  vboIds.insert(vboIds.end(), {canvasVertexVBOId, canvasIndexVBOId});
+
+  // Setup canvas.
+  glGenVertexArrays(1, &canvasId);
+  glBindVertexArray(canvasId);
+
+  // Setup vertices.
+  std::vector<glm::vec2> canvasPoints = {{-1, 1}, {1, 1}, {1, -1}, {-1, -1}};
+  GLuint canvasVertexVBOId = 0;
+  glGenBuffers(1, &canvasVertexVBOId);
+  glBindBuffer(GL_ARRAY_BUFFER, canvasVertexVBOId);
+  glBufferData(GL_ARRAY_BUFFER, canvasPoints.size() * sizeof(glm::vec2),
+               canvasPoints.data(), GL_STATIC_DRAW);
+  canvasShader.setAttribute("vertexPosition", 2, GL_FLOAT);
+
+  // Setup indices.
+  std::vector<unsigned int> canvasIndices = {0, 1, 2, 2, 3, 0};
+  GLuint canvasIndexVBOId = 0;
+  glGenBuffers(1, &canvasIndexVBOId);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, canvasIndexVBOId);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+               canvasIndices.size() * sizeof(unsigned int),
+               canvasIndices.data(), GL_STATIC_DRAW);
+
+  glBindVertexArray(0);
+  vboIds.insert(vboIds.end(), {canvasVertexVBOId, canvasIndexVBOId});
 }
 
 //-----------------------------------------------------------------------------
@@ -337,13 +335,22 @@ Drawer::~Drawer() {
 
 //-----------------------------------------------------------------------------
 void Drawer::drawWorld(const World *world, const glm::mat4 &originalModelView,
-                         const glm::mat4 &projection,
-                         const glm::mat4 &originalShadowModelView,
-                         const glm::mat4 &shadowProjection,
-                         const int lightMask,
-                         const glm::vec4 &cameraPosition) const {
+                       const glm::mat4 &projection,
+                       const glm::mat4 &originalShadowModelView,
+                       const glm::mat4 &shadowProjection, const int lightMask,
+                       const glm::vec4 &cameraPosition) const {
 
   // Render all phong objects.
+  glBindFramebuffer(GL_FRAMEBUFFER, sceneFBOId);
+  checkOpenGLError("Drawer: drawObjects-glBindFrameBuffer");
+  glViewport(0, 0, 1280, 800);
+
+  glBindTexture(GL_TEXTURE_2D, sceneTexture);
+  checkOpenGLError("Drawer: drawObjects-glBindTexture");
+
+  glClearColor(0.1, 0.2, 0.7, 1);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
   phongShader.useProgram();
   setPhongLights(world, phongShader, originalModelView, lightMask);
   for (const auto &obj : phongObjects) {
@@ -351,112 +358,164 @@ void Drawer::drawWorld(const World *world, const glm::mat4 &originalModelView,
                     shadowProjection);
   }
 
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
   // Render all the lightbulbs.
+  glBindFramebuffer(GL_FRAMEBUFFER, lightBulbFBOId);
+  checkOpenGLError("Drawer: drawObjects-glBindFrameBuffer");
+  glViewport(0, 0, 1280, 800);
+
+  glBindTexture(GL_TEXTURE_2D, lightBulbTexture);
+  checkOpenGLError("Drawer: drawObjects-glBindTexture");
+
+  glClearColor(0.f, 0.f, 0.f, 1);
+  glClear(GL_COLOR_BUFFER_BIT);
+
   lightBulbShader.useProgram();
   int lightBulbCounter = 0;
   for (auto index = 0u; index < lightBulbs.size(); ++index) {
-    if(((1 << index) & lightMask) == 0) 
+    if (((1 << index) & lightMask) == 0)
       continue;
-    drawLightBulb(lightBulbs[index], originalModelView, projection, cameraPosition);
+    drawLightBulb(lightBulbs[index], originalModelView, projection,
+                  cameraPosition);
   }
 
-////  auto lightBulbIter = std::find_if(
-////      shaderMap.begin(), shaderMap.end(),
-////      [](const std::pair<ShaderProgram *, std::vector<const Object *>> &x)
-///{
-////        return x.first->getName() == "lightBulb";
-////      });
-////
-////  return;
-//
-////  glBindFramebuffer(GL_FRAMEBUFFER, sceneFBOId);
-////  checkOpenGLError("Drawer: drawObjects-glBindFrameBuffer");
-////  glViewport(0, 0, 1280, 800);
-////
-////  glBindTexture(GL_TEXTURE_2D, sceneTexture);
-////  checkOpenGLError("Drawer: drawObjects-glBindTexture");
-////
-//  glClearColor(0.1, 0.2, 0.7, 1);
-//  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//
-//
-////  glClear(GL_DEPTH_BUFFER_BIT);
-////  glEnable(GL_STENCIL_TEST);
-////  glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-////  glDepthMask(GL_FALSE);
-////  glStencilFunc(GL_NEVER, 1, 0xFF);
-////  glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP);
-////  glStencilMask(0xFF);
-////
-////  glClear(GL_STENCIL_BUFFER_BIT);
-////
-////  // Draw stencil square.
-////
-////  basicShader->useProgram();
-////  glBindVertexArray(canvasId);
-////  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-////  glBindVertexArray(0);
-////
-////  glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-////  glDepthMask(GL_TRUE);
-////  glStencilMask(0x00);
-//////  glStencilFunc(GL_EQUAL, 0, 0xFF);
-////
-////  glStencilFunc(GL_EQUAL, 1, 0xFF);
-//
-//  // Iterate all the other shaders.
-//  for (auto &x : shaderMap) {
-//    ShaderProgram *shader = x.first;
-//
-//    if(shader->getName() == "lightBulb")
-//      continue;
-//
-//    const auto &objectVector = x.second;
-//    shader->useProgram();
-//
-//    setLights(world, shader, originalModelView, lightMask);
-//    for (const auto &object : objectVector) {
-//      drawObject(object, *shader, originalModelView, projection,
-//                 originalShadowModelView, shadowProjection);
-//    }
-//  }
-//
-////  glDisable(GL_STENCIL_TEST);
-//
-////  glBindTexture(GL_TEXTURE_2D, 0);
-////  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-////
-////  // Get the LightBulb shader.
-////  for (auto &iter : shaderMap) {
-////    ShaderProgram *shader = iter.first;
-////    if(shader->getName() == "lightBulb") {
-////      shader->useProgram();
-////      drawLightBulbs(shader, iter.second, originalModelView, projection,
-////                     originalShadowModelView, shadowProjection);
-////      break;
-////    }
-////  }
-////
-////  // Merge the frame buffer with the lightBulb texture.
-////
-////  // Second pass.
-////  canvasShader->useProgram();
-////  glActiveTexture(GL_TEXTURE0);
-//////  glBindTexture(GL_TEXTURE_2D, lightBulbTexture);
-////  glBindTexture(GL_TEXTURE_2D, blurredLightBulbTexture);
-////  canvasShader->setUniform("firstTexture", 0);
-////
-////  glActiveTexture(GL_TEXTURE1);
-////  glBindTexture(GL_TEXTURE_2D, sceneTexture);
-////  canvasShader->setUniform("secondTexture", 1);
-////
-////  glBindVertexArray(canvasId);
-////  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-////  glBindVertexArray(0);
-////  glActiveTexture(GL_TEXTURE1);
-////  glBindTexture(GL_TEXTURE_2D, 0);
-////  glActiveTexture(GL_TEXTURE0);
-////  glBindTexture(GL_TEXTURE_2D, 0);
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+  // Add blur.
+  glBindFramebuffer(GL_FRAMEBUFFER, blurredLightBulbFBOId);
+  checkOpenGLError("Drawer: drawObjects-glBindFrameBuffer");
+
+  glBindTexture(GL_TEXTURE_2D, lightBulbTexture);
+  checkOpenGLError("Drawer: drawObjects-glBindTexture");
+  glViewport(0, 0, 1280, 800);
+
+  blurShader.useProgram();
+  glBindTexture(GL_TEXTURE_2D, lightBulbTexture);
+  
+  glBindVertexArray(canvasId);
+  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+  // Second pass.
+  canvasShader.useProgram();
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, sceneTexture);
+  canvasShader.setUniform(CanvasShader::firstTexture, 0);
+  glActiveTexture(GL_TEXTURE1);
+//  glBindTexture(GL_TEXTURE_2D, lightBulbTexture);
+  glBindTexture(GL_TEXTURE_2D, blurredLightBulbTexture);
+  canvasShader.setUniform(CanvasShader::secondTexture, 1);
+
+  glBindVertexArray(canvasId);
+  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
+  glBindVertexArray(0);
+  glActiveTexture(GL_TEXTURE1);
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  ////  auto lightBulbIter = std::find_if(
+  ////      shaderMap.begin(), shaderMap.end(),
+  ////      [](const std::pair<ShaderProgram *, std::vector<const Object *>> &x)
+  ///{
+  ////        return x.first->getName() == "lightBulb";
+  ////      });
+  ////
+  ////  return;
+  //
+  ////  glBindFramebuffer(GL_FRAMEBUFFER, sceneFBOId);
+  ////  checkOpenGLError("Drawer: drawObjects-glBindFrameBuffer");
+  ////  glViewport(0, 0, 1280, 800);
+  ////
+  ////  glBindTexture(GL_TEXTURE_2D, sceneTexture);
+  ////  checkOpenGLError("Drawer: drawObjects-glBindTexture");
+  ////
+  //  glClearColor(0.1, 0.2, 0.7, 1);
+  //  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  //
+  //
+  ////  glClear(GL_DEPTH_BUFFER_BIT);
+  ////  glEnable(GL_STENCIL_TEST);
+  ////  glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+  ////  glDepthMask(GL_FALSE);
+  ////  glStencilFunc(GL_NEVER, 1, 0xFF);
+  ////  glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP);
+  ////  glStencilMask(0xFF);
+  ////
+  ////  glClear(GL_STENCIL_BUFFER_BIT);
+  ////
+  ////  // Draw stencil square.
+  ////
+  ////  basicShader->useProgram();
+  ////  glBindVertexArray(canvasId);
+  ////  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+  ////  glBindVertexArray(0);
+  ////
+  ////  glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+  ////  glDepthMask(GL_TRUE);
+  ////  glStencilMask(0x00);
+  //////  glStencilFunc(GL_EQUAL, 0, 0xFF);
+  ////
+  ////  glStencilFunc(GL_EQUAL, 1, 0xFF);
+  //
+  //  // Iterate all the other shaders.
+  //  for (auto &x : shaderMap) {
+  //    ShaderProgram *shader = x.first;
+  //
+  //    if(shader->getName() == "lightBulb")
+  //      continue;
+  //
+  //    const auto &objectVector = x.second;
+  //    shader->useProgram();
+  //
+  //    setLights(world, shader, originalModelView, lightMask);
+  //    for (const auto &object : objectVector) {
+  //      drawObject(object, *shader, originalModelView, projection,
+  //                 originalShadowModelView, shadowProjection);
+  //    }
+  //  }
+  //
+  ////  glDisable(GL_STENCIL_TEST);
+  //
+  ////  glBindTexture(GL_TEXTURE_2D, 0);
+  ////  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  ////
+  ////  // Get the LightBulb shader.
+  ////  for (auto &iter : shaderMap) {
+  ////    ShaderProgram *shader = iter.first;
+  ////    if(shader->getName() == "lightBulb") {
+  ////      shader->useProgram();
+  ////      drawLightBulbs(shader, iter.second, originalModelView, projection,
+  ////                     originalShadowModelView, shadowProjection);
+  ////      break;
+  ////    }
+  ////  }
+  ////
+  ////  // Merge the frame buffer with the lightBulb texture.
+  ////
+  ////  // Second pass.
+  ////  canvasShader.useProgram();
+  ////  glActiveTexture(GL_TEXTURE0);
+  //////  glBindTexture(GL_TEXTURE_2D, lightBulbTexture);
+  ////  glBindTexture(GL_TEXTURE_2D, blurredLightBulbTexture);
+  ////  canvasShader.setUniform("firstTexture", 0);
+  ////
+  ////  glActiveTexture(GL_TEXTURE1);
+  ////  glBindTexture(GL_TEXTURE_2D, sceneTexture);
+  ////  canvasShader.setUniform("secondTexture", 1);
+  ////
+  ////  glBindVertexArray(canvasId);
+  ////  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+  ////  glBindVertexArray(0);
+  ////  glActiveTexture(GL_TEXTURE1);
+  ////  glBindTexture(GL_TEXTURE_2D, 0);
+  ////  glActiveTexture(GL_TEXTURE0);
+  ////  glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 ////-----------------------------------------------------------------------------

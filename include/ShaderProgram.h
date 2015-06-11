@@ -14,7 +14,7 @@ class VertexShader;
 class FragmentShader;
 
 enum class ShaderType {
-  shText, shPhong, shLightBulb
+  shText, shPhong, shLightBulb, shCanvas
 };
 
 class ShaderProgram {

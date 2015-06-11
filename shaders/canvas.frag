@@ -8,6 +8,6 @@ in vec2 textureCoordinates;
 out vec4 outputColor;
 
 void main() {
-  outputColor = texture2D(firstTexture, textureCoordinates) +
+  outputColor = texture2D(firstTexture, textureCoordinates) + 
                 texture2D(secondTexture, textureCoordinates);
 }

@@ -1,13 +1,13 @@
-#include "LightBulbShader.h"
+#include "BlurShader.h"
 
 #include <cassert>
 #include <string>
 
-std::vector<std::string> LightBulbShader::uniformNames{"mvpMatrix"};
+std::vector<std::string> BlurShader::uniformNames{"inputTexture"};
 
 // -----------------------------------------------------------------------------
-LightBulbShader::LightBulbShader(const std::string &vertexShaderFileName,
-                                 const std::string &fragmentShaderFileName)
+BlurShader::BlurShader(const std::string &vertexShaderFileName,
+                           const std::string &fragmentShaderFileName)
     : ShaderProgram(vertexShaderFileName, fragmentShaderFileName) {
   uniformLocations = createUniformTable(uniformNames);
   assert(uniformLocations.size() == uniformNames.size() &&

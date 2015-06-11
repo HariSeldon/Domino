@@ -1,5 +1,7 @@
 #pragma once
 
+#include "BlurShader.h"
+#include "CanvasShader.h"
 #include "LightBulbShader.h"
 #include "PhongShader.h"
 
@@ -89,6 +91,8 @@ private:
 
   LightBulbShader lightBulbShader;
   PhongShader phongShader;
+  CanvasShader canvasShader;
+  BlurShader blurShader;
 
   // Mapping between shaders and world objects.
 //  std::map<ShaderProgram *, std::vector<const Object *>> shaderMap;
@@ -118,9 +122,7 @@ private:
 
   GLuint dboId;
 
-  //ShaderProgram *canvasShader;
-  //ShaderProgram *blurShader;
   //ShaderProgram *basicShader;
-  //GLuint canvasId;
-  //GLuint stencilId;
+  GLuint canvasId;
+  GLuint stencilId;
 };
