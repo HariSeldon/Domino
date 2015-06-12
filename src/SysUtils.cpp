@@ -38,6 +38,7 @@ std::string getFileContent(const std::string &filePath) {
     return readStream(fileStream);
   } else {
     std::cout << "Cannot open: " + filePath << "\n";
+    exit(1);
   }
 }
 
