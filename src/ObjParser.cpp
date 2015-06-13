@@ -162,5 +162,5 @@ void ObjParser::parseMtlLine(const std::string &line) {
                               1.f);
 
   if (firstWord == "map_Kd")
-    texFile = TEXTURE_PATH + words[1];
+    texFile = words[1];
 }
