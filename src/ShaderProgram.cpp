@@ -57,7 +57,9 @@ ShaderProgram::~ShaderProgram() {
 GLint ShaderProgram::queryUniformLocation(GLuint programID,
                                           const char *uniformName) {
   GLint location = glGetUniformLocation(programID, uniformName);
-  assert(location != -1 && "Error querying uniform location");
+  if(location == -1) {
+    std::cerr << "Cannot query uniform: " << uniformName << "\n"; 
+  }
   return location;
 }
 
@@ -176,9 +178,13 @@ int ShaderProgram::getAttributeLocation(const std::string &name) const {
 // -----------------------------------------------------------------------------
 void ShaderProgram::setAttribute(const std::string &name, int size,
                                  GLenum type) const {
-  int location = attributeLocationsMap.at(name);
-  glVertexAttribPointer(location, size, type, GL_FALSE, 0, nullptr);
-  glEnableVertexAttribArray(location);
+  if(attributeLocationsMap.find(name) == attributeLocationsMap.end()) {
+    std::cerr << "Cannot set attribute: " << name << "\n";
+  } else {
+    int location = attributeLocationsMap.at(name);
+    glVertexAttribPointer(location, size, type, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray(location);
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -228,7 +234,7 @@ int queryAttributeLocation(GLuint programID, const char *attributeName) {
 // -----------------------------------------------------------------------------
 void checkErrors(GLuint programID) {
   if (!glIsProgram(programID))
-    std::cout << "Error in creating shader program"
+    std::cerr << "Error in creating shader program"
               << "\n";
 
   int errorLength = 0;
@@ -238,6 +244,6 @@ void checkErrors(GLuint programID) {
   glGetProgramInfoLog(programID, maxLength, &errorLength, errorMessage.data());
 
   if (errorLength > 0)
-    std::cout << "Error in shader program:\n"
+    std::cerr << "Error in shader program:\n"
               << std::string(errorMessage.data()) << "\n";
 }

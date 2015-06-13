@@ -3,10 +3,14 @@
 #include "Drawer.h"
 #include "MathUtils.h"
 
+#include <glm/ext.hpp>
+#include <iostream>
+
 #include <LinearMath/btVector3.h>
 
 template class ObjectBuilder<PlaneBuilder>;
 
+//-----------------------------------------------------------------------------
 Plane::Plane(const btTransform &transform, const btScalar mass, btVector3 &inertia,
              const btScalar side, const int textureRepetitions)
     : Object(transform, mass, inertia), textureRepetitions(textureRepetitions) {
@@ -19,6 +23,7 @@ Plane::Plane(const btTransform &transform, const btScalar mass, btVector3 &inert
   rigidBody = new btRigidBody(*constructionInfo);
 }
 
+//-----------------------------------------------------------------------------
 void Plane::computePoints(const btScalar side) {
   const btScalar halfSide = side / 2;
 
@@ -31,29 +36,26 @@ void Plane::computePoints(const btScalar side) {
 
   indices = { 0, 1, 2, 2, 3, 0 };
 
-  textureCoos = {{0, textureRepetitions}, {textureRepetitions, textureRepetitions}, {textureRepetitions, 0}, {0, 0}};
+  textureCoos = {{0, textureRepetitions},
+                 {textureRepetitions, textureRepetitions},
+                 {textureRepetitions, 0},
+                 {0, 0}};
 
   glm::vec3 normal = computeNormal(first, second, third);
 
   normals = { normal, normal, normal, normal }; 
+
+  tangents.assign(4, {1, 0, 0});
 }
 
 //-----------------------------------------------------------------------------
-PlaneBuilder::PlaneBuilder() : ObjectBuilder(), side(btScalar(0.0)) {}
-
-PlaneBuilder &PlaneBuilder::setSide(btScalar side) {
-  this->side = side;
-  return *this;
-}
-
-PlaneBuilder &PlaneBuilder::setTextureRepetitions(const int repetitions) {
-  this->textureRepetitions = repetitions;
-  return *this;
-}
+PlaneBuilder::PlaneBuilder()
+    : ObjectBuilder(), side(btScalar(0.0f)), textureRepetitions(1) {}
 
 Plane *PlaneBuilder::create() {
   Plane *plane = new Plane(transform, mass, inertia, side, textureRepetitions);
   ObjectBuilder::setColors(plane);
   plane->textureFile = textureFile;
+  plane->normalTextureFile = normalTextureFile;
   return plane;
 }

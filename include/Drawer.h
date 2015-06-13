@@ -4,6 +4,7 @@
 #include "CanvasShader.h"
 #include "LightBulbShader.h"
 #include "PhongShader.h"
+#include "PhongNormalMappingShader.h"
 
 #include <GL/glew.h>
 
@@ -55,14 +56,24 @@ private:
 
   void createLightBulbsGPUBuffers();
   void createLightBulbGPUBuffers(const Object *object);
+  void createCanvasBuffer();
 
   void createPhongObjectsGPUBuffers();
   void createPhongObjectGPUBuffers(const Object *object);
+
+  void createPhongNormalMappingObjectsGPUBuffers();
+  void createPhongNormalMappingObjectGPUBuffers(const Object *object);
+
+  void createObjectTextures(const Object *object);
+  void initTexture(const Object *object, const std::string &fileName,
+                   std::unordered_map<const Object *, GLuint> &texMap);
+  void createFrameBuffers();
 
   GLuint setupVertexVBO(const Object *object, const ShaderProgram &shader);
   GLuint setupNormalVBO(const Object *object, const ShaderProgram &shader);
   GLuint setupIndexVBO(const Object *object);
   GLuint setupTextureVBO(const Object *object, const ShaderProgram &shader);
+  GLuint setupTangentVBO(const Object *object, const ShaderProgram &shader);
 
   void invokeDrawCall(const Object *object) const;
 
@@ -73,7 +84,17 @@ private:
                         const glm::mat4 &shadowProjection,
                         const int lightMask) const;
 
+  void drawPhongNormalMappingObjects(const World *world, 
+                                     const glm::mat4 &originalModelView,
+                                     const glm::mat4 &projection,
+                                     const glm::mat4 &originalShadowModelView,
+                                     const glm::mat4 &shadowProjection,
+                                     const int lightMask) const;
+
   static void setPhongLights(const World *world, const PhongShader &shader,
+                             const glm::mat4 &modelView, const int lightMask);
+  static void setPhongLights(const World *world,
+                             const PhongNormalMappingShader &shader,
                              const glm::mat4 &modelView, const int lightMask);
 
   void drawPhongObject(const Object *object,
@@ -81,6 +102,12 @@ private:
                        const glm::mat4 &projection,
                        const glm::mat4 &originalShadowModelView,
                        const glm::mat4 &shadowProjection) const;
+
+  void drawPhongNormalMappingObject(const Object *object,
+                                    const glm::mat4 &originalModelView,
+                                    const glm::mat4 &projection,
+                                    const glm::mat4 &originalShadowModelView,
+                                    const glm::mat4 &shadowProjection) const;
 
   void drawLightBulbs(const glm::mat4 &originalModelView,
                       const glm::mat4 &projection,
@@ -100,9 +127,11 @@ private:
 private:
   std::vector<const Object *> lightBulbs;
   std::vector<const Object *> phongObjects;
+  std::vector<const Object *> phongNormalMappingObjects;
 
   LightBulbShader lightBulbShader;
   PhongShader phongShader;
+  PhongNormalMappingShader phongNormalShader; 
   CanvasShader canvasShader;
   BlurShader blurShader;
 
@@ -115,6 +144,8 @@ private:
   std::unordered_map<const Object *, GLuint> vboWorldMap;
   // Mapping between world objects and their texture objects.
   std::unordered_map<const Object *, GLuint> textureMap;
+  // Mapping between world objects and their normal texture objects.
+  std::unordered_map<const Object *, GLuint> normalTextureMap;
 
   // Ids of VBOs associated with the VAOs. These are kept so I know what to
   // delete

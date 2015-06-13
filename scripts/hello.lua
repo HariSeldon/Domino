@@ -68,19 +68,19 @@ setBackgroundColor({r = 0.2, g = 0.4, b = 0.6, a = 1});
 --        orientation = {x = 0, y = 0, z = 0},
 --        mass = 0, textureFile = "default.png"});
 addBox({sides = {x = 2, y = 2, z = 2}, 
-        position = {x = 0, y = 7, z = 0}, 
+        position = {x = 7, y = 7, z = 0}, 
         orientation = {x = 0, y = 0, z = 0},
-        mass = 0.01, textureFile = "checkerboard.png"});
+        mass = 0.01, textureFile = "red_brick.tif", normalTextureFile = "red_brick_normal.tif"});
 addLightBulb({side = 1, ambientColor = {r = 0.2, g = 0.2, b = 0.2, a = 1}, 
               position = {x = 1, y = 1, z = 0}, 
               mass = 10, constantAttenuation = 0.1, linearAttenuation = 0.1});
 addLightBulb({side = 1, 
-              position = {x = 0, y = 2, z = 0}, 
+              position = {x = 0, y = 10, z = 0}, 
               mass = 0, constantAttenuation = 0.1, linearAttenuation = 0.1});
 addLightBulb({side = 1, 
               position = {x = -10, y = 3, z = -10}, 
               mass = 10, constantAttenuation = 0.1, linearAttenuation = 0.1});
-addPlane({side = 60, textureFile = "grass.tif", textureRepetitions = 7});
+addPlane({side = 60, textureFile = "red_brick.tif", normalTextureFile = "red_brick_normal.tif", textureRepetitions = 2});
 
 -- for index = 1,20 do
 --   addMesh({objFile = "barrel.obj", position = {x = -30 + index * 3, y = 2, z = -30}, mass = 0});

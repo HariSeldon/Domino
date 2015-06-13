@@ -42,6 +42,8 @@ void Mesh::fillMesh(const ObjParser &parser) {
   const auto &parserTextureCoos = parser.getTextureCoos();
   const auto &parserIndices = parser.getIndices();
 
+  // Mapping between a touple identifying the point/normal/texture and the
+  // new index.
   std::map<ObjParser::FaceIndices, int> indexMap;
 
   const int indexNumber = parserIndices.size();
@@ -53,22 +55,31 @@ void Mesh::fillMesh(const ObjParser &parser) {
 
   int counter = 0;
 
+  // Go over the indices in the obj file.
   for (auto &faceIndices : parserIndices) {
+    // Check if a vertex with the current position/normal/texture is already present.
     auto iterator = indexMap.find(faceIndices);
+    // If yes the index of the touple to the output index buffer.     
     if (iterator != indexMap.end()) {
       indices.push_back(iterator->second);
-    } else {
+    } 
+    // If not create a new instance.
+    else {
+      // Get the current point. 
       glm::vec3 vertex = parserPoints[std::get<0>(faceIndices) - 1];
       points.push_back(vertex);
 
+      // If there is a texture coordinate add it.
       if(std::get<1>(faceIndices) != -1) {
         glm::vec2 textureCoo = parserTextureCoos[std::get<1>(faceIndices) - 1];
         textureCoos.push_back(textureCoo);
       }
 
+      // Add normal.
       glm::vec3 normal = parserNormals[std::get<2>(faceIndices) - 1];
       normals.push_back(normal);
 
+      // Create a new counter.
       indices.push_back(counter);
       indexMap[faceIndices] = counter;
       counter++;

@@ -1,6 +1,7 @@
 #version 330
 
 uniform sampler2D texture;
+uniform sampler2D normalTexture;
 
 in vec3 position;
 in vec3 normal;
@@ -47,6 +48,28 @@ uniform int lightMask;
 uniform vec4 ambientColor;
 
 const float DEFAULT_SPOT_CUTOFF = 180.f;
+
+// -----------------------------------------------------------------------------
+vec3 computeNormal() {
+  vec3 normalizedNormal = (2 * int(gl_FrontFacing) - 1) * normalize(normal);
+// This is equivalent to: 
+// if(gl_FrontFacing == false) -> normalizedNormal = -normalizedNormal;
+  
+  vec3 normalizedTangent = normalize(tangent); 
+
+  vec3 newTangent =
+      normalize(normalizedTangent -
+                dot(normalizedTangent, normalizedNormal) * normalizedNormal);
+
+  vec3 bitangent = cross(normalizedNormal, newTangent);
+
+  vec3 textureNormal =
+      normalize(vec3(2 * texture2D(normalTexture, textureCoordinates) - 1));
+
+  mat3 tbn = mat3(newTangent, bitangent, normalizedNormal);
+
+  return normalize(tbn * textureNormal); 
+}
 
 // -----------------------------------------------------------------------------
 // Light-independent shading.
@@ -157,9 +180,7 @@ vec4 shadePositionalLight(vec3 position, vec3 normal, vec3 cameraDirection,
 
 // -----------------------------------------------------------------------------
 void main() {
-  vec3 normalizedNormal = (2 * int(gl_FrontFacing) - 1) * normalize(normal);
-// This is equivalent to: 
-// if(gl_FrontFacing == false) -> normalizedNormal = -normalizedNormal;
+  vec3 normalizedNormal = computeNormal(); 
 
   vec3 cameraDirection = normalize(-1.0 * position);
 

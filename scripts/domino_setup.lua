@@ -240,7 +240,10 @@ function addPlane(plane)
     plane.specularColor = BLACK; 
   end 
   if plane.shader == nil then
-    plane.shader = "phong";
+    plane.shader = "phongNormalMapping";
+  end
+  if plane.normalTextureFile == nil then
+    plane.normalTextureFile = "";
   end
   if plane.textureRepetitions == nil then
     plane.textureRepetitions = 1;
@@ -267,6 +270,7 @@ function addPlane(plane)
                    plane.specularColor.b,
                    plane.specularColor.a,
                    plane.textureFile,
+                   plane.normalTextureFile,
                    plane.textureRepetitions,
                    plane.shader);
 end
@@ -298,10 +302,13 @@ function addBox(box)
     box.specularColor = BLACK; 
   end 
   if box.shader == nil then
-    box.shader = "phong";
+    box.shader = "phongNormalMapping";
   end
   if box.textureFile == nil then
     box.textureFile = "";
+  end
+  if box.normalTextureFile == nil then
+    box.normalTextureFile = "";
   end
 
   engine:_addBox(box.sides.x,
@@ -327,6 +334,7 @@ function addBox(box)
                  box.specularColor.b,
                  box.specularColor.a,
                  box.textureFile,
+                 box.normalTextureFile,
                  box.shader);
 end
 

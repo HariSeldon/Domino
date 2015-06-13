@@ -47,6 +47,7 @@ private:
   std::vector<glm::vec3> points;
   std::vector<glm::vec3> normals;
   std::vector<glm::vec2> textureCoos;
+  std::vector<glm::vec3> tangents;
   std::vector<FaceIndices> indices;
 
   // Material.

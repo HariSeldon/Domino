@@ -13,6 +13,8 @@
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 
+#include <glm/ext.hpp>
+
 #include <utility>
 
 const glm::vec3 Object::DEFAULT_POSITION = {0.f, 0.f, 0.f};
@@ -42,6 +44,10 @@ const unsigned int *Object::getIndices() const { return indices.data(); }
 
 const float *Object::getTextureCoos() const {
   return reinterpret_cast<const float *>(textureCoos.data());
+}
+
+const float *Object::getTangents() const {
+  return reinterpret_cast<const float *>(tangents.data());
 }
 
 void Object::setMass(btScalar mass) { this->mass = mass; }
@@ -130,7 +136,14 @@ Subtype &ObjectBuilder<Subtype>::setShininess(float shininess) {
 
 template <class Subtype>
 Subtype &ObjectBuilder<Subtype>::setTextureFile(std::string textureFile) {
-  this->textureFile = TEXTURE_PATH + textureFile;
+  this->textureFile = textureFile;
+  return static_cast<Subtype &>(*this);
+}
+
+template <class Subtype>
+Subtype &
+ObjectBuilder<Subtype>::setNormalTextureFile(std::string normalTextureFile) {
+  this->normalTextureFile = normalTextureFile;
   return static_cast<Subtype &>(*this);
 }
 

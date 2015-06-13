@@ -46,6 +46,7 @@ protected:
   std::vector<glm::vec3> normals;
   std::vector<unsigned int> indices;
   std::vector<glm::vec2> textureCoos;
+  std::vector<glm::vec3> tangents;
 
   // Material colors.
   glm::vec4 ambientColor;
@@ -53,6 +54,7 @@ protected:
   glm::vec4 specularColor;
   float shininess;
   std::string textureFile;
+  std::string normalTextureFile;
 
   std::string name;
 
@@ -65,6 +67,8 @@ public:
 
   const float* getTextureCoos() const;
   
+  const float* getTangents() const;
+
   inline int getTrigsNumber() const {
     return indices.size() / 3;
   }
@@ -118,8 +122,12 @@ public:
     transform.getOpenGLMatrix(matrix);
   }
 
-  const std::string &getTextureFile() const {
+  inline const std::string &getTextureFile() const {
     return textureFile;
+  }
+
+  inline const std::string &getNormalTextureFile() const {
+    return normalTextureFile;
   }
 };
 
@@ -140,6 +148,7 @@ public:
   Subtype& setShininess(float shininess);
 
   Subtype& setTextureFile(std::string textureFile);
+  Subtype& setNormalTextureFile(std::string normalTextureFile);
 
   virtual Object* create() = 0;
 
@@ -155,4 +164,5 @@ protected:
   glm::vec4 specularColor;
   float shininess;
   std::string textureFile;
+  std::string normalTextureFile;
 };
