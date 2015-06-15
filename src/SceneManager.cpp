@@ -89,7 +89,7 @@ void SceneManager::drawWorld(const glm::mat4 &modelView,
   glClearColor(BACKGROUND_COLOR.x, BACKGROUND_COLOR.y, BACKGROUND_COLOR.z,
                BACKGROUND_COLOR.w);
   drawer.drawWorld(world, modelView, projection, shadowView, shadowProjection,
-                   lightMask, camera->getPosition());
+                   lightMask, glm::vec4(cameraPosition, 1.f));
   drawer.drawMirror(modelView, projection);
 }
 
@@ -114,6 +114,7 @@ void SceneManager::mirrorRenderingPass() {
     glm::mat4 cameraView = mirror->getModelView();
     auto tmp = mirror->getPosition();
     glm::vec3 mirrorPosition {tmp.x(), tmp.y(), tmp.z()};
+    std::cout << glm::to_string(mirrorPosition) << "\n";
     drawWorld(cameraView, mirrorPosition);
     drawer.disableMirror();
   }

@@ -68,7 +68,7 @@ setBackgroundColor({r = 0.2, g = 0.4, b = 0.6, a = 1});
 --        orientation = {x = 0, y = 0, z = 0},
 --        mass = 0, textureFile = "default.png"});
 
-addMirror({sides = {x = 20, y= 10}, position = {x = 0, y = 5, z = 20},
+addMirror({sides = {x = 16, y= 10}, position = {x = 0, y = 5, z = 20},
           orientation = {x = 0, y = -3.1415},
           mass = 0});
 

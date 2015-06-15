@@ -40,8 +40,6 @@ void Mirror::computePoints(const glm::vec2 &sides) {
   indices = { 0, 1, 2, 2, 3, 0 };
 
   glm::vec3 normal = computeNormal(first, second, third);
-
-  textureCoos = { { 0, 1 }, { 1, 1 }, { 1, 0 }, { 0, 0 } };
 }
 
 //-----------------------------------------------------------------------------
@@ -70,7 +68,7 @@ glm::mat4 Mirror::getModelView() const {
       glm::translate(currentTransform, glm::vec3(0.f, 0.f, 1.f));
   glm::vec4 center = centerMatrix[3];
   // The second column of the center matrix contains the up vector.
-  glm::vec4 up = -1.f * centerMatrix[1];
+  glm::vec4 up = centerMatrix[1];
   return glm::lookAt(glm::vec3(eye), glm::vec3(center), glm::vec3(up));
 }
 

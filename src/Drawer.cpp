@@ -288,7 +288,6 @@ void Drawer::createMirrorObjects() {
   mirrorFBO = std::get<0>(mirrorData);
   mirrorTexture = std::get<1>(mirrorData);
   mirrorDBO = createDBO(mirrorFBO);
-  std::cout << "mt:" << mirrorTexture << "\n";
 }
 
 //-----------------------------------------------------------------------------
@@ -412,13 +411,24 @@ GLuint Drawer::setupIndexVBO(const Object *object) {
 
 //-----------------------------------------------------------------------------
 Drawer::~Drawer() {
-  for (auto iter : vaoWorldMap)
+  for (auto &iter : vaoWorldMap)
     glDeleteVertexArrays(1, &iter.second);
 
   if (vboIds.size() > 0)
     glDeleteBuffers(vboIds.size(), vboIds.data());
 
-  // FIXME Remember to delete all the frame buffers.
+  for (auto &iter : textureMap) {
+    glDeleteTextures(1, &iter.second);
+  } 
+
+  for (auto &iter : normalTextureMap) {
+    glDeleteTextures(1, &iter.second);
+  }
+
+  glDeleteFramebuffers(1, &mirrorFBO);
+  glDeleteTextures(1, &mirrorTexture);
+  glGenRenderbuffers(1, &mirrorDBO);
+
 }
 
 //-----------------------------------------------------------------------------
@@ -516,7 +526,6 @@ void Drawer::drawMirror(const glm::mat4 &originalModelView,
   auto modelView = getObjectModelView(mirror, originalModelView);
 
   mirrorShader.setUniform(MirrorShader::mvpMatrix, projection * modelView);
-  std::cout << "mirrorTexture: " << mirrorTexture << "\n";
 
   // Set color and normal texture.
   glBindTexture(GL_TEXTURE_2D, mirrorTexture);

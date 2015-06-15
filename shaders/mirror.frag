@@ -7,5 +7,5 @@ in vec2 textureCoordinates;
 out vec4 outputColor;
 
 void main() {
-  outputColor = vec4(texture2D(texture, textureCoordinates.xy));
+  outputColor = (gl_FrontFacing) ? vec4(0,0,0,1) : texture2D(texture, textureCoordinates);
 }
