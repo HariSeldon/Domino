@@ -44,9 +44,12 @@ std::string getFileContent(const std::string &filePath) {
 
 // -----------------------------------------------------------------------------
 void dumpGLInfo() {
-  std::cout << "GL Version:   " << glGetString(GL_VERSION) << "\n";
-  std::cout << "GLSL Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION)
-            << "\n";
+  auto majorVersion = 0;
+  glGetIntegerv(GL_MAJOR_VERSION, &majorVersion);
+  auto minorVersion = 0;
+  glGetIntegerv(GL_MINOR_VERSION, &minorVersion); 
+
+  std::cout << "GL Version:   " << majorVersion << "." << minorVersion << "\n";
 }
 
 // -----------------------------------------------------------------------------
