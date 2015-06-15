@@ -3,6 +3,8 @@
 #include "Camera.h"
 #include "SysDefines.h"
 #include "World.h"
+#include "Mirror.h"
+#include "Object.h"
 
 #include <LinearMath/btVector3.h>
 
@@ -29,6 +31,10 @@ public:
 //  }
   inline void addObject(Object *object) { world->addObject(object); }
   inline void addLightBulb(LightBulb *bulb) { world->addLightBulb(bulb); }
+  inline void setMirror(Mirror *mirror) { 
+    world->setMirror(mirror); 
+    addObject(dynamic_cast<Object*>(mirror));
+  } 
   inline void setGravity(const btVector3 &gravity) {
     world->setGravity(gravity);
   }
@@ -53,10 +59,7 @@ public:
   inline Camera *getCamera() const { return camera; }
   inline glm::vec4 getBackgroundColor() const { return backgroundColor; }
   //inline const std::map<const Object *, const std::string> &
-  inline const std::map<const std::string, std::vector<const Object*>> &
-  getShaderMap() const {
-    return shaderFileMap;
-  }
+  inline const auto getShaderMap() const { return shaderFileMap; }
 
 private:
   Camera *camera;

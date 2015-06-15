@@ -67,6 +67,11 @@ setBackgroundColor({r = 0.2, g = 0.4, b = 0.6, a = 1});
 --        position = {x = 0, y = 0, z = 0}, 
 --        orientation = {x = 0, y = 0, z = 0},
 --        mass = 0, textureFile = "default.png"});
+
+addMirror({sides = {x = 20, y= 10}, position = {x = 0, y = 5, z = 20},
+          orientation = {x = 0, y = -3.1415},
+          mass = 0});
+
 addBox({sides = {x = 2, y = 2, z = 2}, 
         position = {x = 7, y = 7, z = 0}, 
         orientation = {x = 0, y = 0, z = 0},
@@ -82,9 +87,9 @@ addLightBulb({side = 1,
               mass = 10, constantAttenuation = 0.1, linearAttenuation = 0.1});
 addPlane({side = 60, textureFile = "red_brick.tif", normalTextureFile = "red_brick_normal.tif", textureRepetitions = 2});
 
--- for index = 1,20 do
---   addMesh({objFile = "barrel.obj", position = {x = -30 + index * 3, y = 2, z = -30}, mass = 0});
--- end
+for index = 10,15 do
+addMesh({objFile = "barrel.obj", position = {x = -30 + index * 3, y = 2, z = -30}, mass = 0});
+end
 -- for index = 1,20 do
 --   addMesh({objFile = "barrel.obj", position = {x = -30 + index * 3, y = 2, z = 30}, mass = 0});
 -- end

@@ -8,6 +8,7 @@
 #include "Light.h"
 #include "LightBulb.h"
 #include "Mesh.h"
+#include "Mirror.h"
 #include "Plane.h"
 #include "SceneContainer.h"
 #include "SysDefines.h"
@@ -25,6 +26,7 @@ static luaL_Reg ScriptEngineMetatable[] = {
     {"_addDirectionalLight", addDirectionalLight},
     {"_addMesh", addMesh},
     {"_addPlane", addPlane},
+    {"_addMirror", addMirror},
 //    {"_addPositionalLight", addPositionalLight},
     {"_addSphere", addSphere},
     {"_addSpotLight", addSpotLight},
@@ -49,7 +51,7 @@ void LuaState::runScript(const std::string &scriptFile) {
                               ScriptEngineMetatable, NewScriptEngine);
   int errors = luaL_dofile(luaState, scriptFile.c_str());
   if (errors) {
-    std::cout << "Error running lua script: " << scriptFile << "\n"
+    std::cerr << "Error running lua script: " << scriptFile << "\n"
               << luaL_checkstring(luaState, -1) << std::endl;
     exit(1);
   }
@@ -104,48 +106,6 @@ int setCamera(lua_State *luaState) {
                                {rotationX, rotationY}, viewAngle, zNear, zFar);
   return 0;
 }
-
-//// -----------------------------------------------------------------------------
-//int addPositionalLight(lua_State *luaState) {
-//  ScriptEngine *engine = luaW_check<ScriptEngine>(luaState, 1);
-//  float positionX = static_cast<float>(luaL_checknumber(luaState, 2));
-//  float positionY = static_cast<float>(luaL_checknumber(luaState, 3));
-//  float positionZ = static_cast<float>(luaL_checknumber(luaState, 4));
-//  float ambientColorR = static_cast<float>(luaL_checknumber(luaState, 5));
-//  float ambientColorG = static_cast<float>(luaL_checknumber(luaState, 6));
-//  float ambientColorB = static_cast<float>(luaL_checknumber(luaState, 7));
-//  float ambientColorA = static_cast<float>(luaL_checknumber(luaState, 8));
-//  float diffuseColorR = static_cast<float>(luaL_checknumber(luaState, 9));
-//  float diffuseColorG = static_cast<float>(luaL_checknumber(luaState, 10));
-//  float diffuseColorB = static_cast<float>(luaL_checknumber(luaState, 11));
-//  float diffuseColorA = static_cast<float>(luaL_checknumber(luaState, 12));
-//  float specularColorR = static_cast<float>(luaL_checknumber(luaState, 13));
-//  float specularColorG = static_cast<float>(luaL_checknumber(luaState, 14));
-//  float specularColorB = static_cast<float>(luaL_checknumber(luaState, 15));
-//  float specularColorA = static_cast<float>(luaL_checknumber(luaState, 16));
-//  float constantAttenuation =
-//      static_cast<float>(luaL_checknumber(luaState, 17));
-//  float linearAttenuation = static_cast<float>(luaL_checknumber(luaState, 18));
-//  float quadraticAttenuation =
-//      static_cast<float>(luaL_checknumber(luaState, 19));
-//
-//  Light *light =
-//      engine->lightBuilder.setPosition(
-//                               glm::vec3(positionX, positionY, positionZ))
-//          .setAmbientColor(
-//               {ambientColorR, ambientColorG, ambientColorB, ambientColorA})
-//          .setDiffuseColor(
-//               {diffuseColorR, diffuseColorG, diffuseColorB, diffuseColorA})
-//          .setSpecularColor(
-//               {specularColorR, specularColorG, specularColorB, specularColorA})
-//          .setConstantAttenuation(constantAttenuation)
-//          .setLinearAttenuation(linearAttenuation)
-//          .setQuadraticAttenuation(quadraticAttenuation)
-//          .createPositional();
-//
-//  engine->container->addLight(light);
-//  return 0;
-//}
 
 // -----------------------------------------------------------------------------
 int addLightBulb(lua_State *luaState) {
@@ -340,6 +300,33 @@ int addPlane(lua_State *luaState) {
 
   engine->container->addShader(plane, std::string(shaderFile));
   engine->container->addObject(plane);
+  return 0;
+}
+
+// -----------------------------------------------------------------------------
+int addMirror(lua_State *luaState) {
+  ScriptEngine *engine = luaW_check<ScriptEngine>(luaState, 1);
+  float sideX = static_cast<float>(luaL_checknumber(luaState, 2));
+  float sideY = static_cast<float>(luaL_checknumber(luaState, 3));
+  float mass = static_cast<float>(luaL_checknumber(luaState, 4));
+  float positionX = static_cast<float>(luaL_checknumber(luaState, 5));
+  float positionY = static_cast<float>(luaL_checknumber(luaState, 6));
+  float positionZ = static_cast<float>(luaL_checknumber(luaState, 7));
+  float rotationX = static_cast<float>(luaL_checknumber(luaState, 8));
+  float rotationY = static_cast<float>(luaL_checknumber(luaState, 9));
+
+  MirrorBuilder mirrorBuilder;
+  btQuaternion rotation(rotationX, rotationY, 0.f);
+  Mirror *mirror =
+      mirrorBuilder.setTransform(
+                        btTransform(rotation,
+                                    btVector3(positionX, positionY, positionZ)))
+          .setSides({sideX, sideY})
+          .setMass(mass)
+          .create();
+
+  engine->container->addShader(mirror, "mirror");
+  engine->container->setMirror(mirror);
   return 0;
 }
 

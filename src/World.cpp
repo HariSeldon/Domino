@@ -84,17 +84,6 @@ const glm::vec4 &World::getAmbientColor() const { return ambientColor; }
 void World::setAmbientColor(const glm::vec4 &color) { ambientColor = color; }
 
 // -----------------------------------------------------------------------------
-int World::getLightsNumber() const {
-  return lights.size();
-}
-
-// -----------------------------------------------------------------------------
-Mirror *World::getMirror() { return mirror; }
-
-// -----------------------------------------------------------------------------
-const Mirror *World::getMirror() const { return mirror; }
-
-// -----------------------------------------------------------------------------
 void traceDominoLine(const btVector3 &origin, const btVector3 &destination,
                      World *world, int full, bool tilt = false) {
   // Assume the y component of the positions is not relevant.

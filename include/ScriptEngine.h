@@ -24,6 +24,7 @@ int addBox(lua_State *luaState);
 int addDirectionalLight(lua_State *luaState);
 int addMesh(lua_State *luaState);
 int addPlane(lua_State *luaState);
+int addMirror(lua_State *luaState);
 int addLightBulb(lua_State *luaState);
 //int addPositionalLight(lua_State *luaState);
 int addSphere(lua_State *luaState);

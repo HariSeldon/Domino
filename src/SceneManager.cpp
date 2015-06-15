@@ -64,13 +64,21 @@ SceneManager::~SceneManager() {
 // -----------------------------------------------------------------------------
 void SceneManager::drawScene() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  //mirrorRenderingPass();
+  mirrorRenderingPass();
   //shadowRenderingPass();
   screenRenderingPass();
 }
 
 // -----------------------------------------------------------------------------
-void SceneManager::drawWorld(const glm::mat4 &modelView) {
+void SceneManager::screenRenderingPass() {
+  glm::mat4 modelView = camera->applyView();
+  drawWorld(modelView, glm::vec3(camera->getPosition()));
+  drawText();
+}
+
+// -----------------------------------------------------------------------------
+void SceneManager::drawWorld(const glm::mat4 &modelView,
+                             const glm::vec3 &cameraPosition) {
   glm::mat4 shadowView =
       glm::lookAt(glm::vec3(-11, 4, 0), glm::vec3(-9.29, 3.29, 0),
                   glm::vec3(10.29, 4.71, 0));
@@ -82,29 +90,33 @@ void SceneManager::drawWorld(const glm::mat4 &modelView) {
                BACKGROUND_COLOR.w);
   drawer.drawWorld(world, modelView, projection, shadowView, shadowProjection,
                    lightMask, camera->getPosition());
+  drawer.drawMirror(modelView, projection);
 }
 
-// -----------------------------------------------------------------------------
-void SceneManager::drawMirror(const glm::mat4 &) {
-//  if (Mirror *mirror = world->getMirror()) {
-//    ShaderProgram &mirrorShader = mirror->getShaderProgram();
-//    mirrorShader.useProgram();
-//    //mirrorShader.setUniform("projectionMatrix", projection);
-//    //mirrorShader.setUniform("texture", 0);
-////    drawer.drawObject(mirror, mirrorShader, modelView, projection);
-//  }
-}
+//// -----------------------------------------------------------------------------
+//void SceneManager::drawMirror(const glm::mat4 &) {
+////  if (Mirror *mirror = world->getMirror()) {
+////    ShaderProgram &mirrorShader = mirror->getShaderProgram();
+////    mirrorShader.useProgram();
+////    //mirrorShader.setUniform("projectionMatrix", projection);
+////    //mirrorShader.setUniform("texture", 0);
+//////    drawer.drawObject(mirror, mirrorShader, modelView, projection);
+////  }
+//}
 
 // -----------------------------------------------------------------------------
 void SceneManager::mirrorRenderingPass() {
-//  if (Mirror *mirror = world->getMirror()) {
-//    // Draw the scene on the mirror texture from the point of view of the
-//    // mirror.
-//    mirror->enableMirror();
-//    glm::mat4 cameraView = mirror->getModelView();
-//    drawWorld(cameraView, worldShader);
-//    mirror->disableMirror();
-//  }
+  // FIXME remove this if.
+  if (Mirror *mirror = world->getMirror()) {
+    // Draw the scene on the mirror texture from the point of view of the
+    // mirror.
+    drawer.enableMirror();
+    glm::mat4 cameraView = mirror->getModelView();
+    auto tmp = mirror->getPosition();
+    glm::vec3 mirrorPosition {tmp.x(), tmp.y(), tmp.z()};
+    drawWorld(cameraView, mirrorPosition);
+    drawer.disableMirror();
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -136,14 +148,6 @@ void SceneManager::drawShadowWorld(const glm::mat4 &modelView,
                 [&](const Object *object) {
     drawer.drawObjectForShadow(object, shader, modelView, projection);
   });
-}
-
-// -----------------------------------------------------------------------------
-void SceneManager::screenRenderingPass() {
-  glm::mat4 modelView = camera->applyView();
-  drawWorld(modelView);
-  //drawMirror(modelView);
-  drawText();
 }
 
 // -----------------------------------------------------------------------------

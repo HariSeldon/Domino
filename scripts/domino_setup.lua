@@ -211,6 +211,34 @@ function addSpotLight(light)
 end
 
 --------------------------------------------------------------------------------
+function addMirror(mirror)
+  -- Mandatory parameters.
+  if mirror.sides == nil then
+    error("Mirror sides missing");
+  end
+
+  -- Optional parameters.
+  if mirror.mass == nil then
+    mirror.mass = 0;
+  end
+  if mirror.position == nil then
+    mirror.position = CENTER;
+  end
+  if mirror.orientation == nil then
+    mirror.orientation = CENTER;
+  end
+
+  engine:_addMirror(mirror.sides.x,
+                    mirror.sides.y,
+                    mirror.mass,
+                    mirror.position.x,
+                    mirror.position.y,
+                    mirror.position.z,
+                    mirror.orientation.x,
+                    mirror.orientation.y);
+end
+
+--------------------------------------------------------------------------------
 function addPlane(plane)
   -- Mandatory parameters.
   if plane.side == nil then

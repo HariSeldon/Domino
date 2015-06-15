@@ -48,10 +48,10 @@ private:
   void initGPU(SceneContainer *container);
   void initTextures();
   void setupProjection(const glm::ivec2 &screenSize);
-  void drawWorld(const glm::mat4 &modelView);
+  void drawWorld(const glm::mat4 &modelView, const glm::vec3 &cameraPosition);
+  void drawWorldForMirror(const glm::mat4 &modelView);
   void drawShadowWorld(const glm::mat4 &modelView, const glm::mat4 &projection,
                        ShaderProgram &shader);
-  void drawMirror(const glm::mat4 &modelView);
   void drawText();
   void mirrorRenderingPass();
   void shadowRenderingPass();

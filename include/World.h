@@ -45,10 +45,19 @@ public:
   const glm::vec4 &getAmbientColor() const;
   void setAmbientColor(const glm::vec4 &color);
 
-  int getLightsNumber() const;
+  inline int getLightsNumber() const {
+    return lights.size();
+  }
 
-  Mirror *getMirror();
-  const Mirror *getMirror() const;
+  inline void setMirror(Mirror *mirror) {
+    this->mirror = mirror;
+  } 
+  inline Mirror *getMirror() {
+    return mirror;
+  }
+  inline const Mirror *getMirror() const {
+    return mirror;
+  }
 
 private:
   void initWorld();

@@ -3,6 +3,7 @@
 #include "BlurShader.h"
 #include "CanvasShader.h"
 #include "LightBulbShader.h"
+#include "MirrorShader.h"
 #include "PhongShader.h"
 #include "PhongNormalMappingShader.h"
 
@@ -37,7 +38,7 @@ public:
   void initTextures(const World &world);
   void initGPUShadowObjects(const ShaderProgram &shadowShader,
                             const World &world);
-  void initMirror(const ShaderProgram &mirrorShader, const Mirror *mirror);
+  void initMirror(const Mirror *mirror);
 
   // Drawing functions.
   void drawWorld(const World *world, const glm::mat4 &originalModelView,
@@ -49,6 +50,11 @@ public:
   void drawObjectForShadow(const Object *object, ShaderProgram &shader,
                            const glm::mat4 &originalModelView,
                            const glm::mat4 &projection) const;
+  void enableMirror() const;
+  void drawMirror(const glm::mat4 &originalModelView,
+                  const glm::mat4 &projection) const;
+  void disableMirror() const;
+
 private:
   void fillObjectsVectors(const std::map<
       const std::string, std::vector<const Object *>> &shaderNameMap);
@@ -64,9 +70,13 @@ private:
   void createPhongNormalMappingObjectsGPUBuffers();
   void createPhongNormalMappingObjectGPUBuffers(const Object *object);
 
+  void createMirrorObjectsGPUBuffers();
+  void createMirrorObjectGPUBuffers(const Object *object);
+
   void createObjectTextures(const Object *object);
   void initTexture(const Object *object, const std::string &fileName,
                    std::unordered_map<const Object *, GLuint> &texMap);
+  void createMirrorObjects();
   void createFrameBuffers();
 
   GLuint setupVertexVBO(const Object *object, const ShaderProgram &shader);
@@ -128,12 +138,14 @@ private:
   std::vector<const Object *> lightBulbs;
   std::vector<const Object *> phongObjects;
   std::vector<const Object *> phongNormalMappingObjects;
+  const Object *mirror;
 
   LightBulbShader lightBulbShader;
   PhongShader phongShader;
   PhongNormalMappingShader phongNormalShader; 
   CanvasShader canvasShader;
   BlurShader blurShader;
+  MirrorShader mirrorShader;
 
   // Mapping between shaders and world objects.
   // Mapping between world objects and VAOs.
@@ -151,6 +163,10 @@ private:
   // delete
   // to free the memory.
   std::vector<GLuint> vboIds;
+
+  GLuint mirrorFBO = 0;
+  GLuint mirrorTexture = 0;
+  GLuint mirrorDBO = 0;
 
   // Temporary stuff.
   GLuint sceneFBOId;

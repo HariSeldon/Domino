@@ -33,13 +33,15 @@ void setOrientation(const Object *object, const PhongShader &shader,
                     const glm::mat4 &projection,
                     const glm::mat4 &originalShadowModelView,
                     const glm::mat4 &shadowProjection);
-void setOrientation(const Object *object, const PhongNormalMappingShader &shader,
+void setOrientation(const Object *object,
+                    const PhongNormalMappingShader &shader,
                     const glm::mat4 &originalModelView,
                     const glm::mat4 &projection,
                     const glm::mat4 &originalShadowModelView,
                     const glm::mat4 &shadowProjection);
-void setLightBulbOrientation(const Object *object, const LightBulbShader &shader,
-                             const glm::mat4 &originalModelView, 
+void setLightBulbOrientation(const Object *object,
+                             const LightBulbShader &shader,
+                             const glm::mat4 &originalModelView,
                              const glm::mat4 &projection,
                              const glm::vec4 &cameraPosition);
 void setOrientationForShadow(const Object *object, const ShaderProgram &shader,
@@ -55,15 +57,17 @@ GLuint createDBO(GLuint fboId);
 //-----------------------------------------------------------------------------
 Drawer::Drawer()
     : lightBulbShader("lightBulb.vert", "lightBulb.frag"),
-      phongShader("phong.vert", "phong.frag"), 
-      phongNormalShader("phong_normal_mapping.vert", "phong_normal_mapping.frag"),
+      phongShader("phong.vert", "phong.frag"),
+      phongNormalShader("phong_normal_mapping.vert",
+                        "phong_normal_mapping.frag"),
+      blurShader("blur.vert", "blur.frag"),
       canvasShader("canvas.vert", "canvas.frag"),
-      blurShader("blur.vert", "blur.frag") {}
+      mirrorShader("mirror.vert", "mirror.frag") {}
 
 //-----------------------------------------------------------------------------
 void Drawer::initGPUObjects(const std::map<
     const std::string, std::vector<const Object *>> &shaderNameMap) {
-  
+
   fillObjectsVectors(shaderNameMap);
   createGPUBuffers();
 }
@@ -75,19 +79,21 @@ void Drawer::fillObjectsVectors(const std::map<
     const std::string shaderName = x.first;
     auto objectVector = x.second;
 
-    std::cout << shaderName << "\n";
-
-    if(shaderName == "phong") {
+    if (shaderName == "phong") {
       phongObjects = objectVector;
     }
 
-    if(shaderName  == "lightBulb") {
+    if (shaderName == "lightBulb") {
       lightBulbs = objectVector;
     }
 
-    if(shaderName == "phongNormalMapping") {
+    if (shaderName == "phongNormalMapping") {
       phongNormalMappingObjects = objectVector;
-    } 
+    }
+
+    if (shaderName == "mirror") {
+      mirror = objectVector[0];
+    }
   }
 }
 
@@ -96,6 +102,7 @@ void Drawer::createGPUBuffers() {
   createLightBulbsGPUBuffers();
   createPhongObjectsGPUBuffers();
   createPhongNormalMappingObjectsGPUBuffers();
+  createMirrorObjectsGPUBuffers();
 }
 
 //-----------------------------------------------------------------------------
@@ -146,6 +153,31 @@ void Drawer::createPhongNormalMappingObjectsGPUBuffers() {
                 phongNormalMappingObjects.end(), [this](const Object *object) {
                   createPhongNormalMappingObjectGPUBuffers(object);
                 });
+}
+
+//-----------------------------------------------------------------------------
+void Drawer::createMirrorObjectsGPUBuffers() {
+  createMirrorObjectGPUBuffers(mirror);
+}
+
+//-----------------------------------------------------------------------------
+void Drawer::createMirrorObjectGPUBuffers(const Object *object) {
+  GLuint vaoId = 0;
+  // Create VAO.
+  glGenVertexArrays(1, &vaoId);
+  glBindVertexArray(vaoId);
+
+  GLuint vertexVBOId = setupVertexVBO(object, phongShader);
+  GLuint indexVBOId = setupIndexVBO(object);
+  GLuint normalVBOId = setupNormalVBO(object, phongShader);
+  GLuint textureVBOId = setupTextureVBO(object, phongShader);
+
+  // Unbind.
+  glBindVertexArray(0);
+
+  vaoWorldMap.insert(std::pair<const Object *, GLuint>(object, vaoId));
+  vboIds.insert(vboIds.end(),
+                {vertexVBOId, indexVBOId, normalVBOId, textureVBOId});
 }
 
 //-----------------------------------------------------------------------------
@@ -211,6 +243,7 @@ void Drawer::initTextures(const World &world) {
   // Load textures.
   std::for_each(constBeginObjects(world), constEndObjects(world),
                 [&](const Object *object) { createObjectTextures(object); });
+  createMirrorObjects();
 }
 
 //-----------------------------------------------------------------------------
@@ -250,45 +283,72 @@ void Drawer::initTexture(const Object *object, const std::string &fileName,
 }
 
 //-----------------------------------------------------------------------------
-void Drawer::initGPUShadowObjects(const ShaderProgram &shadowShader,
-                                  const World &world) {
-// TODO.
-//  for (auto mapIter : vaoWorldMap) {
-//    const Object *object = mapIter.first;
-//
-//    GLuint vaoId = 0;
-//
-//    glGenVertexArrays(1, &vaoId);
-//    glBindVertexArray(vaoId);
-//
-//    // Bind the vertex buffer to the vao.
-//    // I should not need this.
-//    GLuint vertexVBOId = setupVertexVBO(object, &shadowShader);
-//    GLuint indexVBOId = setupIndexVBO(object);
-//
-//    glBindVertexArray(0);
-//
-//    vaoShadowMap.insert(std::pair<const Object *, GLuint>(object, vaoId));
-//    vboIds.push_back(indexVBOId);
-//  }
+void Drawer::createMirrorObjects() {
+  auto mirrorData = generateFBOColor();
+  mirrorFBO = std::get<0>(mirrorData);
+  mirrorTexture = std::get<1>(mirrorData);
+  mirrorDBO = createDBO(mirrorFBO);
+  std::cout << "mt:" << mirrorTexture << "\n";
 }
 
 //-----------------------------------------------------------------------------
-void Drawer::initMirror(const ShaderProgram &shader, const Mirror *mirror) {
+void Drawer::initGPUShadowObjects(const ShaderProgram &shadowShader,
+                                  const World &world) {
+  // TODO.
+  //  for (auto mapIter : vaoWorldMap) {
+  //    const Object *object = mapIter.first;
+  //
+  //    GLuint vaoId = 0;
+  //
+  //    glGenVertexArrays(1, &vaoId);
+  //    glBindVertexArray(vaoId);
+  //
+  //    // Bind the vertex buffer to the vao.
+  //    // I should not need this.
+  //    GLuint vertexVBOId = setupVertexVBO(object, &shadowShader);
+  //    GLuint indexVBOId = setupIndexVBO(object);
+  //
+  //    glBindVertexArray(0);
+  //
+  //    vaoShadowMap.insert(std::pair<const Object *, GLuint>(object, vaoId));
+  //    vboIds.push_back(indexVBOId);
+  //  }
+}
+
+//-----------------------------------------------------------------------------
+void Drawer::initMirror(const Mirror *mirror) {
   GLuint vaoId = 0;
   // Create VAO.
   glGenVertexArrays(1, &vaoId);
   glBindVertexArray(vaoId);
 
-  GLuint vertexVBOId = setupVertexVBO(mirror, shader);
+  GLuint vertexVBOId = setupVertexVBO(mirror, mirrorShader);
   GLuint indexVBOId = setupIndexVBO(mirror);
-  GLuint textureVBOId = setupTextureVBO(mirror, shader);
+  GLuint textureVBOId = setupTextureVBO(mirror, mirrorShader);
 
   // Unbind.
   glBindVertexArray(0);
 
   vaoWorldMap[mirror] = vaoId;
   vboIds.insert(vboIds.end(), {vertexVBOId, indexVBOId, textureVBOId});
+}
+
+//-----------------------------------------------------------------------------
+void Drawer::enableMirror() const {
+  glBindFramebuffer(GL_FRAMEBUFFER, mirrorFBO);
+  checkOpenGLError("Drawer: enableMirror-glBindFrameBuffer");
+  glViewport(0, 0, 1280, 800);
+  checkOpenGLError("Drawer: enableMirror-glViewport");
+  //  glBindTexture(GL_TEXTURE_2D, mirrorTexture);
+  //  checkOpenGLError("Drawer: enableMirror-glBindTexture");
+}
+
+//-----------------------------------------------------------------------------
+void Drawer::disableMirror() const {
+  //  glBindTexture(GL_TEXTURE_2D, 0);
+  //  checkOpenGLError("Drawer: disableMirror-glBindTexture");
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  checkOpenGLError("Drawer: disableMirror-glBindFramebuffer");
 }
 
 //-----------------------------------------------------------------------------
@@ -375,8 +435,9 @@ void Drawer::drawWorld(const World *world, const glm::mat4 &originalModelView,
                                 originalShadowModelView, shadowProjection,
                                 lightMask);
   drawLightBulbs(originalModelView, projection, cameraPosition, lightMask);
-//  blurLightBulbs(blurShader, blurredBulbFBOId, lightBulbTexture); 
-//  drawFinalImage();
+  // drawMirror(originalModelView, projection);
+  //  blurLightBulbs(blurShader, blurredBulbFBOId, lightBulbTexture);
+  //  drawFinalImage();
 }
 
 //-----------------------------------------------------------------------------
@@ -386,9 +447,9 @@ void Drawer::drawPhongObjects(const World *world,
                               const glm::mat4 &originalShadowModelView,
                               const glm::mat4 &shadowProjection,
                               const int lightMask) const {
-//  glBindFramebuffer(GL_FRAMEBUFFER, sceneFBOId);
-//  checkOpenGLError("Drawer: drawObjects-glBindFrameBuffer");
-//  glViewport(0, 0, 1280, 800);
+  //  glBindFramebuffer(GL_FRAMEBUFFER, sceneFBOId);
+  //  checkOpenGLError("Drawer: drawObjects-glBindFrameBuffer");
+  //  glViewport(0, 0, 1280, 800);
 
   phongShader.useProgram();
   setPhongLights(world, phongShader, originalModelView, lightMask);
@@ -397,7 +458,7 @@ void Drawer::drawPhongObjects(const World *world,
                     shadowProjection);
   }
 
-//  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  //  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 //-----------------------------------------------------------------------------
@@ -405,9 +466,9 @@ void Drawer::drawPhongNormalMappingObjects(
     const World *world, const glm::mat4 &originalModelView,
     const glm::mat4 &projection, const glm::mat4 &originalShadowModelView,
     const glm::mat4 &shadowProjection, const int lightMask) const {
-//  glBindFramebuffer(GL_FRAMEBUFFER, sceneFBOId);
-//  checkOpenGLError("Drawer: drawObjects-glBindFrameBuffer");
-//  glViewport(0, 0, 1280, 800);
+  //  glBindFramebuffer(GL_FRAMEBUFFER, sceneFBOId);
+  //  checkOpenGLError("Drawer: drawObjects-glBindFrameBuffer");
+  //  glViewport(0, 0, 1280, 800);
 
   phongNormalShader.useProgram();
   setPhongLights(world, phongNormalShader, originalModelView, lightMask);
@@ -416,7 +477,7 @@ void Drawer::drawPhongNormalMappingObjects(
                                  originalShadowModelView, shadowProjection);
   }
 
-//  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  //  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 //-----------------------------------------------------------------------------
@@ -424,15 +485,15 @@ void Drawer::drawLightBulbs(const glm::mat4 &originalModelView,
                             const glm::mat4 &projection,
                             const glm::vec4 &cameraPosition,
                             const int lightMask) const {
-//  glBindFramebuffer(GL_FRAMEBUFFER, lightBulbFBOId);
-//  checkOpenGLError("Drawer: drawObjects-glBindFrameBuffer");
-//  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-//                            GL_RENDERBUFFER, dboId);
-//  checkOpenGLError("Drawer: drawObjects-glFramebufferRenderbuffer");
-//  glViewport(0, 0, 1280, 800);
-//
-//  glClearColor(0.f, 0.f, 0.f, 1);
-//  glClear(GL_COLOR_BUFFER_BIT);
+  //  glBindFramebuffer(GL_FRAMEBUFFER, lightBulbFBOId);
+  //  checkOpenGLError("Drawer: drawObjects-glBindFrameBuffer");
+  //  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+  //                            GL_RENDERBUFFER, dboId);
+  //  checkOpenGLError("Drawer: drawObjects-glFramebufferRenderbuffer");
+  //  glViewport(0, 0, 1280, 800);
+  //
+  //  glClearColor(0.f, 0.f, 0.f, 1);
+  //  glClear(GL_COLOR_BUFFER_BIT);
 
   lightBulbShader.useProgram();
   int lightBulbCounter = 0;
@@ -443,13 +504,30 @@ void Drawer::drawLightBulbs(const glm::mat4 &originalModelView,
                   cameraPosition);
   }
 
-//  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-//                            GL_RENDERBUFFER, 0);
-//  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  //  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+  //                            GL_RENDERBUFFER, 0);
+  //  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 //-----------------------------------------------------------------------------
-void Drawer::blurLightBulbs(const BlurShader &blurShader, 
+void Drawer::drawMirror(const glm::mat4 &originalModelView,
+                        const glm::mat4 &projection) const {
+  mirrorShader.useProgram();
+  auto modelView = getObjectModelView(mirror, originalModelView);
+
+  mirrorShader.setUniform(MirrorShader::mvpMatrix, projection * modelView);
+  std::cout << "mirrorTexture: " << mirrorTexture << "\n";
+
+  // Set color and normal texture.
+  glBindTexture(GL_TEXTURE_2D, mirrorTexture);
+  mirrorShader.setUniform(MirrorShader::texture, 0);
+
+  invokeDrawCall(mirror);
+  glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+//-----------------------------------------------------------------------------
+void Drawer::blurLightBulbs(const BlurShader &blurShader,
                             const GLuint outputFrameBuffer,
                             const GLuint inputTexture) const {
   glBindFramebuffer(GL_FRAMEBUFFER, outputFrameBuffer);
@@ -463,7 +541,7 @@ void Drawer::blurLightBulbs(const BlurShader &blurShader,
   blurShader.useProgram();
   glBindTexture(GL_TEXTURE_2D, inputTexture);
   checkOpenGLError("Drawer: drawObjects-glBindTexture");
-  
+
   glBindVertexArray(canvasId);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
   glBindTexture(GL_TEXTURE_2D, 0);
@@ -507,8 +585,10 @@ void Drawer::setPhongLights(const World *world, const PhongShader &shader,
 void Drawer::setPhongLights(const World *world,
                             const PhongNormalMappingShader &shader,
                             const glm::mat4 &modelView, const int lightMask) {
-  shader.setUniform(PhongNormalMappingShader::ambientColor, world->getAmbientColor());
-  shader.setUniform(PhongNormalMappingShader::lightsNumber, world->getLightsNumber());
+  shader.setUniform(PhongNormalMappingShader::ambientColor,
+                    world->getAmbientColor());
+  shader.setUniform(PhongNormalMappingShader::lightsNumber,
+                    world->getLightsNumber());
   shader.setUniform(PhongNormalMappingShader::lightMask, lightMask);
   std::for_each(
       constBeginLights(*world), constEndLights(*world),
@@ -559,7 +639,7 @@ void Drawer::drawPhongNormalMappingObject(
 void Drawer::drawLightBulb(const Object *lightBulb,
                            const glm::mat4 &originalModelView,
                            const glm::mat4 &projection,
-                           const glm::vec4 &cameraPosition) const { 
+                           const glm::vec4 &cameraPosition) const {
   setLightBulbOrientation(lightBulb, lightBulbShader, originalModelView,
                           projection, cameraPosition);
   invokeDrawCall(lightBulb);
@@ -597,10 +677,13 @@ void setColors(const Object *object, const PhongShader &shader) {
 
 //------------------------------------------------------------------------------
 void setColors(const Object *object, const PhongNormalMappingShader &shader) {
-  shader.setUniform(PhongNormalMappingShader::materialAmbient, object->getAmbientColor());
+  shader.setUniform(PhongNormalMappingShader::materialAmbient,
+                    object->getAmbientColor());
   // The diffuse color is replaces by a texture.
-  shader.setUniform(PhongNormalMappingShader::materialSpecular, object->getSpecularColor());
-  shader.setUniform(PhongNormalMappingShader::materialShininess, object->getShininess());
+  shader.setUniform(PhongNormalMappingShader::materialSpecular,
+                    object->getSpecularColor());
+  shader.setUniform(PhongNormalMappingShader::materialShininess,
+                    object->getShininess());
 }
 
 //------------------------------------------------------------------------------
@@ -609,42 +692,47 @@ void setOrientation(const Object *object, const PhongShader &shader,
                     const glm::mat4 &projection,
                     const glm::mat4 &originalShadowModelView,
                     const glm::mat4 &shadowProjection) {
-//  glm::mat4 biasMatrix(0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5,
-//                       0.0, 0.5, 0.5, 0.5, 1.0);
-//  glm::mat4 shadowMVP =
-//      biasMatrix * shadowProjection * originalShadowModelView * modelView;
+  //  glm::mat4 biasMatrix(0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0,
+  //  0.5,
+  //                       0.0, 0.5, 0.5, 0.5, 1.0);
+  //  glm::mat4 shadowMVP =
+  //      biasMatrix * shadowProjection * originalShadowModelView * modelView;
 
   auto modelView = getObjectModelView(object, originalModelView);
 
   shader.setUniform(PhongShader::mvpMatrix, projection * modelView);
   shader.setUniform(PhongShader::modelViewMatrix, modelView);
   shader.setUniform(PhongShader::normalMatrix,
-                     glm::inverseTranspose(glm::mat3(modelView)));
-//  shader->setUniform("mvpShadowMatrix", shadowMVP);
+                    glm::inverseTranspose(glm::mat3(modelView)));
+  //  shader->setUniform("mvpShadowMatrix", shadowMVP);
 }
 //------------------------------------------------------------------------------
-void setOrientation(const Object *object, const PhongNormalMappingShader &shader,
+void setOrientation(const Object *object,
+                    const PhongNormalMappingShader &shader,
                     const glm::mat4 &originalModelView,
                     const glm::mat4 &projection,
                     const glm::mat4 &originalShadowModelView,
                     const glm::mat4 &shadowProjection) {
-//  glm::mat4 biasMatrix(0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5,
-//                       0.0, 0.5, 0.5, 0.5, 1.0);
-//  glm::mat4 shadowMVP =
-//      biasMatrix * shadowProjection * originalShadowModelView * modelView;
+  //  glm::mat4 biasMatrix(0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0,
+  //  0.5,
+  //                       0.0, 0.5, 0.5, 0.5, 1.0);
+  //  glm::mat4 shadowMVP =
+  //      biasMatrix * shadowProjection * originalShadowModelView * modelView;
 
   auto modelView = getObjectModelView(object, originalModelView);
 
-  shader.setUniform(PhongNormalMappingShader::mvpMatrix, projection * modelView);
+  shader.setUniform(PhongNormalMappingShader::mvpMatrix,
+                    projection * modelView);
   shader.setUniform(PhongNormalMappingShader::modelViewMatrix, modelView);
   shader.setUniform(PhongNormalMappingShader::normalMatrix,
-                     glm::inverseTranspose(glm::mat3(modelView)));
-//  shader->setUniform("mvpShadowMatrix", shadowMVP);
+                    glm::inverseTranspose(glm::mat3(modelView)));
+  //  shader->setUniform("mvpShadowMatrix", shadowMVP);
 }
 
 //------------------------------------------------------------------------------
-void setLightBulbOrientation(const Object *object, const LightBulbShader &shader,
-                             const glm::mat4 &originalModelView, 
+void setLightBulbOrientation(const Object *object,
+                             const LightBulbShader &shader,
+                             const glm::mat4 &originalModelView,
                              const glm::mat4 &projection,
                              const glm::vec4 &cameraPosition) {
   btScalar transform[16];
@@ -653,7 +741,8 @@ void setLightBulbOrientation(const Object *object, const LightBulbShader &shader
   auto lightBulbPosition = modelView[3];
   auto direction = glm::vec3(cameraPosition - lightBulbPosition);
   // Rotation around axis X.
-  auto distanceXZ = glm::sqrt(direction.x * direction.x + direction.z * direction.z);
+  auto distanceXZ =
+      glm::sqrt(direction.x * direction.x + direction.z * direction.z);
   auto directionYZ = glm::normalize(glm::vec2(distanceXZ, direction.y));
   // Rotation around axis Y.
   auto directionXZ = glm::normalize(glm::vec2(direction.x, direction.z));
@@ -661,11 +750,11 @@ void setLightBulbOrientation(const Object *object, const LightBulbShader &shader
   auto sy = directionXZ.x;
   auto cx = directionYZ.x;
   auto sx = -directionYZ.y;
-  
+
   glm::mat4 yxRotation = {cy, 0, -sy, 0, sx * sy, cx, sx * cy, 0, cx * sy, -sx,
                           cx * cy, 0, lightBulbPosition.x, lightBulbPosition.y,
                           lightBulbPosition.z, 1};
-  modelView = originalModelView * yxRotation; 
+  modelView = originalModelView * yxRotation;
   shader.setUniform(PhongShader::mvpMatrix, projection * modelView);
 }
 
@@ -677,18 +766,18 @@ inline glm::mat4 getObjectModelView(const Object *object,
   object->getOpenGLMatrix(transform);
   glm::mat4 modelView = glm::make_mat4x4(transform);
   return originalModelView * modelView;
-} 
+}
 
 //------------------------------------------------------------------------------
 void setOrientationForShadow(const Object *object, const ShaderProgram &shader,
                              const glm::mat4 &originalModelView,
                              const glm::mat4 &projection) {
-// TODO
-//  btScalar transform[16];
-//  object->getOpenGLMatrix(transform);
-//  glm::mat4 modelView = glm::make_mat4x4(transform);
-//  glm::mat4 mvp = projection * originalModelView * modelView;
-//  shader.setUniform(LightedObjectShader::mvpMatrix, mvp);
+  // TODO
+  //  btScalar transform[16];
+  //  object->getOpenGLMatrix(transform);
+  //  glm::mat4 modelView = glm::make_mat4x4(transform);
+  //  glm::mat4 mvp = projection * originalModelView * modelView;
+  //  shader.setUniform(LightedObjectShader::mvpMatrix, mvp);
 }
 
 //------------------------------------------------------------------------------
@@ -698,7 +787,7 @@ std::pair<GLuint, GLuint> generateFBOColor() {
 
   // Init lightBulb Texture.
   glGenFramebuffers(1, &fboId);
-  checkOpenGLError("generateFBOColor: glGenRenderbuffers");
+  checkOpenGLError("generateFBOColor: glGenFramebuffers");
 
   glGenTextures(1, &textureId);
   checkOpenGLError("generateFBOColor: glGenTextures");
@@ -789,8 +878,8 @@ GLuint createTextureFromFile(const std::string &fileName) {
     exit(1);
   };
 
-  glTexImage2D(GL_TEXTURE_2D, 0, format, texSurface->w, texSurface->h,
-               0, format, GL_UNSIGNED_BYTE, texSurface->pixels);
+  glTexImage2D(GL_TEXTURE_2D, 0, format, texSurface->w, texSurface->h, 0,
+               format, GL_UNSIGNED_BYTE, texSurface->pixels);
   checkOpenGLError("Drawer: glTexImage2D");
   SDL_FreeSurface(texSurface);
 
