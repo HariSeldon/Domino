@@ -114,7 +114,6 @@ void SceneManager::mirrorRenderingPass() {
     glm::mat4 cameraView = mirror->getModelView();
     auto tmp = mirror->getPosition();
     glm::vec3 mirrorPosition {tmp.x(), tmp.y(), tmp.z()};
-    std::cout << glm::to_string(mirrorPosition) << "\n";
     drawWorld(cameraView, mirrorPosition);
     drawer.disableMirror();
   }
