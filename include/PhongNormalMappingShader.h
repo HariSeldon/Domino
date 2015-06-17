@@ -1,3 +1,5 @@
+#pragma once
+
 #include "LightedObjectShader.h"
 
 class PhongNormalMappingShader : public LightedObjectShader {
