@@ -54,7 +54,7 @@ if( "${CMAKE_BUILD_TYPE}" STREQUAL "" )
 endif("${CMAKE_BUILD_TYPE}" STREQUAL "")
 
 if( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-  add_definitions("DEBUG")  
+  add_definitions("-DDEBUG")  
 endif("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 
 message(STATUS "CMake build type: " ${CMAKE_BUILD_TYPE})
