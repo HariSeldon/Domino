@@ -7,7 +7,9 @@ std::vector<std::string> PhongNormalMappingShader::uniformNames {
     "mvpMatrix", "modelViewMatrix",
     "normalMatrix",
     "ambientColor",
-    "lightsNumber", "lightMask", "texture", "normalTexture", "material.ambient",
+    "lightsNumber", "lightMask", 
+    "textureArray", 
+    "material.ambient",
     "material.specular", "material.shininess",
 };
 

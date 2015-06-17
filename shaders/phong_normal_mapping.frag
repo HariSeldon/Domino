@@ -1,7 +1,6 @@
 #version 330
 
-uniform sampler2D texture;
-uniform sampler2D normalTexture;
+uniform sampler2DArray textureArray;
 
 in vec3 position;
 in vec3 normal;
@@ -62,9 +61,10 @@ vec3 computeNormal() {
                 dot(normalizedTangent, normalizedNormal) * normalizedNormal);
 
   vec3 bitangent = cross(normalizedNormal, newTangent);
+  // Fetch a texel from the second texture in the array.
+  vec3 textureNormal = vec3(texture(textureArray, vec3(textureCoordinates, 1.f)));
 
-  vec3 textureNormal =
-      normalize(vec3(2 * texture2D(normalTexture, textureCoordinates) - 1));
+  textureNormal = normalize(vec3(2 * textureNormal - 1));
 
   mat3 tbn = mat3(newTangent, bitangent, normalizedNormal);
 
@@ -86,7 +86,8 @@ vec4 shadeDirectionalLight(vec3 position, vec3 normal, vec3 cameraDirection,
                            int lightIndex) {
   // Get material properties.
   vec4 ambientMaterialColor = material.ambient;
-  vec4 diffuseMaterialColor = texture2D(texture, textureCoordinates);
+  // Fetch a texel from the first texture in the array.
+  vec4 diffuseMaterialColor = texture(textureArray, vec3(textureCoordinates, 0.f));
   vec4 specularMaterialColor = material.specular;
   float shininess = material.shininess;
 
@@ -120,8 +121,8 @@ vec4 shadePositionalLight(vec3 position, vec3 normal, vec3 cameraDirection,
                           int lightIndex) {
   // Get material properties.
   vec4 ambientMaterialColor = material.ambient;
-  //vec4 diffuseMaterialColor = material.diffuse;
-  vec4 diffuseMaterialColor = texture2D(texture, textureCoordinates);
+  // Fetch a texel from the first texture in the array.
+  vec4 diffuseMaterialColor = texture(textureArray, vec3(textureCoordinates, 0.f));
   vec4 specularMaterialColor = material.specular;
   float shininess = material.shininess;
 
