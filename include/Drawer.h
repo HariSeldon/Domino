@@ -6,6 +6,7 @@
 #include "MirrorShader.h"
 #include "PhongShader.h"
 #include "PhongNormalMappingShader.h"
+#include "TextureManager.h"    
 
 #include <GL/glew.h>
 
@@ -146,6 +147,8 @@ private:
   CanvasShader canvasShader;
   BlurShader blurShader;
   MirrorShader mirrorShader;
+
+  TextureManager textureManager;
 
   // Mapping between shaders and world objects.
   // Mapping between world objects and VAOs.
