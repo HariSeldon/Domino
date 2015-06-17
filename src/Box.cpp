@@ -102,7 +102,7 @@ void Box::setupFaces(const glm::vec3 &halfSides) {
 //    };
 
   // Compute the tangent vector for each triangle.
-  for (int index = 0; index < indices.size() / 3; ++index) {
+  for (auto index = 0u; index < indices.size() / 3; ++index) {
     auto point0 = points[indices[3 * index + 0]];
     auto point1 = points[indices[3 * index + 1]]; 
     auto point2 = points[indices[3 * index + 2]];

@@ -56,8 +56,8 @@ Drawer::Drawer()
       phongShader("phong.vert", "phong.frag"),
       phongNormalShader("phong_normal_mapping.vert",
                         "phong_normal_mapping.frag"),
-      blurShader("blur.vert", "blur.frag"),
       canvasShader("canvas.vert", "canvas.frag"),
+      blurShader("blur.vert", "blur.frag"),
       mirrorShader("mirror.vert", "mirror.frag") {}
 
 //-----------------------------------------------------------------------------

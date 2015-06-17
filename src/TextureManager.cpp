@@ -43,7 +43,6 @@ TextureManager::createTextureArray(const std::vector<std::string> &fileNames) {
   auto textureId = createTextureArrayFromFiles(fileNames);
   fileTextureArrayMap[concatenation] = textureId;
   return textureId;
-  
 }
 
 //------------------------------------------------------------------------------

@@ -11,8 +11,8 @@ TextManager::TextManager(const std::string &fileName, int fontHeight,
                          const glm::ivec2 &screenSize)
     : atlas(fileName, fontHeight),
       textShader("text.vert", "text.frag"),
-      color({ 1, 1, 1, 1 }), vScale(2 / (float)screenSize.y),
-      hScale(2 / (float)screenSize.x) {
+      color({ 1, 1, 1, 1 }), vScale(2.f / screenSize.y),
+      hScale(2.f / screenSize.x) {
   glGenVertexArrays(1, &vaoId);
   glGenBuffers(1, &indexVBOId);
   glGenBuffers(1, &textureVBOId);

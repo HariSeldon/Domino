@@ -36,7 +36,8 @@ SceneManager::SceneManager(const glm::ivec2 &screenSize,
 // -----------------------------------------------------------------------------
 void SceneManager::setupProjection(const glm::ivec2 &screenSize) {
   glViewport(0, 0, screenSize.x, screenSize.y);
-  float aspectRatio = (float)screenSize.x / (float)screenSize.y;
+  float aspectRatio =
+      static_cast<float>(screenSize.x) / static_cast<float>(screenSize.y);
   projection = glm::perspective(camera->getViewAngle(), aspectRatio,
                                 camera->getZNear(), camera->getZFar());
 }

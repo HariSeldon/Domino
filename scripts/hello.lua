@@ -87,18 +87,18 @@ addLightBulb({side = 1,
               mass = 10, constantAttenuation = 0.1, linearAttenuation = 0.1});
 addPlane({side = 60, textureFile = "red_brick.tif", normalTextureFile = "red_brick_normal.tif", textureRepetitions = 2});
 
-for index = 10,15 do
+for index = 1,20 do
 addMesh({objFile = "barrel.obj", position = {x = -30 + index * 3, y = 2, z = -30}, mass = 0});
 end
--- for index = 1,20 do
---   addMesh({objFile = "barrel.obj", position = {x = -30 + index * 3, y = 2, z = 30}, mass = 0});
--- end
--- for index = 1,20 do
---   addMesh({objFile = "barrel.obj", position = {x = 30, y = 2, z = -30 + index * 3}, mass = 0});
--- end
--- for index = 1,20 do
---   addMesh({objFile = "barrel.obj", position = {x = -30, y = 2, z = -30 + index * 3}, mass = 0});
--- end
+for index = 1,20 do
+  addMesh({objFile = "barrel.obj", position = {x = -30 + index * 3, y = 2, z = 30}, mass = 0});
+end
+for index = 1,20 do
+  addMesh({objFile = "barrel.obj", position = {x = 30, y = 2, z = -30 + index * 3}, mass = 0});
+end
+for index = 1,20 do
+  addMesh({objFile = "barrel.obj", position = {x = -30, y = 2, z = -30 + index * 3}, mass = 0});
+end
 
 --for index = 1,30 do 
 --  addMesh({objFile = "barrel.obj", position = {x = 0, y = index * 10, z = index % 2}, mass = 10});

@@ -46,8 +46,6 @@ void Mesh::fillMesh(const ObjParser &parser) {
   // new index.
   std::map<ObjParser::FaceIndices, int> indexMap;
 
-  const int indexNumber = parserIndices.size();
-
   indices.reserve(parserIndices.size());
   points.reserve(parserIndices.size() / 2);
   normals.reserve(parserIndices.size() / 2);

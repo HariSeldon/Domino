@@ -102,6 +102,8 @@ void checkOpenGLError(const std::string &description) {
 int getTextureSize(GLuint inputTexture, GLint format) {
   const int TEX_LEVEL = 0;
 
+  glBindTexture(GL_TEXTURE_2D, inputTexture);
+
   int elementSize = 0;
   GLint width, height;
 
@@ -170,6 +172,8 @@ int getTextureSize(GLuint inputTexture, GLint format) {
   glGetTexLevelParameteriv(GL_TEXTURE_2D, TEX_LEVEL, GL_TEXTURE_HEIGHT,
                            &height);
   checkOpenGLError("dumpTextureToFile: glGetTexLevelParameteriv");
+
+  glBindTexture(GL_TEXTURE_2D, 0);
 
   return width * height * elementSize;
 }

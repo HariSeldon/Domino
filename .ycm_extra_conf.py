@@ -34,6 +34,10 @@ import ycm_core
 flags = [
 '-DGLM_FORCE_RADIANS',
 '-std=c++14',
+'-Wall',
+'-Wpedantic',
+'-Wold-style-cast',
+'-Wunused',
 '-stdlib=libc++',
 '-x', 'c++',
 '-I/home/hari/src/domino/ext/',
