@@ -11,6 +11,7 @@
 #include <GL/glew.h>
 
 #include <glm/fwd.hpp>
+#include <glm/vec2.hpp>
 
 #include <map>
 #include <memory>
@@ -30,7 +31,7 @@ class World;
 
 class Drawer {
 public:
-  Drawer();
+  Drawer(const glm::ivec2 screenSize);
   ~Drawer();
 
 public:
@@ -54,7 +55,7 @@ public:
   inline void enableMirror() const {
     glBindFramebuffer(GL_FRAMEBUFFER, mirrorFBO);
     checkOpenGLError("Drawer: enableMirror-glBindFrameBuffer");
-    glViewport(0, 0, 1280, 800);
+    glViewport(0, 0, screenSize.x, screenSize.y);
     checkOpenGLError("Drawer: enableMirror-glViewport");
   }
   void drawMirror(const glm::mat4 &originalModelView,
@@ -146,6 +147,8 @@ private:
   std::vector<const Object *> phongNormalMappingObjects;
   const Object *mirror = nullptr;
 
+  glm::ivec2 screenSize;
+
   LightBulbShader lightBulbShader;
   PhongShader phongShader;
   PhongNormalMappingShader phongNormalShader; 
@@ -191,7 +194,6 @@ private:
 
   GLuint dboId;
 
-  //ShaderProgram *basicShader;
   GLuint canvasId;
   GLuint stencilId;
 };

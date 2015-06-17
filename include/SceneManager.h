@@ -28,7 +28,7 @@ public:
   static const std::string FONT_FILE;
 
 public:
-  SceneManager(const glm::ivec2 &screenSize, SceneContainer *container);
+  SceneManager(const glm::ivec2 screenSize, SceneContainer *container);
   ~SceneManager();
 
 public:

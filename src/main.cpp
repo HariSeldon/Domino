@@ -6,8 +6,6 @@
 
 #include <memory>
 
-#include <glm/ext.hpp>
-
 extern SceneContainer *tmpContainer;
 
 int main(int, char **) {
@@ -20,8 +18,6 @@ int main(int, char **) {
   // Init GL.
   glm::ivec2 screenSize = GLInitializer::initSDL();
   
-  std::cout << "Size: " << glm::to_string(screenSize) << "\n";
-
   Window window;
   GLInitializer::initGL();
 

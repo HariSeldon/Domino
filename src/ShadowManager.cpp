@@ -4,14 +4,13 @@
 #include "SysUtils.h"
 
 #include <cassert>
-#include <iostream>
 
 const std::string ShadowManager::SHADOW_VERTEX_SHADER = "shadow.vert";
 const std::string ShadowManager::SHADOW_FRAGMENT_SHADER = "shadow.frag";
 
 //-----------------------------------------------------------------------------
-ShadowManager::ShadowManager()
-    : fboId(0), shadowTexture(0) {
+ShadowManager::ShadowManager(const glm::ivec2 screenSize)
+    : screenSize(screenSize), fboId(0), shadowTexture(0) {
       //shadowShader("shadow", SHADOW_VERTEX_SHADER, SHADOW_FRAGMENT_SHADER)
 //  createFBO();
 //  createShadowTexture();
@@ -42,8 +41,8 @@ void ShadowManager::createShadowTexture() {
   glBindTexture(GL_TEXTURE_2D, shadowTexture);
   checkOpenGLError("Shadow: glBindTexture");
 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 1280, 800, 0,
-               GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, screenSize.x,
+               screenSize.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
   checkOpenGLError("Shadow: glTexImage2D");
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

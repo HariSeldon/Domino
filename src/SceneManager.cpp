@@ -21,10 +21,12 @@
 const std::string SceneManager::FONT_FILE = "VeraMono.ttf";
 
 // -----------------------------------------------------------------------------
-SceneManager::SceneManager(const glm::ivec2 &screenSize,
+SceneManager::SceneManager(const glm::ivec2 screenSize,
                            SceneContainer *container)
     : world(container->getWorld()), camera(container->getCamera()),
       textManager(TextManager(FONT_PATH + FONT_FILE, FONT_HEIGHT, screenSize)),
+      drawer(screenSize),
+      shadowManager(screenSize),
       BACKGROUND_COLOR(container->getBackgroundColor()),
       currentYRotation(0.0), currentXRotation(0.0), currentOffset(0.0),
       positionMutex(SDL_CreateMutex()), fps(0) {

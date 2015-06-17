@@ -47,12 +47,13 @@ void setOrientationForShadow(const Object *object, const ShaderProgram &shader,
 glm::mat4 getObjectModelView(const Object *object,
                              const glm::mat4 &originalModelView);
 // Returns the fboId and the textureId.
-std::pair<GLuint, GLuint> generateFBOColor();
-GLuint createDBO(GLuint fboId);
+std::pair<GLuint, GLuint> generateFBOColor(const glm::ivec2 screenSize);
+GLuint createDBO(GLuint fboId, const glm::ivec2 screenSize);
 
 //-----------------------------------------------------------------------------
-Drawer::Drawer()
-    : lightBulbShader("lightBulb.vert", "lightBulb.frag"),
+Drawer::Drawer(glm::ivec2 screenSize)
+    : screenSize(screenSize),
+      lightBulbShader("lightBulb.vert", "lightBulb.frag"),
       phongShader("phong.vert", "phong.frag"),
       phongNormalShader("phong_normal_mapping.vert",
                         "phong_normal_mapping.frag"),
@@ -262,23 +263,23 @@ void Drawer::initTextures(const World &world) {
 
 //-----------------------------------------------------------------------------
 void Drawer::createFrameBuffers() {
-  auto lightBulbData = generateFBOColor();
+  auto lightBulbData = generateFBOColor(screenSize);
   lightBulbFBOId = std::get<0>(lightBulbData);
   lightBulbTexture = std::get<1>(lightBulbData);
 
-  auto bulbData = generateFBOColor();
+  auto bulbData = generateFBOColor(screenSize);
   bulbFBOId = std::get<0>(bulbData);
   bulbTexture = std::get<1>(bulbData);
 
-  auto finalLightBulbData = generateFBOColor();
+  auto finalLightBulbData = generateFBOColor(screenSize);
   blurredBulbFBOId = std::get<0>(finalLightBulbData);
   blurredBulbTexture = std::get<1>(finalLightBulbData);
 
-  auto sceneData = generateFBOColor();
+  auto sceneData = generateFBOColor(screenSize);
   sceneFBOId = std::get<0>(sceneData);
   sceneTexture = std::get<1>(sceneData);
 
-  dboId = createDBO(sceneFBOId);
+  dboId = createDBO(sceneFBOId, screenSize);
 }
 
 //-----------------------------------------------------------------------------
@@ -304,10 +305,10 @@ void Drawer::createObjectTextures(const Object *object) {
 
 //-----------------------------------------------------------------------------
 void Drawer::createMirrorObjects() {
-  auto mirrorData = generateFBOColor();
+  auto mirrorData = generateFBOColor(screenSize);
   mirrorFBO = std::get<0>(mirrorData);
   mirrorTexture = std::get<1>(mirrorData);
-  mirrorDBO = createDBO(mirrorFBO);
+  mirrorDBO = createDBO(mirrorFBO, screenSize);
 }
 
 //-----------------------------------------------------------------------------
@@ -422,7 +423,7 @@ void Drawer::drawPhongObjects(const World *world,
                               const int lightMask) const {
   //  glBindFramebuffer(GL_FRAMEBUFFER, sceneFBOId);
   //  checkOpenGLError("Drawer: drawObjects-glBindFrameBuffer");
-  //  glViewport(0, 0, 1280, 800);
+  //  glViewport(0, 0, screenSize.x, screenSize.y);
 
   phongShader.useProgram();
   setPhongLights(world, phongShader, originalModelView, lightMask);
@@ -441,7 +442,7 @@ void Drawer::drawPhongNormalMappingObjects(
     const glm::mat4 &shadowProjection, const int lightMask) const {
   //  glBindFramebuffer(GL_FRAMEBUFFER, sceneFBOId);
   //  checkOpenGLError("Drawer: drawObjects-glBindFrameBuffer");
-  //  glViewport(0, 0, 1280, 800);
+  //  glViewport(0, 0, screenSize.x, screenSize.y);
 
   phongNormalShader.useProgram();
   setPhongLights(world, phongNormalShader, originalModelView, lightMask);
@@ -463,7 +464,7 @@ void Drawer::drawLightBulbs(const glm::mat4 &originalModelView,
   //  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
   //                            GL_RENDERBUFFER, dboId);
   //  checkOpenGLError("Drawer: drawObjects-glFramebufferRenderbuffer");
-  //  glViewport(0, 0, 1280, 800);
+  //  glViewport(0, 0, screenSize.x, screenSize.y);
   //
   //  glClearColor(0.f, 0.f, 0.f, 1);
   //  glClear(GL_COLOR_BUFFER_BIT);
@@ -508,7 +509,7 @@ void Drawer::blurLightBulbs(const BlurShader &blurShader,
                             GL_RENDERBUFFER, dboId);
   checkOpenGLError("Drawer: drawObjects-glFramebufferRenderbuffer");
 
-  glViewport(0, 0, 1280, 800);
+  glViewport(0, 0, screenSize.x, screenSize.y);
   checkOpenGLError("Drawer: drawObjects-glViewPort");
 
   blurShader.useProgram();
@@ -749,7 +750,7 @@ void setOrientationForShadow(const Object *object, const ShaderProgram &shader,
 }
 
 //------------------------------------------------------------------------------
-std::pair<GLuint, GLuint> generateFBOColor() {
+std::pair<GLuint, GLuint> generateFBOColor(const glm::ivec2 screenSize) {
   GLuint fboId = 0;
   GLuint textureId = 0;
 
@@ -763,8 +764,8 @@ std::pair<GLuint, GLuint> generateFBOColor() {
   glBindTexture(GL_TEXTURE_2D, textureId);
   checkOpenGLError("generateFBOColor: glBindTexture");
 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1280, 800, 0, GL_RGBA, GL_FLOAT,
-               nullptr);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screenSize.x, screenSize.y, 0,
+               GL_RGBA, GL_FLOAT, nullptr);
   checkOpenGLError("generateFBOColor: glTexImage2D");
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -794,7 +795,7 @@ std::pair<GLuint, GLuint> generateFBOColor() {
 }
 
 //------------------------------------------------------------------------------
-GLuint createDBO(GLuint fboId) {
+GLuint createDBO(GLuint fboId, const glm::ivec2 screenSize) {
   GLuint dboId = 0;
   glGenRenderbuffers(1, &dboId);
   checkOpenGLError("glGenRenderbuffers");
@@ -803,7 +804,8 @@ GLuint createDBO(GLuint fboId) {
   checkOpenGLError("glBindRenderbuffer");
 
   // Define the size of the render buffer.
-  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1280, 800);
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screenSize.x,
+                        screenSize.y);
   checkOpenGLError("glRenderbufferStorage");
 
   glBindFramebuffer(GL_FRAMEBUFFER, fboId);

@@ -2,13 +2,15 @@
 
 #include "ShaderProgram.h"
 
+#include <glm/vec2.hpp>
+
 #include <string>
 
 #include <GL/glew.h>
 
 class ShadowManager {
 public:
-  ShadowManager();
+  ShadowManager(const glm::ivec2 screenSize);
   ~ShadowManager();
 
 public:
@@ -23,6 +25,7 @@ private:
   void attachTexture();
 
 private:
+  glm::ivec2 screenSize;
   GLuint fboId;
   GLuint shadowTexture;
 //  ShaderProgram shadowShader;
