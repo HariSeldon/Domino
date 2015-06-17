@@ -76,10 +76,11 @@ Drawer::~Drawer() {
     glDeleteTextures(1, &iter.second);
   }
 
-  glDeleteFramebuffers(1, &mirrorFBO);
-  glDeleteTextures(1, &mirrorTexture);
-  glGenRenderbuffers(1, &mirrorDBO);
-
+  if(mirrorFBO != 0) {
+    glDeleteFramebuffers(1, &mirrorFBO);
+    glDeleteTextures(1, &mirrorTexture);
+    glGenRenderbuffers(1, &mirrorDBO);
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -120,7 +121,7 @@ void Drawer::createGPUBuffers() {
   createLightBulbsGPUBuffers();
   createPhongObjectsGPUBuffers();
   createPhongNormalMappingObjectsGPUBuffers();
-  createMirrorObjectsGPUBuffers();
+  createMirrorObjectGPUBuffers();
 }
 
 //-----------------------------------------------------------------------------
@@ -174,28 +175,23 @@ void Drawer::createPhongNormalMappingObjectsGPUBuffers() {
 }
 
 //-----------------------------------------------------------------------------
-void Drawer::createMirrorObjectsGPUBuffers() {
-  createMirrorObjectGPUBuffers(mirror);
-}
+void Drawer::createMirrorObjectGPUBuffers() {
+  if(mirror == nullptr)
+    return;
 
-//-----------------------------------------------------------------------------
-void Drawer::createMirrorObjectGPUBuffers(const Object *object) {
   GLuint vaoId = 0;
   // Create VAO.
   glGenVertexArrays(1, &vaoId);
   glBindVertexArray(vaoId);
 
-  GLuint vertexVBOId = setupVertexVBO(object, phongShader);
-  GLuint indexVBOId = setupIndexVBO(object);
-  GLuint normalVBOId = setupNormalVBO(object, phongShader);
-  GLuint textureVBOId = setupTextureVBO(object, phongShader);
+  GLuint vertexVBOId = setupVertexVBO(mirror, mirrorShader);
+  GLuint indexVBOId = setupIndexVBO(mirror);
 
   // Unbind.
   glBindVertexArray(0);
 
-  vaoWorldMap.insert(std::pair<const Object *, GLuint>(object, vaoId));
-  vboIds.insert(vboIds.end(),
-                {vertexVBOId, indexVBOId, normalVBOId, textureVBOId});
+  vaoWorldMap.insert(std::pair<const Object *, GLuint>(mirror, vaoId));
+  vboIds.insert(vboIds.end(), {vertexVBOId, indexVBOId});
 }
 
 //-----------------------------------------------------------------------------
@@ -258,10 +254,10 @@ void Drawer::createPhongNormalMappingObjectGPUBuffers(const Object *object) {
 
 //-----------------------------------------------------------------------------
 void Drawer::initTextures(const World &world) {
-  // Load textures.
   std::for_each(constBeginObjects(world), constEndObjects(world),
                 [&](const Object *object) { createObjectTextures(object); });
-  createMirrorObjects();
+  if(mirror != nullptr)
+    createMirrorObjects();
 }
 
 //-----------------------------------------------------------------------------
@@ -306,15 +302,6 @@ void Drawer::createObjectTextures(const Object *object) {
   }
 }
 
-////-----------------------------------------------------------------------------
-//void Drawer::initTexture(const Object *object, const std::string &fileName,
-//                         std::unordered_map<const Object *, GLuint> &texMap) {
-//  if (!fileName.empty()) {
-//    auto currentTexture = createTextureFromFile(TEXTURE_PATH + fileName);
-//    texMap[object] = currentTexture;
-//  }
-//}
-
 //-----------------------------------------------------------------------------
 void Drawer::createMirrorObjects() {
   auto mirrorData = generateFBOColor();
@@ -345,42 +332,6 @@ void Drawer::initGPUShadowObjects(const ShaderProgram &shadowShader,
   //    vaoShadowMap.insert(std::pair<const Object *, GLuint>(object, vaoId));
   //    vboIds.push_back(indexVBOId);
   //  }
-}
-
-//-----------------------------------------------------------------------------
-void Drawer::initMirror(const Mirror *mirror) {
-  GLuint vaoId = 0;
-  // Create VAO.
-  glGenVertexArrays(1, &vaoId);
-  glBindVertexArray(vaoId);
-
-  GLuint vertexVBOId = setupVertexVBO(mirror, mirrorShader);
-  GLuint indexVBOId = setupIndexVBO(mirror);
-  GLuint textureVBOId = setupTextureVBO(mirror, mirrorShader);
-
-  // Unbind.
-  glBindVertexArray(0);
-
-  vaoWorldMap[mirror] = vaoId;
-  vboIds.insert(vboIds.end(), {vertexVBOId, indexVBOId, textureVBOId});
-}
-
-//-----------------------------------------------------------------------------
-void Drawer::enableMirror() const {
-  glBindFramebuffer(GL_FRAMEBUFFER, mirrorFBO);
-  checkOpenGLError("Drawer: enableMirror-glBindFrameBuffer");
-  glViewport(0, 0, 1280, 800);
-  checkOpenGLError("Drawer: enableMirror-glViewport");
-  //  glBindTexture(GL_TEXTURE_2D, mirrorTexture);
-  //  checkOpenGLError("Drawer: enableMirror-glBindTexture");
-}
-
-//-----------------------------------------------------------------------------
-void Drawer::disableMirror() const {
-  //  glBindTexture(GL_TEXTURE_2D, 0);
-  //  checkOpenGLError("Drawer: disableMirror-glBindTexture");
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  checkOpenGLError("Drawer: disableMirror-glBindFramebuffer");
 }
 
 //-----------------------------------------------------------------------------
@@ -456,7 +407,8 @@ void Drawer::drawWorld(const World *world, const glm::mat4 &originalModelView,
                                 originalShadowModelView, shadowProjection,
                                 lightMask);
   drawLightBulbs(originalModelView, projection, cameraPosition, lightMask);
-  // drawMirror(originalModelView, projection);
+  if(mirror != nullptr)
+    drawMirror(originalModelView, projection);
   //  blurLightBulbs(blurShader, blurredBulbFBOId, lightBulbTexture);
   //  drawFinalImage();
 }
@@ -557,6 +509,7 @@ void Drawer::blurLightBulbs(const BlurShader &blurShader,
   checkOpenGLError("Drawer: drawObjects-glFramebufferRenderbuffer");
 
   glViewport(0, 0, 1280, 800);
+  checkOpenGLError("Drawer: drawObjects-glViewPort");
 
   blurShader.useProgram();
   glBindTexture(GL_TEXTURE_2D, inputTexture);

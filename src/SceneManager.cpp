@@ -10,6 +10,7 @@
 #include "World.h"
 
 #include <algorithm>
+#include <thread>
 
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
@@ -30,7 +31,6 @@ SceneManager::SceneManager(const glm::ivec2 &screenSize,
   lightMask = (2 << (world->getLightsNumber() - 1)) - 1;
   setupProjection(screenSize);
   initGPU(container);
-  checkOpenGLError("GLInitializer: glClearColor");
 }
 
 // -----------------------------------------------------------------------------
@@ -52,6 +52,10 @@ void SceneManager::initGPU(SceneContainer *container) {
   //  drawer.initMirror(mirrorShader, mirror);
   //}
   drawer.initTextures(*world);
+  if(container->getWorld()->getMirror() != nullptr)
+    mirrorPass = &SceneManager::mirrorRenderingPass;
+  else
+    mirrorPass = &SceneManager::noMirrorRenderingPass;
 }
 
 // -----------------------------------------------------------------------------
@@ -63,15 +67,21 @@ SceneManager::~SceneManager() {
 }
 
 // -----------------------------------------------------------------------------
-void SceneManager::drawScene() {
+void SceneManager::drawScene() { 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  mirrorRenderingPass();
+//  auto begin = std::chrono::system_clock::now();
+  mirrorPass(this);
   //shadowRenderingPass();
+//  using namespace std::literals;
+//  std::this_thread::sleep_for(20ms);
   screenRenderingPass();
+//  auto end = std::chrono::system_clock::now();
+//  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+//  std::cout << duration << "\n";
 }
 
 // -----------------------------------------------------------------------------
-void SceneManager::screenRenderingPass() {
+inline void SceneManager::screenRenderingPass() {
   glm::mat4 modelView = camera->applyView();
   drawWorld(modelView, glm::vec3(camera->getPosition()));
   drawText();
@@ -89,36 +99,27 @@ void SceneManager::drawWorld(const glm::mat4 &modelView,
 
   glClearColor(BACKGROUND_COLOR.x, BACKGROUND_COLOR.y, BACKGROUND_COLOR.z,
                BACKGROUND_COLOR.w);
+  checkOpenGLError("GLInitializer: glClearColor");
   drawer.drawWorld(world, modelView, projection, shadowView, shadowProjection,
                    lightMask, glm::vec4(cameraPosition, 1.f));
-  drawer.drawMirror(modelView, projection);
 }
-
-//// -----------------------------------------------------------------------------
-//void SceneManager::drawMirror(const glm::mat4 &) {
-////  if (Mirror *mirror = world->getMirror()) {
-////    ShaderProgram &mirrorShader = mirror->getShaderProgram();
-////    mirrorShader.useProgram();
-////    //mirrorShader.setUniform("projectionMatrix", projection);
-////    //mirrorShader.setUniform("texture", 0);
-//////    drawer.drawObject(mirror, mirrorShader, modelView, projection);
-////  }
-//}
 
 // -----------------------------------------------------------------------------
 void SceneManager::mirrorRenderingPass() {
-  // FIXME remove this if.
-  if (Mirror *mirror = world->getMirror()) {
-    // Draw the scene on the mirror texture from the point of view of the
-    // mirror.
-    drawer.enableMirror();
-    glm::mat4 cameraView = mirror->getModelView();
-    auto tmp = mirror->getPosition();
-    glm::vec3 mirrorPosition {tmp.x(), tmp.y(), tmp.z()};
-    drawWorld(cameraView, mirrorPosition);
-    drawer.disableMirror();
-  }
+  // Draw the scene on the mirror texture from the point of view of the mirror.
+  auto mirror = world->getMirror();
+  drawer.enableMirror();
+  glm::mat4 cameraView = mirror->getModelView();
+  auto tmp = mirror->getPosition();
+  glm::vec3 mirrorPosition {tmp.x(), tmp.y(), tmp.z()};
+  drawWorld(cameraView, mirrorPosition);
+  drawer.disableMirror();
 }
+
+// -----------------------------------------------------------------------------
+void SceneManager::noMirrorRenderingPass() {
+}
+
 
 // -----------------------------------------------------------------------------
 void SceneManager::shadowRenderingPass() {

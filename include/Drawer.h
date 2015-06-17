@@ -51,10 +51,18 @@ public:
   void drawObjectForShadow(const Object *object, ShaderProgram &shader,
                            const glm::mat4 &originalModelView,
                            const glm::mat4 &projection) const;
-  void enableMirror() const;
+  inline void enableMirror() const {
+    glBindFramebuffer(GL_FRAMEBUFFER, mirrorFBO);
+    checkOpenGLError("Drawer: enableMirror-glBindFrameBuffer");
+    glViewport(0, 0, 1280, 800);
+    checkOpenGLError("Drawer: enableMirror-glViewport");
+  }
   void drawMirror(const glm::mat4 &originalModelView,
                   const glm::mat4 &projection) const;
-  void disableMirror() const;
+  inline void disableMirror() const {
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    checkOpenGLError("Drawer: disableMirror-glBindFramebuffer");
+  }
 
 private:
   void fillObjectsVectors(const std::map<
@@ -71,12 +79,9 @@ private:
   void createPhongNormalMappingObjectsGPUBuffers();
   void createPhongNormalMappingObjectGPUBuffers(const Object *object);
 
-  void createMirrorObjectsGPUBuffers();
-  void createMirrorObjectGPUBuffers(const Object *object);
+  void createMirrorObjectGPUBuffers();
 
   void createObjectTextures(const Object *object);
-  void initTexture(const Object *object, const std::string &fileName,
-                   std::unordered_map<const Object *, GLuint> &texMap);
   void createMirrorObjects();
   void createFrameBuffers();
 
@@ -139,7 +144,7 @@ private:
   std::vector<const Object *> lightBulbs;
   std::vector<const Object *> phongObjects;
   std::vector<const Object *> phongNormalMappingObjects;
-  const Object *mirror;
+  const Object *mirror = nullptr;
 
   LightBulbShader lightBulbShader;
   PhongShader phongShader;

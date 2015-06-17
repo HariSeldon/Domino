@@ -12,6 +12,7 @@
 #include <glm/mat4x4.hpp>
 
 #include <atomic>
+#include <functional>
 #include <memory>
 #include <string>
 
@@ -54,6 +55,7 @@ private:
                        ShaderProgram &shader);
   void drawText();
   void mirrorRenderingPass();
+  void noMirrorRenderingPass();
   void shadowRenderingPass();
   void screenRenderingPass();
 
@@ -64,6 +66,8 @@ private:
   TextManager textManager;
   Drawer drawer;
   ShadowManager shadowManager;
+
+  std::function<void(SceneManager*)> mirrorPass;
 
   glm::mat4 projection;
 

@@ -133,20 +133,6 @@ void traceDominoLine(const btVector3 &origin, const btVector3 &destination,
 }
 
 //-----------------------------------------------------------------------------
-void World::initMirror() {
-//  MirrorBuilder mirrorBuilder;
-//  float SIDE = 4.f;
-//  btQuaternion rotation(M_PI, 0.0, 0.0);
-//  mirror =
-//      mirrorBuilder.setTransform(
-//                        btTransform(rotation, btVector3(0.f, SIDE / 2, 15.f)))
-//          .setAmbientColor(glm::vec4(1.f, 1.f, 1., 1.f))
-//          .setDiffuseColor(glm::vec4(1.f, 1.f, 1., 1.f))
-//          .setSide(btScalar(SIDE))
-//          .create();
-}
-
-//-----------------------------------------------------------------------------
 World::object_iterator::object_iterator() { currentObject = 0; }
 World::object_iterator::object_iterator(const World &world) {
   objects = world.objects;

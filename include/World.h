@@ -61,7 +61,6 @@ public:
 
 private:
   void initWorld();
-  void initMirror();
 
 //-----------------------------------------------------------------------------
 public:

@@ -42,7 +42,7 @@ FragmentShader::FragmentShader(const std::string &filePath)
 // -----------------------------------------------------------------------------
 void checkErrors(GLuint shaderId, const std::string &fileName) {
   if (!glIsShader(shaderId))
-    std::cout << "Error creating shader from file: " + fileName + "\n";
+    std::cerr << "Error creating shader from file: " + fileName + "\n";
 
   int maxLength = 0;
   int errorLength = 0;
@@ -51,5 +51,5 @@ void checkErrors(GLuint shaderId, const std::string &fileName) {
   glGetShaderInfoLog(shaderId, maxLength, &errorLength, errorMessage.data());
 
   if (errorLength > 0)
-    std::cout << "Error compiling " + fileName + "\n" + errorMessage.data();
+    std::cerr << "Error compiling " + fileName + "\n" + errorMessage.data();
 }

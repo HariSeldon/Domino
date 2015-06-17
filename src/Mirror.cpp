@@ -19,11 +19,6 @@ Mirror::Mirror(btTransform &transform, btScalar mass, btVector3 &inertia,
     : Object(transform, mass, inertia) {
   computePoints(sides);
   setupBulletShape();
-
-//  createFBO();
-//  createDBO();
-//  createMirrorTexture();
-//  attachTexture();
 }
 
 //-----------------------------------------------------------------------------

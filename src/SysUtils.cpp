@@ -37,7 +37,7 @@ std::string getFileContent(const std::string &filePath) {
   if (fileStream.is_open()) {
     return readStream(fileStream);
   } else {
-    std::cout << "Cannot open: " + filePath << "\n";
+    std::cerr << "Cannot open: " + filePath << "\n";
     exit(1);
   }
 }
@@ -50,52 +50,6 @@ void dumpGLInfo() {
   glGetIntegerv(GL_MINOR_VERSION, &minorVersion); 
 
   std::cout << "GL Version:   " << majorVersion << "." << minorVersion << "\n";
-}
-
-// -----------------------------------------------------------------------------
-void checkOpenGLError(const std::string &description) {
-  #ifndef NDEBUG
-  GLenum error = glGetError();
-  if (error == GL_NO_ERROR)
-    return;
-
-  std::string errorString;
-  switch (error) {
-  case GL_INVALID_ENUM: {
-    errorString = "GL_INVALID_ENUM";
-    break;
-  }
-  case GL_INVALID_VALUE: {
-    errorString = "GL_INVALID_VALUE";
-    break;
-  }
-  case GL_INVALID_OPERATION: {
-    errorString = "GL_INVALID_OPERATION";
-    break;
-  }
-  case GL_INVALID_FRAMEBUFFER_OPERATION: {
-    errorString = "GL_INVALID_FRAMEBUFFER_OPERATION";
-    break;
-  }
-  case GL_OUT_OF_MEMORY: {
-    errorString = "GL_OUT_OF_MEMORY";
-    break;
-  }
-  case GL_STACK_UNDERFLOW: {
-    errorString = "GL_STACK_UNDERFLOW";
-    break;
-  }
-  case GL_STACK_OVERFLOW: {
-    errorString = "GL_STACK_OVERFLOW";
-    break;
-  }
-  default: {
-    errorString = "Unknown error";
-    break;
-  }
-  }
-  std::cerr << description << " Error: " << errorString << "\n";
-  #endif
 }
 
 // -----------------------------------------------------------------------------

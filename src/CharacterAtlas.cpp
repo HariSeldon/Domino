@@ -102,7 +102,7 @@ void CharacterAtlas::fillTexture(FT_Face fontFace) {
       exit(1);
     }
 
-#ifndef NDEBUG
+#ifdef DEBUG
     // Check the size of the texture. If the size is 0 means that no texture
     // is currently bound.
     int currentWidth = -1;
@@ -131,12 +131,14 @@ void CharacterAtlas::fillTexture(FT_Face fontFace) {
     glyphs[character - FIRST_VISIBLE_CHAR].advanceX = glyph->advance.x >> 6;
     glyphs[character - FIRST_VISIBLE_CHAR].advanceY = glyph->advance.y >> 6;
 
-    glyphs[character - FIRST_VISIBLE_CHAR].textureHorizontal0 = (float)offset / (float)width;
+    glyphs[character - FIRST_VISIBLE_CHAR].textureHorizontal0 =
+        static_cast<float>(offset) / static_cast<float>(width);
     glyphs[character - FIRST_VISIBLE_CHAR].textureHorizontal1 =
-        (float)(offset + glyph->bitmap.width) / (float)width;
+        static_cast<float>(offset + glyph->bitmap.width) /
+        static_cast<float>(width);
     glyphs[character - FIRST_VISIBLE_CHAR].textureVertical0 = 0.f;
     glyphs[character - FIRST_VISIBLE_CHAR].textureVertical1 =
-        (float)(glyph->bitmap.rows) / (float)(height);
+        static_cast<float>(glyph->bitmap.rows) / static_cast<float>(height);
 
     offset += glyph->bitmap.width + 1;
   }
