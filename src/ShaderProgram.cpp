@@ -4,6 +4,7 @@
 #include "SysDefines.h"
 #include "SysUtils.h"
 
+#include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 #include <glm/mat3x3.hpp>
@@ -69,9 +70,11 @@ template void ShaderProgram::setUniform(int nameIndex, const int &value) const;
 template void ShaderProgram::setUniform(int nameIndex,
                                         const unsigned int &value) const;
 template void ShaderProgram::setUniform(int nameIndex,
-                                        const glm::vec4 &value) const;
+                                        const glm::vec2 &value) const;
 template void ShaderProgram::setUniform(int nameIndex,
                                         const glm::vec3 &value) const;
+template void ShaderProgram::setUniform(int nameIndex,
+                                        const glm::vec4 &value) const;
 template void ShaderProgram::setUniform(int nameIndex,
                                         const glm::mat4 &value) const;
 template void ShaderProgram::setUniform(int nameIndex,
@@ -102,6 +105,12 @@ void ShaderProgram::setUniformValue(GLint location, const int &value) const {
 template <>
 void ShaderProgram::setUniformValue(GLint location, const float &value) const {
   glUniform1f(location, value);
+  checkOpenGLError("set Uniform with location: " + std::to_string(location));
+}
+
+template <>
+void ShaderProgram::setUniformValue(GLint location, const glm::vec2 &vector) const {
+  glUniform2f(location, vector.x, vector.y);
   checkOpenGLError("set Uniform with location: " + std::to_string(location));
 }
 

@@ -36,7 +36,8 @@ public:
 
 public:
   void initGPUObjects(const std::map<const std::string,
-                                     std::vector<const Object *>> &shaderMap);
+                                     std::vector<const Object *>> &shaderMap,
+                      const Mirror *mirror);
   void initTextures(const World &world);
   void initGPUShadowObjects(const ShaderProgram &shadowShader,
                             const World &world);
@@ -145,7 +146,7 @@ private:
   std::vector<const Object *> lightBulbs;
   std::vector<const Object *> phongObjects;
   std::vector<const Object *> phongNormalMappingObjects;
-  const Object *mirror = nullptr;
+  const Mirror *mirror = nullptr;
 
   glm::ivec2 screenSize;
 

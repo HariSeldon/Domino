@@ -46,13 +46,9 @@ void SceneManager::setupProjection(const glm::ivec2 &screenSize) {
 
 // -----------------------------------------------------------------------------
 void SceneManager::initGPU(SceneContainer *container) {
-  // The drawing function depends on the objects in the scene.
-  drawer.initGPUObjects(container->getShaderMap());
+  drawer.initGPUObjects(container->getShaderMap(),
+                        container->getWorld()->getMirror());
   //drawer.initGPUShadowObjects(shadowManager.getShader(), *world);
-  //if (Mirror *mirror = world->getMirror()) {
-  //  ShaderProgram &mirrorShader = mirror->getShaderProgram();
-  //  drawer.initMirror(mirrorShader, mirror);
-  //}
   drawer.initTextures(*world);
   if(container->getWorld()->getMirror() != nullptr)
     mirrorPass = &SceneManager::mirrorRenderingPass;

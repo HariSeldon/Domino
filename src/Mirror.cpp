@@ -16,7 +16,7 @@
 
 Mirror::Mirror(btTransform &transform, btScalar mass, btVector3 &inertia,
                const glm::vec2 &sides)
-    : Object(transform, mass, inertia) {
+    : Object(transform, mass, inertia), sides(sides) {
   computePoints(sides);
   setupBulletShape();
 }

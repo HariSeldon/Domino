@@ -27,7 +27,6 @@ static luaL_Reg ScriptEngineMetatable[] = {
     {"_addMesh", addMesh},
     {"_addPlane", addPlane},
     {"_addMirror", addMirror},
-//    {"_addPositionalLight", addPositionalLight},
     {"_addSphere", addSphere},
     {"_addSpotLight", addSpotLight},
     {"_setBackgroundColor", setBackgroundColor},

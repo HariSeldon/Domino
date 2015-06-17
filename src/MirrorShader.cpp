@@ -4,7 +4,7 @@
 #include <string>
 
 std::vector<std::string> MirrorShader::uniformNames{
-    "mvpMatrix", "texture"};
+    "mvpMatrix", "mirrorSize", "texture"};
 
 // -----------------------------------------------------------------------------
 MirrorShader::MirrorShader(const std::string &vertexShaderFileName,

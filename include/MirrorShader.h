@@ -8,6 +8,7 @@ class MirrorShader : public ShaderProgram {
 public:
   enum UniformName {
     mvpMatrix,
+    mirrorSize,
     texture
   };
 

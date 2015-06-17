@@ -86,8 +86,9 @@ Drawer::~Drawer() {
 
 //-----------------------------------------------------------------------------
 void Drawer::initGPUObjects(const std::map<
-    const std::string, std::vector<const Object *>> &shaderNameMap) {
-
+    const std::string, std::vector<const Object *>> &shaderNameMap,
+    const Mirror *mirror) {
+  this->mirror = mirror;
   fillObjectsVectors(shaderNameMap);
   createGPUBuffers();
 }
@@ -109,10 +110,6 @@ void Drawer::fillObjectsVectors(const std::map<
 
     if (shaderName == "phongNormalMapping") {
       phongNormalMappingObjects = objectVector;
-    }
-
-    if (shaderName == "mirror") {
-      mirror = objectVector[0];
     }
   }
 }
@@ -490,6 +487,7 @@ void Drawer::drawMirror(const glm::mat4 &originalModelView,
   auto modelView = getObjectModelView(mirror, originalModelView);
 
   mirrorShader.setUniform(MirrorShader::mvpMatrix, projection * modelView);
+  mirrorShader.setUniform(MirrorShader::mirrorSize, mirror->getSize());
 
   // Set color and normal texture.
   glBindTexture(GL_TEXTURE_2D, mirrorTexture);

@@ -19,13 +19,16 @@ public:
 
 public:
   glm::mat4 getModelView() const;
+  inline glm::vec2 getSize() const {
+    return sides;
+  }
 
 private:
   void computePoints(const glm::vec2 &sides);
   void setupBulletShape();
 
 private:
-  glm::vec2 sides;
+  const glm::vec2 sides;
     
   friend class MirrorBuilder;
 };
