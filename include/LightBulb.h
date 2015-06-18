@@ -14,17 +14,19 @@ class ObjParser;
 class LightBulb : public Object {
 private:
   LightBulb(const btTransform &transform, const btScalar mass,
-            btVector3 &inertia);
+            btVector3 &inertia, float radius);
 
 public:
   PositionalLight* getLight() const;
 
 private:
   void setLight(PositionalLight *light);
-  void fillMesh(const ObjParser &objParser);
+  void setupPoints();
+  void setupBulletShape();
  
 private:
   PositionalLight *light;
+  float radius;
   static constexpr auto POINTS_NUMBER = 30;
   static constexpr auto ANGLE = 2 * M_PI / POINTS_NUMBER;
 
@@ -36,9 +38,11 @@ class LightBulbBuilder : public ObjectBuilder<LightBulbBuilder> {
 public:
   LightBulbBuilder();
 
+  LightBulbBuilder &setRadius(float radius);
   LightBulbBuilder &setLight(PositionalLight *light);
   LightBulb *create();
 
 private:
   PositionalLight *light;
+  float radius;
 };

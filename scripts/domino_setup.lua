@@ -368,6 +368,9 @@ end
 
 --------------------------------------------------------------------------------
 function addLightBulb(bulb)
+  if bulb.radius == nil then
+    error("Light bulb radius missing");
+  end
   -- Optional parameters.
   if bulb.mass == nil then
     bulb.mass = 0;
@@ -399,11 +402,11 @@ function addLightBulb(bulb)
   if bulb.textureFile == nil then
     bulb.textureFile = "";
   end
-  if bulb.shader == nil then
-    bulb.shader = "lightBulb";
-  end
 
-  engine:_addLightBulb(bulb.mass,
+  bulb.shader = "lightBulb";
+
+  engine:_addLightBulb(bulb.radius,
+                       bulb.mass,
                        bulb.position.x,
                        bulb.position.y,
                        bulb.position.z,

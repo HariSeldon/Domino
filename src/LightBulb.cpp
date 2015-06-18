@@ -13,8 +13,14 @@
 template class ObjectBuilder<LightBulbBuilder>;
 
 LightBulb::LightBulb(const btTransform &transform, const btScalar mass,
-                     btVector3 &inertia)
-    : Object(transform, mass, inertia) {
+                     btVector3 &inertia, float radius)
+    : Object(transform, mass, inertia), radius(radius) {
+  setupPoints();
+  setupBulletShape();
+}
+
+//------------------------------------------------------------------------------
+void LightBulb::setupPoints() {
   points.reserve(POINTS_NUMBER + 1);
 
   // Generate 2D data for a unit circle.
@@ -22,16 +28,19 @@ LightBulb::LightBulb(const btTransform &transform, const btScalar mass,
 
   for (int index = 0; index < POINTS_NUMBER + 1; ++index) {
     auto angle = index * ANGLE;
-    auto x = glm::cos(angle);
-    auto y = glm::sin(angle);
+    auto x = radius * glm::cos(angle);
+    auto y = radius * glm::sin(angle);
     points.emplace_back(x, y, 0);
   }
 
   for (auto index = 0u; index < POINTS_NUMBER; ++index) {
     indices.insert(indices.end(), {0, index + 1, index + 2});
   }
+}
 
-  collisionShape = new btSphereShape(1);
+//------------------------------------------------------------------------------
+void LightBulb::setupBulletShape() {
+  collisionShape = new btSphereShape(radius);
   collisionShape->calculateLocalInertia(mass, inertia);
   motionState = new btDefaultMotionState(transform);
   constructionInfo = new btRigidBody::btRigidBodyConstructionInfo(
@@ -40,63 +49,25 @@ LightBulb::LightBulb(const btTransform &transform, const btScalar mass,
 }
 
 //------------------------------------------------------------------------------
-void LightBulb::fillMesh(const ObjParser &parser) {
-//  const auto &parserPoints = parser.getPoints();
-//  const auto &parserNormals = parser.getNormals();
-//  const auto &parserTextureCoos = parser.getTextureCoos();
-//  const auto &parserIndices = parser.getIndices();
-//
-//  std::map<ObjParser::FaceIndices, int> indexMap;
-//
-//  indices.reserve(parserIndices.size());
-//  points.reserve(parserIndices.size() / 2);
-//  normals.reserve(parserIndices.size() / 2);
-//  textureCoos.reserve(parserIndices.size() / 2);
-//
-//  int counter = 0;
-//
-//  for (auto &faceIndices : parserIndices) {
-//    auto iterator = indexMap.find(faceIndices);
-//    if (iterator != indexMap.end()) {
-//      indices.push_back(iterator->second);
-//    } else {
-//      glm::vec3 vertex = parserPoints[std::get<0>(faceIndices) - 1];
-//      points.push_back(vertex);
-//
-//      if(std::get<1>(faceIndices) != -1) {
-//        glm::vec2 textureCoo = parserTextureCoos[std::get<1>(faceIndices) - 1];
-//        textureCoos.push_back(textureCoo);
-//      }
-//
-//      glm::vec3 normal = parserNormals[std::get<2>(faceIndices) - 1];
-//      normals.push_back(normal);
-//
-//      indices.push_back(counter);
-//      indexMap[faceIndices] = counter;
-//      counter++;
-//    }
-//  }
-}
+void LightBulb::setLight(PositionalLight *light) { this->light = light; }
 
-//------------------------------------------------------------------------------
-void LightBulb::setLight(PositionalLight *light) {
-  this->light = light; 
-}
-
-PositionalLight *LightBulb::getLight() const {
-  return light;
-}
+PositionalLight *LightBulb::getLight() const { return light; }
 
 //------------------------------------------------------------------------------
 LightBulbBuilder::LightBulbBuilder() : ObjectBuilder() {}
 
-LightBulbBuilder& LightBulbBuilder::setLight(PositionalLight *light) {
+LightBulbBuilder &LightBulbBuilder::setLight(PositionalLight *light) {
   this->light = light;
   return *this;
 }
 
+LightBulbBuilder &LightBulbBuilder::setRadius(float radius) {
+  this->radius = radius;
+  return *this;
+}
+
 LightBulb *LightBulbBuilder::create() {
-  LightBulb *bulb = new LightBulb(transform, mass, inertia);
+  LightBulb *bulb = new LightBulb(transform, mass, inertia, radius);
   bulb->setLight(light);
   bulb->textureFile = textureFile;
   return bulb;

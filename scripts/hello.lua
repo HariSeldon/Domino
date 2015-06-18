@@ -55,13 +55,8 @@ end
 setCamera({position = {x = 0, y = 2, z = -20}, orientation = {x = 0, y = 0}});
 setGravity({x = 0, y = -9.81, z = 0});
 setBackgroundColor({r = 0.2, g = 0.4, b = 0.6, a = 1});
---addPositionalLight({position = {x = 20, y = 1, z = 0}, constantAttenuation = 1});
---addPositionalLight({position = {x = 19, y = 1, z = 5}, constantAttenuation = 1});
 --addSpotLight({position = {x = 0, y = 30, z = 0}, direction = {x = 0, y = -1, z = 0}, 
 --              constantAttenuation = 1, cutoff = 85, exponent = 10, constantAttenuation = 2});
---addPositionalLight({position = {x = 0, y = 10, z = 0}, constantAttenuation = 1});
---addPositionalLight({position = {x = 0, y = 0.1, z = 20}, constantAttenuation = 0.1});
---addPositionalLight({position = {x = 20, y = 0.1, z = 20}, constantAttenuation = 0.1});
 --addDirectionalLight({direction = {x = -1, y = -1, z = 0}});
 --addBox({sides = {x = 100, y = 100, z = 100}, 
 --        position = {x = 0, y = 0, z = 0}, 
@@ -76,36 +71,36 @@ addBox({sides = {x = 2, y = 2, z = 2},
         position = {x = 7, y = 7, z = 0}, 
         orientation = {x = 0, y = 0, z = 0},
         mass = 0.01, textureFile = "red_brick.tif", normalTextureFile = "red_brick_normal.tif"});
-addLightBulb({side = 1, ambientColor = {r = 0.2, g = 0.2, b = 0.2, a = 1}, 
+addLightBulb({radius = 2, ambientColor = {r = 0.2, g = 0.2, b = 0.2, a = 1}, 
               position = {x = 1, y = 1, z = 0}, 
               mass = 10, constantAttenuation = 0.1, linearAttenuation = 0.1});
-addLightBulb({side = 1, 
+addLightBulb({radius = 1, 
               position = {x = 0, y = 10, z = 0}, 
               mass = 0, constantAttenuation = 0.1, linearAttenuation = 0.1});
-addLightBulb({side = 1, 
+addLightBulb({radius = 0.5, 
               position = {x = -10, y = 3, z = -10}, 
               mass = 10, constantAttenuation = 0.1, linearAttenuation = 0.1});
 addPlane({side = 60, textureFile = "red_brick.tif", normalTextureFile = "red_brick_normal.tif", textureRepetitions = 2});
 
 for index = 1,20 do
-addMesh({objFile = "barrel.obj", position = {x = -30 + index * 3, y = 2, z = -30}, mass = 0});
+addMesh({objFile = "barrel.obj", position = {x = -31 + index * 3, y = 2, z = -31}, mass = 0});
 end
 for index = 1,20 do
-  addMesh({objFile = "barrel.obj", position = {x = -30 + index * 3, y = 2, z = 30}, mass = 0});
+  addMesh({objFile = "barrel.obj", position = {x = -31 + index * 3, y = 2, z = 31}, mass = 0});
 end
 for index = 1,20 do
-  addMesh({objFile = "barrel.obj", position = {x = 30, y = 2, z = -30 + index * 3}, mass = 0});
+  addMesh({objFile = "barrel.obj", position = {x = 31, y = 2, z = -31 + index * 3}, mass = 0});
 end
 for index = 1,20 do
-  addMesh({objFile = "barrel.obj", position = {x = -30, y = 2, z = -30 + index * 3}, mass = 0});
+  addMesh({objFile = "barrel.obj", position = {x = -31, y = 2, z = -31 + index * 3}, mass = 0});
 end
 
---for index = 1,30 do 
---  addMesh({objFile = "barrel.obj", position = {x = 0, y = index * 10, z = index % 2}, mass = 10});
---end
---for index = 1,30 do 
---  addMesh({objFile = "kufel.obj", position = {x = 0, y = index * 10, z = index % 2}, mass = 10});
---end
+for index = 1,30 do 
+  addMesh({objFile = "barrel.obj", position = {x = 0, y = index * 10, z = index % 2}, mass = 10});
+end
+for index = 1,30 do 
+  addMesh({objFile = "kufel.obj", position = {x = 0, y = index * 10, z = index % 2}, mass = 10});
+end
 
 --addMesh({objFile = "torch.obj", position = {x = 0, y = 0, z = 0}, mass = 10, shader = "gouraud"});
 --addMesh({objFile = "barrel.obj", position = {x = -10, y = 20, z = 0}, mass = 10});

@@ -66,16 +66,15 @@ SceneManager::~SceneManager() {
 
 // -----------------------------------------------------------------------------
 void SceneManager::drawScene() { 
+  auto begin = std::chrono::system_clock::now();
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//  auto begin = std::chrono::system_clock::now();
   mirrorPass(this);
   //shadowRenderingPass();
-//  using namespace std::literals;
-//  std::this_thread::sleep_for(20ms);
   screenRenderingPass();
-//  auto end = std::chrono::system_clock::now();
-//  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
-//  std::cout << duration << "\n";
+  glFinish();
+  auto end = std::chrono::system_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+  std::cout << duration << "\n";
 }
 
 // -----------------------------------------------------------------------------
@@ -117,7 +116,6 @@ void SceneManager::mirrorRenderingPass() {
 // -----------------------------------------------------------------------------
 void SceneManager::noMirrorRenderingPass() {
 }
-
 
 // -----------------------------------------------------------------------------
 void SceneManager::shadowRenderingPass() {
