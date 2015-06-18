@@ -39,11 +39,8 @@ void Mirror::computePoints(const glm::vec2 &sides) {
 
 //-----------------------------------------------------------------------------
 void Mirror::setupBulletShape() {
-  // FIXME: verify that this is correct.
-  // It will matter when I enable the engine.
   collisionShape =
-      new btConvexHullShape((btScalar *)points.data(), 4, sizeof(glm::vec3));
-
+      new btConvexHullShape(getPoints(), getPointsNumber(), sizeof(glm::vec3));
   motionState = new btDefaultMotionState(transform);
   constructionInfo = new btRigidBody::btRigidBodyConstructionInfo(
       mass, motionState, collisionShape, inertia);

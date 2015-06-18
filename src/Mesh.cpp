@@ -19,16 +19,17 @@ template class ObjectBuilder<MeshBuilder>;
 Mesh::Mesh(const btTransform &transform, const btScalar mass,
            btVector3 &inertia, const std::string &meshFile)
     : Object(transform, mass, inertia) {
-
   ObjParser objParser;
   objParser.parse(meshFile);
-
   fillMesh(objParser);
+  setupBulletShape();
+}
 
+//------------------------------------------------------------------------------
+void Mesh::setupBulletShape() {
   collisionShape =
       new btConvexHullShape(getPoints(), getPointsNumber(), sizeof(glm::vec3));
   collisionShape->calculateLocalInertia(mass, inertia);
-
   motionState = new btDefaultMotionState(transform);
   constructionInfo = new btRigidBody::btRigidBodyConstructionInfo(
       mass, motionState, collisionShape, inertia);

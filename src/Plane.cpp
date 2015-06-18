@@ -15,12 +15,7 @@ Plane::Plane(const btTransform &transform, const btScalar mass, btVector3 &inert
              const btScalar side, const int textureRepetitions)
     : Object(transform, mass, inertia), textureRepetitions(textureRepetitions) {
   computePoints(side);
-  collisionShape = new btStaticPlaneShape(
-      btVector3(normals[0].x, normals[0].y, normals[0].z), btScalar(0));
-  motionState = new btDefaultMotionState(transform);
-  constructionInfo = new btRigidBody::btRigidBodyConstructionInfo(
-      0, motionState, collisionShape, inertia);
-  rigidBody = new btRigidBody(*constructionInfo);
+  setupBulletShape();
 }
 
 //-----------------------------------------------------------------------------
@@ -46,6 +41,19 @@ void Plane::computePoints(const btScalar side) {
   normals = { normal, normal, normal, normal }; 
 
   tangents.assign(4, {1, 0, 0});
+}
+
+//-----------------------------------------------------------------------------
+void Plane::setupBulletShape() {
+  collisionShape =
+      new btConvexHullShape(getPoints(), getPointsNumber(), sizeof(glm::vec3));
+//  collisionShape = new btStaticPlaneShape(
+//      btVector3(normals[0].x, normals[0].y, normals[0].z), btScalar(0));
+  collisionShape->calculateLocalInertia(mass, inertia);
+  motionState = new btDefaultMotionState(transform);
+  constructionInfo = new btRigidBody::btRigidBodyConstructionInfo(
+      mass, motionState, collisionShape, inertia);
+  rigidBody = new btRigidBody(*constructionInfo);
 }
 
 //-----------------------------------------------------------------------------

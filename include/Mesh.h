@@ -13,6 +13,7 @@ private:
        const std::string &meshFile);
   void parseObjFile(const std::string &meshFile);
   void fillMesh(const ObjParser &objParser);
+  void setupBulletShape();
 
   friend class MeshBuilder;
 };

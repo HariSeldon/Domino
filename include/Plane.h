@@ -14,7 +14,9 @@ private:
 
 private:
   void computePoints(const btScalar side);
+  void setupBulletShape();
 
+private:
   int textureRepetitions; 
 
   friend class PlaneBuilder;

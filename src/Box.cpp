@@ -13,19 +13,14 @@
 template class ObjectBuilder<BoxBuilder>;
 
 Box::Box(const btTransform &transform, const btScalar mass, btVector3 &inertia,
-         const btVector3 &sidesLengths)
+         const btVector3 &sides)
     : Object(transform, mass, inertia) {
-  const btVector3 tmpHalfSides = sidesLengths / 2;
-
-  collisionShape = new btBoxShape(tmpHalfSides);
-  collisionShape->calculateLocalInertia(mass, inertia);
-  motionState = new btDefaultMotionState(transform);
-  constructionInfo = new btRigidBody::btRigidBodyConstructionInfo(
-      mass, motionState, collisionShape, inertia);
-  rigidBody = new btRigidBody(*constructionInfo);
-  setupFaces({ tmpHalfSides.x(), tmpHalfSides.y(), tmpHalfSides.z() });
+  const btVector3 halfSides = sides / 2;
+  setupFaces({ halfSides.x(), halfSides.y(), halfSides.z() });
+  setupBulletShape(halfSides);
 }
 
+//------------------------------------------------------------------------------
 void Box::setupFaces(const glm::vec3 &halfSides) {
   glm::vec3 frontTopLeft = glm::vec3(-1, 1, -1) * halfSides;
   glm::vec3 frontTopRight = glm::vec3(1, 1, -1) * halfSides;
@@ -122,6 +117,16 @@ void Box::setupFaces(const glm::vec3 &halfSides) {
 
     tangents.insert(tangents.end(), {tangent, tangent}); 
   }
+}
+
+//------------------------------------------------------------------------------
+void Box::setupBulletShape(const btVector3 halfSides) {
+  collisionShape = new btBoxShape(halfSides);
+  collisionShape->calculateLocalInertia(mass, inertia);
+  motionState = new btDefaultMotionState(transform);
+  constructionInfo = new btRigidBody::btRigidBodyConstructionInfo(
+      mass, motionState, collisionShape, inertia);
+  rigidBody = new btRigidBody(*constructionInfo);
 }
 
 //------------------------------------------------------------------------------
