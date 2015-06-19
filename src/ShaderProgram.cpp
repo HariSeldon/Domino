@@ -37,11 +37,12 @@ ShaderProgram::ShaderProgram(const std::string &vertexShaderFileName,
   glAttachShader(programID, fragmentShader->getID());
   glLinkProgram(programID);
 
+  checkErrors(programID);
+
   GLint output;
   glGetProgramiv(programID, GL_LINK_STATUS, &output);
   assert(output == GL_TRUE);
 
-  checkErrors(programID);
   fillAttributeMap();
 }
 
@@ -58,8 +59,9 @@ ShaderProgram::~ShaderProgram() {
 GLint ShaderProgram::queryUniformLocation(GLuint programID,
                                           const char *uniformName) {
   GLint location = glGetUniformLocation(programID, uniformName);
-  if(location == -1) {
-    std::cerr << "Cannot query uniform: " << uniformName << "\n"; 
+  if (location == -1) {
+    std::cerr << "Cannot query uniform: " << uniformName << "\n";
+    exit(1);
   }
   return location;
 }
@@ -91,7 +93,8 @@ void ShaderProgram::setUniformValue(GLint, const type &) const {
 }
 
 template <>
-void ShaderProgram::setUniformValue(GLint location, const unsigned int &value) const {
+void ShaderProgram::setUniformValue(GLint location,
+                                    const unsigned int &value) const {
   glUniform1i(location, value);
   checkOpenGLError("set Uniform with location: " + std::to_string(location));
 }
@@ -109,31 +112,36 @@ void ShaderProgram::setUniformValue(GLint location, const float &value) const {
 }
 
 template <>
-void ShaderProgram::setUniformValue(GLint location, const glm::vec2 &vector) const {
+void ShaderProgram::setUniformValue(GLint location,
+                                    const glm::vec2 &vector) const {
   glUniform2f(location, vector.x, vector.y);
   checkOpenGLError("set Uniform with location: " + std::to_string(location));
 }
 
 template <>
-void ShaderProgram::setUniformValue(GLint location, const glm::vec3 &vector) const {
+void ShaderProgram::setUniformValue(GLint location,
+                                    const glm::vec3 &vector) const {
   glUniform3f(location, vector.x, vector.y, vector.z);
   checkOpenGLError("set Uniform with location: " + std::to_string(location));
 }
 
 template <>
-void ShaderProgram::setUniformValue(GLint location, const glm::vec4 &vector) const {
+void ShaderProgram::setUniformValue(GLint location,
+                                    const glm::vec4 &vector) const {
   glUniform4f(location, vector.x, vector.y, vector.z, vector.w);
   checkOpenGLError("set Uniform with location: " + std::to_string(location));
 }
 
 template <>
-void ShaderProgram::setUniformValue(GLint location, const glm::mat4 &matrix) const {
+void ShaderProgram::setUniformValue(GLint location,
+                                    const glm::mat4 &matrix) const {
   glUniformMatrix4fv(location, 1, GL_FALSE, &matrix[0][0]);
   checkOpenGLError("set Uniform with location: " + std::to_string(location));
 }
 
 template <>
-void ShaderProgram::setUniformValue(GLint location, const glm::mat3 &matrix) const {
+void ShaderProgram::setUniformValue(GLint location,
+                                    const glm::mat3 &matrix) const {
   glUniformMatrix3fv(location, 1, GL_FALSE, &matrix[0][0]);
   checkOpenGLError("set Uniform with location: " + std::to_string(location));
 }
@@ -187,7 +195,7 @@ int ShaderProgram::getAttributeLocation(const std::string &name) const {
 // -----------------------------------------------------------------------------
 void ShaderProgram::setAttribute(const std::string &name, int size,
                                  GLenum type) const {
-  if(attributeLocationsMap.find(name) == attributeLocationsMap.end()) {
+  if (attributeLocationsMap.find(name) == attributeLocationsMap.end()) {
     std::cerr << "Cannot set attribute: " << name << "\n";
   } else {
     int location = attributeLocationsMap.at(name);
@@ -214,8 +222,9 @@ void ShaderProgram::fillAttributeMap() {
 }
 
 // -----------------------------------------------------------------------------
-void ShaderProgram::printUniformLocations(const std::vector<std::string> &names,
-                                          const std::vector<int> &locations) const {
+void ShaderProgram::printUniformLocations(
+    const std::vector<std::string> &names,
+    const std::vector<int> &locations) const {
   assert(locations.size() % names.size() == 0);
   std::cout << "-------------------------------------------------\n";
   for (auto index = 0u; index < locations.size(); ++index) {

@@ -33,6 +33,9 @@ SceneManager::SceneManager(const glm::ivec2 screenSize,
   lightMask = (2 << (world->getLightsNumber() - 1)) - 1;
   setupProjection(screenSize);
   initGPU(container);
+  glClearColor(BACKGROUND_COLOR.x, BACKGROUND_COLOR.y, BACKGROUND_COLOR.z,
+               BACKGROUND_COLOR.w);
+  checkOpenGLError("GLInitializer: glClearColor");
 }
 
 // -----------------------------------------------------------------------------
@@ -66,15 +69,15 @@ SceneManager::~SceneManager() {
 
 // -----------------------------------------------------------------------------
 void SceneManager::drawScene() { 
-  auto begin = std::chrono::system_clock::now();
+//  auto begin = std::chrono::system_clock::now();
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   mirrorPass(this);
   //shadowRenderingPass();
   screenRenderingPass();
   glFinish();
-  auto end = std::chrono::system_clock::now();
-  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
-  std::cout << duration << "\n";
+//  auto end = std::chrono::system_clock::now();
+//  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+//  std::cout << duration << "\n";
 }
 
 // -----------------------------------------------------------------------------
@@ -94,9 +97,6 @@ void SceneManager::drawWorld(const glm::mat4 &modelView,
   glm::mat4 shadowProjection =
       glm::ortho<float>(-side, side, -5, side / 1.6, 0, 2.5 * side);
 
-  glClearColor(BACKGROUND_COLOR.x, BACKGROUND_COLOR.y, BACKGROUND_COLOR.z,
-               BACKGROUND_COLOR.w);
-  checkOpenGLError("GLInitializer: glClearColor");
   drawer.drawWorld(world, modelView, projection, shadowView, shadowProjection,
                    lightMask, glm::vec4(cameraPosition, 1.f));
 }
@@ -106,10 +106,18 @@ void SceneManager::mirrorRenderingPass() {
   // Draw the scene on the mirror texture from the point of view of the mirror.
   auto mirror = world->getMirror();
   drawer.enableMirror();
-  glm::mat4 cameraView = mirror->getModelView();
+  glm::mat4 cameraView = mirror->computeMirrorView();
   auto tmp = mirror->getPosition();
   glm::vec3 mirrorPosition {tmp.x(), tmp.y(), tmp.z()};
-  drawWorld(cameraView, mirrorPosition);
+  glm::mat4 shadowView =
+      glm::lookAt(glm::vec3(-11, 4, 0), glm::vec3(-9.29, 3.29, 0),
+                  glm::vec3(10.29, 4.71, 0));
+  float side = 11;
+  glm::mat4 shadowProjection =
+      glm::ortho<float>(-side, side, -5, side / 1.6, 0, 2.5 * side);
+  drawer.drawWorldForMirror(world, cameraView, projection, shadowView,
+                            shadowProjection, lightMask,
+                            glm::vec4(mirrorPosition, 1.f));
   drawer.disableMirror();
 }
 

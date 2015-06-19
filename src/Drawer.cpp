@@ -184,12 +184,13 @@ void Drawer::createMirrorObjectGPUBuffers() {
 
   GLuint vertexVBOId = setupVertexVBO(mirror, mirrorShader);
   GLuint indexVBOId = setupIndexVBO(mirror);
+  GLuint normalVBOId = setupNormalVBO(mirror, mirrorShader);
 
   // Unbind.
   glBindVertexArray(0);
 
   vaoWorldMap.insert(std::pair<const Object *, GLuint>(mirror, vaoId));
-  vboIds.insert(vboIds.end(), {vertexVBOId, indexVBOId});
+  vboIds.insert(vboIds.end(), {vertexVBOId, indexVBOId, normalVBOId});
 }
 
 //-----------------------------------------------------------------------------
@@ -397,18 +398,45 @@ void Drawer::drawWorld(const World *world, const glm::mat4 &originalModelView,
                        const glm::mat4 &originalShadowModelView,
                        const glm::mat4 &shadowProjection, const int lightMask,
                        const glm::vec4 &cameraPosition) const {
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  drawNonReflectiveObjects(world, originalModelView, projection,
+                           originalShadowModelView, shadowProjection, lightMask,
+                           cameraPosition);
+  if(mirror != nullptr)
+    drawMirror(originalModelView, projection);
+  //  blurLightBulbs(blurShader, blurredBulbFBOId, lightBulbTexture);
+  //  drawFinalImage();
+}
+
+//-----------------------------------------------------------------------------
+void Drawer::drawWorldForMirror(const World *world,
+                                const glm::mat4 &originalModelView,
+                                const glm::mat4 &projection,
+                                const glm::mat4 &originalShadowModelView,
+                                const glm::mat4 &shadowProjection,
+                                const int lightMask,
+                                const glm::vec4 &cameraPosition) const {
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  drawNonReflectiveObjects(world, originalModelView, projection,
+                           originalShadowModelView, shadowProjection, lightMask,
+                           cameraPosition);
+}
+
+//-----------------------------------------------------------------------------
+void Drawer::drawNonReflectiveObjects(const World *world,
+                                      const glm::mat4 &originalModelView,
+                                      const glm::mat4 &projection,
+                                      const glm::mat4 &originalShadowModelView,
+                                      const glm::mat4 &shadowProjection,
+                                      const int lightMask,
+                                      const glm::vec4 &cameraPosition) const {
   drawPhongObjects(world, originalModelView, projection,
                    originalShadowModelView, shadowProjection, lightMask);
   drawPhongNormalMappingObjects(world, originalModelView, projection,
                                 originalShadowModelView, shadowProjection,
                                 lightMask);
   drawLightBulbs(originalModelView, projection, cameraPosition, lightMask);
-  if(mirror != nullptr)
-    drawMirror(originalModelView, projection);
-  //  blurLightBulbs(blurShader, blurredBulbFBOId, lightBulbTexture);
-  //  drawFinalImage();
 }
 
 //-----------------------------------------------------------------------------
@@ -484,10 +512,19 @@ void Drawer::drawLightBulbs(const glm::mat4 &originalModelView,
 void Drawer::drawMirror(const glm::mat4 &originalModelView,
                         const glm::mat4 &projection) const {
   mirrorShader.useProgram();
-  auto modelView = getObjectModelView(mirror, originalModelView);
+
+  btScalar transform[16];
+  mirror->getOpenGLMatrix(transform);
+  glm::mat4 mirrorModelView = glm::make_mat4x4(transform);
+  auto modelView = originalModelView * mirrorModelView;
+  auto normalMatrix = glm::inverseTranspose(glm::mat3(mirrorModelView));
 
   mirrorShader.setUniform(MirrorShader::mvpMatrix, projection * modelView);
   mirrorShader.setUniform(MirrorShader::mirrorSize, mirror->getSize());
+  mirrorShader.setUniform(MirrorShader::mirrorNormal,
+                          mirror->computeNormal());
+  mirrorShader.setUniform(MirrorShader::normalMatrix,
+                          glm::inverseTranspose(glm::mat3(mirrorModelView)));
 
   // Set color and normal texture.
   glBindTexture(GL_TEXTURE_2D, mirrorTexture);

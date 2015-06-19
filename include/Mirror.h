@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Object.h"
+#include "Box.h"
 #include "ShaderProgram.h"
 #include "SysUtils.h"
 
@@ -12,20 +12,17 @@
 
 class btVector3;
 
-class Mirror : public Object {
+class Mirror : public Box {
 public:
   Mirror(btTransform &transform, btScalar mass, btVector3 &inertia,
-         const glm::vec2 &sides);
+         const btVector3 &sides);
 
 public:
-  glm::mat4 getModelView() const;
+  glm::mat4 computeMirrorView() const;
+  glm::vec3 computeNormal() const;
   inline glm::vec2 getSize() const {
     return sides;
   }
-
-private:
-  void computePoints(const glm::vec2 &sides);
-  void setupBulletShape();
 
 private:
   const glm::vec2 sides;
@@ -38,10 +35,10 @@ class MirrorBuilder : public ObjectBuilder<MirrorBuilder> {
 public:
   MirrorBuilder();
 
-  MirrorBuilder &setSides(const glm::vec2 &sides);
+  MirrorBuilder &setSides(const btVector3 &sides);
 
   Mirror *create();
 
 private:
-  glm::vec2 sides;
+  btVector3 sides;
 };

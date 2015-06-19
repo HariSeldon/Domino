@@ -48,8 +48,6 @@ function traceDominoLine(start, finish)
             orientation = {x = -angle, y = 0, z = 0},
             mass = 10, textureFile = "checker.png"});
   end
-
-
 end
 
 setCamera({position = {x = 0, y = 2, z = -20}, orientation = {x = 0, y = 0}});
@@ -63,36 +61,37 @@ setBackgroundColor({r = 0.2, g = 0.4, b = 0.6, a = 1});
 --        orientation = {x = 0, y = 0, z = 0},
 --        mass = 0, textureFile = "default.png"});
 
-addMirror({sides = {x = 16, y= 10}, position = {x = 0, y = 5, z = 20},
-          orientation = {x = 0, y = -3.1415},
-          mass = 0});
+addMirror({sides = {x = 16, y = 10, z = 0.2}, position = {x = 0, y = 10, z = 20},
+          orientation = {x = 0, y = -math.pi},
+          mass = 10});
 
 addBox({sides = {x = 2, y = 2, z = 2}, 
         position = {x = 7, y = 7, z = 0}, 
         orientation = {x = 0, y = 0, z = 0},
-        mass = 0.01, textureFile = "red_brick.tif", normalTextureFile = "red_brick_normal.tif"});
+        mass = 0, textureFile = "red_brick.tif", normalTextureFile = "red_brick_normal.tif"});
 addLightBulb({radius = 2, ambientColor = {r = 0.2, g = 0.2, b = 0.2, a = 1}, 
-              position = {x = 1, y = 1, z = 0}, 
-              mass = 10, constantAttenuation = 0.1, linearAttenuation = 0.1});
+              position = {x = 1, y = 3, z = 0}, 
+              mass = 1, constantAttenuation = 0.1, linearAttenuation = 0.1});
 addLightBulb({radius = 1, 
               position = {x = 0, y = 10, z = 0}, 
-              mass = 0, constantAttenuation = 0.1, linearAttenuation = 0.1});
+              mass = 1, constantAttenuation = 0.1, linearAttenuation = 0.1});
 addLightBulb({radius = 0.5, 
               position = {x = -10, y = 3, z = -10}, 
-              mass = 10, constantAttenuation = 0.1, linearAttenuation = 0.1});
-addPlane({side = 60, textureFile = "red_brick.tif", normalTextureFile = "red_brick_normal.tif", textureRepetitions = 2});
+              mass = 1, constantAttenuation = 0.1, linearAttenuation = 0.1});
+addBox({sides = {x = 60, y = 2, z = 60}, textureFile = "red_brick.tif", normalTextureFile = "red_brick_normal.tif"});
 
+barrelPosition = 29;
 for index = 1,20 do
-addMesh({objFile = "barrel.obj", position = {x = -31 + index * 3, y = 2, z = -31}, mass = 0});
+addMesh({objFile = "barrel.obj", position = {x = -barrelPosition + index * 3, y = 2, z = -barrelPosition}, mass = 1});
 end
 for index = 1,20 do
-  addMesh({objFile = "barrel.obj", position = {x = -31 + index * 3, y = 2, z = 31}, mass = 0});
+  addMesh({objFile = "barrel.obj", position = {x = -barrelPosition + index * 3, y = 2, z = barrelPosition}, mass = 1});
 end
 for index = 1,20 do
-  addMesh({objFile = "barrel.obj", position = {x = 31, y = 2, z = -31 + index * 3}, mass = 0});
+  addMesh({objFile = "barrel.obj", position = {x = barrelPosition, y = 2, z = -barrelPosition + index * 3}, mass = 1});
 end
 for index = 1,20 do
-  addMesh({objFile = "barrel.obj", position = {x = -31, y = 2, z = -31 + index * 3}, mass = 0});
+  addMesh({objFile = "barrel.obj", position = {x = -barrelPosition, y = 2, z = -barrelPosition + index * 3}, mass = 1});
 end
 
 for index = 1,30 do 

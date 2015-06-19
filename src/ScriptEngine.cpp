@@ -309,12 +309,13 @@ int addMirror(lua_State *luaState) {
   ScriptEngine *engine = luaW_check<ScriptEngine>(luaState, 1);
   float sideX = static_cast<float>(luaL_checknumber(luaState, 2));
   float sideY = static_cast<float>(luaL_checknumber(luaState, 3));
-  float mass = static_cast<float>(luaL_checknumber(luaState, 4));
-  float positionX = static_cast<float>(luaL_checknumber(luaState, 5));
-  float positionY = static_cast<float>(luaL_checknumber(luaState, 6));
-  float positionZ = static_cast<float>(luaL_checknumber(luaState, 7));
-  float rotationX = static_cast<float>(luaL_checknumber(luaState, 8));
-  float rotationY = static_cast<float>(luaL_checknumber(luaState, 9));
+  float sideZ = static_cast<float>(luaL_checknumber(luaState, 4));
+  float mass = static_cast<float>(luaL_checknumber(luaState, 5));
+  float positionX = static_cast<float>(luaL_checknumber(luaState, 6));
+  float positionY = static_cast<float>(luaL_checknumber(luaState, 7));
+  float positionZ = static_cast<float>(luaL_checknumber(luaState, 8));
+  float rotationX = static_cast<float>(luaL_checknumber(luaState, 9));
+  float rotationY = static_cast<float>(luaL_checknumber(luaState, 10));
 
   MirrorBuilder mirrorBuilder;
   btQuaternion rotation(rotationX, rotationY, 0.f);
@@ -322,7 +323,7 @@ int addMirror(lua_State *luaState) {
       mirrorBuilder.setTransform(
                         btTransform(rotation,
                                     btVector3(positionX, positionY, positionZ)))
-          .setSides({sideX, sideY})
+          .setSides({sideX, sideY, sideZ})
           .setMass(mass)
           .create();
 

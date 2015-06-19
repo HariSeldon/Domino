@@ -49,6 +49,13 @@ public:
                  const glm::mat4 &originalShadowModelView,
                  const glm::mat4 &shadowProjection, const int lightMask,
                  const glm::vec4 &cameraPosition) const;
+  void drawWorldForMirror(const World *world,
+                          const glm::mat4 &originalModelView,
+                          const glm::mat4 &projection,
+                          const glm::mat4 &originalShadowModelView,
+                          const glm::mat4 &shadowProjection,
+                          const int lightMask,
+                          const glm::vec4 &cameraPosition) const;
 
   void drawObjectForShadow(const Object *object, ShaderProgram &shader,
                            const glm::mat4 &originalModelView,
@@ -95,6 +102,13 @@ private:
 
   void invokeDrawCall(const Object *object) const;
 
+  void drawNonReflectiveObjects(const World *world,
+                                const glm::mat4 &originalModelView,
+                                const glm::mat4 &projection,
+                                const glm::mat4 &originalShadowModelView,
+                                const glm::mat4 &shadowProjection,
+                                const int lightMask,
+                                const glm::vec4 &cameraPosition) const;
   void drawPhongObjects(const World *world, 
                         const glm::mat4 &originalModelView,
                         const glm::mat4 &projection,

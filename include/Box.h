@@ -8,11 +8,11 @@
 #include <glm/fwd.hpp>
 
 class Box : public Object {
-private:
+protected:
   Box(const btTransform &transform, const btScalar mass, btVector3 &inertia,
       const btVector3 &sides);
 
-private:
+protected:
   void setupFaces(const glm::vec3 &halfSides);
   void setupBulletShape(const btVector3 halfSides);
 

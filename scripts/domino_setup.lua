@@ -230,6 +230,7 @@ function addMirror(mirror)
 
   engine:_addMirror(mirror.sides.x,
                     mirror.sides.y,
+                    mirror.sides.z,
                     mirror.mass,
                     mirror.position.x,
                     mirror.position.y,
