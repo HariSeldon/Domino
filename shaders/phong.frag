@@ -50,31 +50,33 @@ const float DEFAULT_SPOT_CUTOFF = 180.f;
 
 // -----------------------------------------------------------------------------
 // Light-independent shading.
-vec4 shadeAmbientColor() {
-  vec4 emissionMaterialColor = material.emission;
-  vec4 ambientMaterialColor = material.ambient;
+vec3 shadeAmbientColor() {
+  vec3 emissionMaterialColor = material.emission.xyz;
+  vec3 ambientMaterialColor = material.ambient.xyz;
 
-  vec4 result = ambientColor * ambientMaterialColor + emissionMaterialColor;
+  vec3 result = ambientColor.xyz * ambientMaterialColor + emissionMaterialColor;
   return result;
 }
 
 // -----------------------------------------------------------------------------
-vec4 shadeDirectionalLight(vec3 position, vec3 normal, vec3 cameraDirection,
+vec3 shadeDirectionalLight(vec3 position, vec3 normal, vec3 cameraDirection,
                            int lightIndex) {
   // Get material properties.
-  vec4 ambientMaterialColor = material.ambient;
-  vec4 diffuseMaterialColor = texture2D(texture, textureCoordinates);
-  vec4 specularMaterialColor = material.specular;
+  vec3 ambientMaterialColor = material.ambient.xyz;
+  // Fetch a texel from the first texture in the array.
+  vec3 diffuseMaterialColor =
+      texture2D(texture, textureCoordinates).xyz;
+  vec3 specularMaterialColor = material.specular.xyz;
   float shininess = material.shininess;
 
   // Get light properties.
   LightInfo light = lights[lightIndex];
-  vec4 ambientLightColor = light.ambient;
-  vec4 diffuseLightColor = light.diffuse;
-  vec4 specularLightColor = light.specular;
+  vec3 ambientLightColor = light.ambient.xyz;
+  vec3 diffuseLightColor = light.diffuse.xyz;
+  vec3 specularLightColor = light.specular.xyz;
 
-  vec4 fragmentAmbientColor = ambientMaterialColor * ambientLightColor;
-  vec4 finalColor = fragmentAmbientColor;
+  vec3 fragmentAmbientColor = ambientMaterialColor * ambientLightColor;
+  vec3 finalColor = fragmentAmbientColor;
 
   vec3 lightDirection = -1.0f * normalize(light.position.xyz);
   vec3 halfDirection = normalize(lightDirection + cameraDirection);
@@ -82,32 +84,33 @@ vec4 shadeDirectionalLight(vec3 position, vec3 normal, vec3 cameraDirection,
   float cosTeta = max(dot(normal, lightDirection), 0.0);
   float cosH = max(dot(normal, halfDirection), 0.0);
 
-  vec4 diffuseColor = diffuseMaterialColor * diffuseLightColor * cosTeta;
-  vec4 specularColor =
+  vec3 diffuseColor = diffuseMaterialColor * diffuseLightColor * cosTeta;
+  vec3 specularColor =
       (cosTeta > 0.0)
           ? specularMaterialColor * specularLightColor * pow(cosH, shininess)
-          : vec4(0.0, 0.0, 0.0, 1.0);
+          : vec3(0.0, 0.0, 0.0);
 
   finalColor = diffuseColor + specularColor;
   return finalColor;
 }
 
 // -----------------------------------------------------------------------------
-vec4 shadePositionalLight(vec3 position, vec3 normal, vec3 cameraDirection,
+vec3 shadePositionalLight(vec3 position, vec3 normal, vec3 cameraDirection,
                           int lightIndex) {
   // Get material properties.
-  vec4 ambientMaterialColor = material.ambient;
-  //vec4 diffuseMaterialColor = material.diffuse;
-  vec4 diffuseMaterialColor = texture2D(texture, textureCoordinates);
-  vec4 specularMaterialColor = material.specular;
+  vec3 ambientMaterialColor = material.ambient.xyz;
+  // Fetch a texel from the first texture in the array.
+  vec3 diffuseMaterialColor =
+      texture2D(texture, textureCoordinates).xyz;
+  vec3 specularMaterialColor = material.specular.xyz;
   float shininess = material.shininess;
 
   // Get light properties.
   LightInfo light = lights[lightIndex];
   vec3 lightPosition = light.position.xyz;
-  vec4 ambientLightColor = light.ambient;
-  vec4 diffuseLightColor = light.diffuse;
-  vec4 specularLightColor = light.specular;
+  vec3 ambientLightColor = light.ambient.xyz;
+  vec3 diffuseLightColor = light.diffuse.xyz;
+  vec3 specularLightColor = light.specular.xyz;
   float constantAttenuation = light.constantAttenuation;
   float linearAttenuation = light.linearAttenuation;
   float quadraticAttenuation = light.quadraticAttenuation;
@@ -116,8 +119,8 @@ vec4 shadePositionalLight(vec3 position, vec3 normal, vec3 cameraDirection,
   float spotCutOff = light.spotCutOff;
   vec3 spotDirection = light.spotDirection;
 
-  vec4 fragmentAmbientColor = ambientMaterialColor * ambientLightColor;
-  vec4 finalColor = fragmentAmbientColor;
+  vec3 fragmentAmbientColor = ambientMaterialColor * ambientLightColor;
+  vec3 finalColor = vec3(fragmentAmbientColor.xyz);
 
   vec3 lightDirection = normalize(lightPosition - position);
   float cosTeta = dot(normal, lightDirection);
@@ -127,8 +130,8 @@ vec4 shadePositionalLight(vec3 position, vec3 normal, vec3 cameraDirection,
     vec3 halfDirection = normalize(lightDirection + cameraDirection);
     float cosH = max(dot(normal, halfDirection), 0.0);
 
-    vec4 diffuseColor = diffuseMaterialColor * diffuseLightColor * cosTeta;
-    vec4 specularColor =
+    vec3 diffuseColor = diffuseMaterialColor * diffuseLightColor * cosTeta;
+    vec3 specularColor =
         specularMaterialColor * specularLightColor * pow(cosH, shininess);
 
     // Get distance of point from light.
@@ -142,9 +145,10 @@ vec4 shadePositionalLight(vec3 position, vec3 normal, vec3 cameraDirection,
     if (spotCutOff < DEFAULT_SPOT_CUTOFF) {
       float spotCosine = dot(normalize(spotDirection), -1.0f * lightDirection);
       float spotAttenuation = (spotCosine > spotCosCutOff) ?
-                                  // Inside the cone.
-                                  pow(spotCosine, spotExponent) :
-                                  // Outside the cone.
+                                                           // Inside the cone.
+                                  pow(spotCosine, spotExponent)
+                                                           :
+                                                           // Outside the cone.
                                   0.0f;
       attenuation *= spotAttenuation;
     }
@@ -158,17 +162,17 @@ vec4 shadePositionalLight(vec3 position, vec3 normal, vec3 cameraDirection,
 // -----------------------------------------------------------------------------
 void main() {
   vec3 normalizedNormal = (2 * int(gl_FrontFacing) - 1) * normalize(normal);
-// This is equivalent to: 
-// if(gl_FrontFacing == false) -> normalizedNormal = -normalizedNormal;
+  // This is equivalent to:
+  // if(gl_FrontFacing == false) -> normalizedNormal = -normalizedNormal;
 
   vec3 cameraDirection = normalize(-1.0 * position);
 
-  vec4 finalFragmentColor = shadeAmbientColor();
+  vec3 finalFragmentColor = shadeAmbientColor();
 
   for (int lightIndex = 0; lightIndex < lightsNumber; ++lightIndex) {
-    if ( int((1 << lightIndex) & lightMask) == 0) {
+    if (int((1 << lightIndex) & lightMask) == 0) {
       continue;
-    } 
+    }
 
     LightInfo light = lights[lightIndex];
 
@@ -184,5 +188,5 @@ void main() {
     }
   }
 
-  outputColor = finalFragmentColor;
+  outputColor = vec4(finalFragmentColor, 1.f);
 }
