@@ -16,38 +16,11 @@
 
 Mirror::Mirror(btTransform &transform, btScalar mass, btVector3 &inertia,
                const btVector3 &sides)
-    : Box(transform, mass, inertia, sides), sides{sides.x(), sides.y()} {
-//      std::cout << "Mirror\n";
-    }
-
-////-----------------------------------------------------------------------------
-//void Mirror::computePoints(const glm::vec2 &sides) {
-//  const glm::vec2 halfSides = sides / 2.f;
-//
-//  glm::vec3 first(-1.f * halfSides.x, halfSides.y, 0.f);
-//  glm::vec3 second(halfSides.x, halfSides.y, 0.f);
-//  glm::vec3 third(halfSides.x, -1.f * halfSides.y, 0.f);
-//  glm::vec3 fourth(-1.f * halfSides.x, -1.f * halfSides.y, 0.f);
-//
-//  points = { first, second, third, fourth };
-//
-//  indices = { 0, 1, 2, 2, 3, 0 };
-//
-//  glm::vec3 normal = computeNormal(first, second, third);
-//}
-//
-////-----------------------------------------------------------------------------
-//void Mirror::setupBulletShape() {
-//  collisionShape =
-//      new btConvexHullShape(getPoints(), getPointsNumber(), sizeof(glm::vec3));
-//  motionState = new btDefaultMotionState(transform);
-//  constructionInfo = new btRigidBody::btRigidBodyConstructionInfo(
-//      mass, motionState, collisionShape, inertia);
-//  rigidBody = new btRigidBody(*constructionInfo);
-//}
+    : Box(transform, mass, inertia, sides), sides{sides.x(), sides.y()} {}
 
 //-----------------------------------------------------------------------------
 glm::vec3 Mirror::computeNormal() const {
+  // FIXME find a better way.
   // Get the mirror transformation.
   btScalar oglTransform[16];
   getOpenGLMatrix(oglTransform);
