@@ -24,6 +24,7 @@ set(DOMINO_SETUP_LUA "domino_setup.lua")
 project(PROJECT_NAME)
 
 # Full paths.
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake)
 set(SRC_PATH ${PROJECT_SOURCE_DIR}/${SRC_DIR})
 set(INCLUDE_PATH ${PROJECT_SOURCE_DIR}/${INCLUDE_DIR}) 
 set(SHADER_PATH ${PROJECT_SOURCE_DIR}/${SHADER_DIR}/)
@@ -37,6 +38,11 @@ set(LUA_PATH ${EXT_PATH}/${LUA_DIR}/)
 
 # Files.
 file(GLOB SRC_FILES_LIST "${SRC_PATH}/*.cpp")
+
+# Requird packages.
+find_package(OpenGL)
+find_package(GLEW)
+find_package(SDL2)
 
 # Include files.
 # Include directories.
@@ -75,40 +81,6 @@ add_executable(${EXE_NAME} ${SRC_FILES_LIST})
 install_targets("/${BIN_DIR}/" ${EXE_NAME})
 
 # ------------------------------------------------------------------------------
-# GL
-find_library(GL_LIB_PATH GL
-             DOC "The GL library")
-if(EXISTS ${GL_LIB_PATH})
-  message(STATUS "Looking for GL: found")
-else(EXISTS ${GL_LIB_PATH})
-  message(FATAL_ERROR "Looking for GL: not found")
-endif(EXISTS ${GL_LIB_PATH})
-
-find_library(GLU_LIB_PATH GLU
-             DOC "The GLU library")
-if(EXISTS ${GLU_LIB_PATH})
-  message(STATUS "Looking for GLU: found")
-else(EXISTS ${GLU_LIB_PATH})
-  message(FATAL_ERROR "Looking for GLU: not found")
-endif(EXISTS ${GLU_LIB_PATH})
-
-find_library(GLEW_LIB_PATH GLEW
-             DOC "The GLEW library")
-if(EXISTS ${GLEW_LIB_PATH})
-  message(STATUS "Looking for GLEW: found")
-else(EXISTS ${GLEW_LIB_PATH})
-  message(FATAL_ERROR "Looking for GLEW: not found")
-endif(EXISTS ${GLEW_LIB_PATH})
-
-find_library(SDL2_LIB_PATH SDL2
-             DOC "The SDL2 library")
-if(EXISTS ${SDL2_LIB_PATH})
-  message(STATUS "Looking for SDL2: found")
-else(EXISTS ${SDL2_LIB_PATH})
-  message(FATAL_ERROR "Looking for SDL2: not found")
-endif(EXISTS ${SDL2_LIB_PATH})
-
-
 find_library(SDL2_IMAGE_LIB_PATH SDL2_image
              DOC "The SDL2 Image library")
 if(EXISTS ${SDL2_IMAGE_LIB_PATH})
@@ -125,11 +97,10 @@ else(EXISTS ${FREETYPE_LIB_PATH})
   message(FATAL_ERROR "Looking for freetype: not found")
 endif(EXISTS ${FREETYPE_LIB_PATH})
 
-target_link_libraries(${EXE_NAME} ${SDL2_LIB_PATH} 
+target_link_libraries(${EXE_NAME} ${SDL2_LIBRARY}
+                                  ${GLEW_LIBRARY} 
+                                  ${OPENGL_LIBRARIES}
                                   ${SDL2_IMAGE_LIB_PATH} 
-                                  ${GLEW_LIB_PATH} 
-                                  ${GLU_LIB_PATH} 
-                                  ${GL_LIB_PATH} 
                                   ${FREETYPE_LIB_PATH}) 
 
 add_subdirectory(${BULLET_PATH})
