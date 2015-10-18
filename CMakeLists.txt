@@ -51,9 +51,9 @@ configure_file(${CMAKE_SOURCE_DIR}/${INCLUDE_DIR}/SysDefines.h.cmake
 set(BULLET_INCLUDE_DIR "${BULLET_PATH}/src")
 set(LUA_INCLUDE_DIR "${LUA_PATH}/src")
 set(FREETYPE_INCLUDE_DIR "/usr/include/freetype2")
-include_directories(${EXT_PATH} ${INCLUDE_PATH} "${CMAKE_BINARY_DIR}/${INCLUDE_DIR}")
+include_directories(${INCLUDE_PATH} "${CMAKE_BINARY_DIR}/${INCLUDE_DIR}")
 # Use system flag so to disable warnings when compiling using -Wall.
-include_directories(SYSTEM ${BULLET_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR} ${LUA_INCLUDE_DIR})
+include_directories(SYSTEM ${EXT_PATH} ${BULLET_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR} ${LUA_INCLUDE_DIR})
 
 if( "${CMAKE_BUILD_TYPE}" STREQUAL "" )
   set(CMAKE_BUILD_TYPE "Debug")
@@ -68,8 +68,9 @@ message(STATUS "CMake build type: " ${CMAKE_BUILD_TYPE})
 # Set compilation options.
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -finline-functions")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -std=c++14 -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wold-style-cast -Wcast-align -Wunused -Woverloaded-virtual -pedantic")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -std=c++14")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -std=c++14 -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wold-style-cast -Wcast-align -Wunused -Woverloaded-virtual -pedantic")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -std=c++14")
+
 add_definitions("-g")
 # This is to remove GLM warning.
 add_definitions("-DGLM_FORCE_RADIANS")
@@ -104,6 +105,11 @@ target_link_libraries(${EXE_NAME} ${SDL2_LIBRARY}
                                   ${FREETYPE_LIB_PATH}) 
 
 add_subdirectory(${BULLET_PATH})
+
+set_property(TARGET BulletDynamics APPEND_STRING PROPERTY COMPILE_FLAGS " -w")
+set_property(TARGET BulletCollision APPEND_STRING PROPERTY COMPILE_FLAGS " -w")
+set_property(TARGET LinearMath APPEND_STRING PROPERTY COMPILE_FLAGS " -w")
+
 # Warning! Preserve this ordering for these static libraries.
 # Dynamics depends on Collision and they both depend on LinearMath.
 target_link_libraries(${EXE_NAME} BulletDynamics BulletCollision LinearMath)
