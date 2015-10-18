@@ -5,13 +5,10 @@
 #include "SysUtils.h"
 
 #include <map>
+#include <sstream>
 
 #include <glm/vec3.hpp>
 #include <glm/vec2.hpp>
-
-#include <boost/tokenizer.hpp>
-
-#include <iostream>
 
 //------------------------------------------------------------------------------
 inline glm::vec3 floatTriple2vec3(const std::vector<std::string> &words) {
@@ -32,6 +29,16 @@ inline glm::vec2 floatCouple2vec2(const std::vector<std::string> &words) {
 }
 
 //------------------------------------------------------------------------------
+std::vector<std::string> split(const std::string &inputString, char delim) {
+  std::stringstream ss(inputString);
+  std::string item;
+  std::vector<std::string> elems;
+  while (std::getline(ss, item, delim)) 
+    elems.push_back(item);
+  return elems;
+}
+
+//------------------------------------------------------------------------------
 ObjParser::ObjParser() : specularExponent(0.0) {}
 
 //------------------------------------------------------------------------------
@@ -42,23 +49,17 @@ void ObjParser::parse(const std::string &meshFile) {
 
 //------------------------------------------------------------------------------
 void ObjParser::parseObj(const std::string &meshFile) {
-  std::string data = getFileContent(meshFile.c_str());
+  std::string file = getFileContent(meshFile.c_str());
 
-  boost::char_separator<char> newLine("\n");
-  boost::tokenizer<boost::char_separator<char> > tokenizer(data, newLine);
-  for (auto line : tokenizer) {
+  const auto lines = split(file, '\n');
+  for (const auto& line : lines) {
     parseObjLine(line);
   }
 }
 
 //------------------------------------------------------------------------------
 void ObjParser::parseObjLine(const std::string &line) {
-  boost::char_separator<char> space(" ");
-  boost::tokenizer<boost::char_separator<char> > tokens(line, space);
-
-  std::vector<std::string> words;
-  std::copy(tokens.begin(), tokens.end(),
-            std::back_inserter<std::vector<std::string>>(words));
+  const auto words = split(line, ' '); 
 
   const std::string &firstWord = words[0];
 
@@ -99,14 +100,8 @@ void ObjParser::parseTexture(const std::vector<std::string> &words) {
 
 void ObjParser::parseFace(const std::vector<std::string> &words) {
   // Check how many components the words have.
-  boost::char_separator<char> slashSeparator("/", "",
-                                             boost::keep_empty_tokens);
   for (auto word : words) {
-    boost::tokenizer<boost::char_separator<char> > tokens(word, slashSeparator);
-    std::vector<std::string> values;
-    values.reserve(3);
-    std::copy(tokens.begin(), tokens.end(),
-              std::back_inserter<std::vector<std::string>>(values));
+    const auto values = split(word, '/');
 
     int vertexIndex = stoi(values[0]);
     int normalIndex = stoi(values[2]);
@@ -121,23 +116,20 @@ void ObjParser::parseFace(const std::vector<std::string> &words) {
 
 //------------------------------------------------------------------------------
 void ObjParser::parseMtl(const std::string &mtlFile) {
-  std::string data = getFileContent(MESH_PATH + mtlFile);
+  std::string file = getFileContent(MESH_PATH + mtlFile);
 
-  boost::char_separator<char> newLine("\n");
-  boost::tokenizer<boost::char_separator<char> > tokenizer(data, newLine);
-  for (auto line : tokenizer) {
+  const auto lines = split(file, '\n');
+  for (auto line : lines) {
     parseMtlLine(line);
   }
 }
 
 //------------------------------------------------------------------------------
 void ObjParser::parseMtlLine(const std::string &line) {
-  boost::char_separator<char> space(" ");
-  boost::tokenizer<boost::char_separator<char> > tokens(line, space);
+  if (line == "")
+    return;
 
-  std::vector<std::string> words;
-  std::copy(tokens.begin(), tokens.end(),
-            std::back_inserter<std::vector<std::string> >(words));
+  const auto words = split(line, ' ');
 
   const std::string &firstWord = words[0];
 
