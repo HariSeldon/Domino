@@ -15,10 +15,10 @@ public:
   static const glm::vec3 DEFAULT_DIRECTION;
   static const glm::vec3 DEFAULT_POSITION;
   static const float DEFAULT_SPOT_CUTOFF;
-  static constexpr float DEFAULT_SPOT_EXPONENT = 0.0f;
-  static constexpr float DEFAULT_CONSTANT_ATTENUATION = 1.0f;
-  static constexpr float DEFAULT_LINEAR_ATTENUATION = 0.0f;
-  static constexpr float DEFAULT_QUADRATIC_ATTENUATION = 0.0f;
+  static const float DEFAULT_SPOT_EXPONENT;
+  static const float DEFAULT_CONSTANT_ATTENUATION;
+  static const float DEFAULT_LINEAR_ATTENUATION;
+  static const float DEFAULT_QUADRATIC_ATTENUATION;
 
 public:
   virtual ~Light(){};
@@ -36,10 +36,10 @@ public:
   const glm::vec4 &getSpecularColor() const;
 
 protected:
-  int number;
-  glm::vec4 ambientColor;
-  glm::vec4 diffuseColor;
-  glm::vec4 specularColor;
+  int m_number;
+  glm::vec4 m_ambientColor;
+  glm::vec4 m_diffuseColor;
+  glm::vec4 m_specularColor;
 
   friend class LightBuilder;
 };
@@ -58,7 +58,7 @@ public:
   const glm::vec4 &getDirection();
 
 private:
-  glm::vec4 direction;
+  glm::vec4 m_direction;
 
   friend class LightBuilder;
 };
@@ -87,10 +87,10 @@ public:
                    const glm::mat4 &modelView) const override;
 
 protected:
-  glm::vec4 position;
-  float constantAttenuation;
-  float linearAttenuation;
-  float quadraticAttenuation;
+  glm::vec4 m_position;
+  float m_constantAttenuation;
+  float m_linearAttenuation;
+  float m_quadraticAttenuation;
 
   friend class LightBuilder;
 };
@@ -116,9 +116,9 @@ public:
                    const glm::mat4 &modelView) const override;
 
 private:
-  glm::vec4 direction;
-  float cutOff;
-  float exponent;
+  glm::vec4 m_direction;
+  float m_cutOff;
+  float m_exponent;
 
   friend class LightBuilder;
 };
@@ -151,18 +151,18 @@ private:
   void createHelper(Light *light);
 
 private:
-  int counter;
+  int m_counter = 0;
   // Light attributes.
-  glm::vec3 position;
-  glm::vec3 direction;
+  glm::vec3 m_position;
+  glm::vec3 m_direction;
 
-  glm::vec4 ambientColor;
-  glm::vec4 diffuseColor;
-  glm::vec4 specularColor;
+  glm::vec4 m_ambientColor;
+  glm::vec4 m_diffuseColor;
+  glm::vec4 m_specularColor;
 
-  float cutOff;
-  float spotExponent;
-  float constantAttenuation;
-  float linearAttenuation;
-  float quadraticAttenuation;
+  float m_cutOff = 0.f;
+  float m_spotExponent = 0.f;
+  float m_constantAttenuation = 0.f;
+  float m_linearAttenuation = 0.f;
+  float m_quadraticAttenuation = 0.f;
 };

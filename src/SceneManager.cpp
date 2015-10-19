@@ -23,18 +23,17 @@ const std::string SceneManager::FONT_FILE = "VeraMono.ttf";
 // -----------------------------------------------------------------------------
 SceneManager::SceneManager(const glm::ivec2 screenSize,
                            SceneContainer *container)
-    : world(container->getWorld()), camera(container->getCamera()),
-      textManager(TextManager(FONT_PATH + FONT_FILE, FONT_HEIGHT, screenSize)),
-      drawer(screenSize),
-      shadowManager(screenSize),
-      BACKGROUND_COLOR(container->getBackgroundColor()),
-      currentYRotation(0.0), currentXRotation(0.0), currentOffset(0.0),
-      positionMutex(SDL_CreateMutex()), fps(0) {
-  lightMask = (2 << (world->getLightsNumber() - 1)) - 1;
+    : m_world(container->getWorld()), m_camera(container->getCamera()),
+      m_textManager(TextManager(FONT_PATH + FONT_FILE, FONT_HEIGHT, screenSize)),
+      m_drawer(screenSize),
+      m_shadowManager(screenSize),
+      m_BACKGROUND_COLOR(container->getBackgroundColor()),
+      m_positionMutex(SDL_CreateMutex()) {
+  m_lightMask = (2 << (m_world->getLightsNumber() - 1)) - 1;
   setupProjection(screenSize);
   initGPU(container);
-  glClearColor(BACKGROUND_COLOR.x, BACKGROUND_COLOR.y, BACKGROUND_COLOR.z,
-               BACKGROUND_COLOR.w);
+  glClearColor(m_BACKGROUND_COLOR.x, m_BACKGROUND_COLOR.y, m_BACKGROUND_COLOR.z,
+               m_BACKGROUND_COLOR.w);
   checkOpenGLError("GLInitializer: glClearColor");
 }
 
@@ -43,35 +42,35 @@ void SceneManager::setupProjection(const glm::ivec2 &screenSize) {
   glViewport(0, 0, screenSize.x, screenSize.y);
   float aspectRatio =
       static_cast<float>(screenSize.x) / static_cast<float>(screenSize.y);
-  projection = glm::perspective(camera->getViewAngle(), aspectRatio,
-                                camera->getZNear(), camera->getZFar());
+  m_projection = glm::perspective(m_camera->getViewAngle(), aspectRatio,
+                                m_camera->getZNear(), m_camera->getZFar());
 }
 
 // -----------------------------------------------------------------------------
 void SceneManager::initGPU(SceneContainer *container) {
-  drawer.initGPUObjects(container->getShaderMap(),
+  m_drawer.initGPUObjects(container->getShaderMap(),
                         container->getWorld()->getMirror());
   //drawer.initGPUShadowObjects(shadowManager.getShader(), *world);
-  drawer.initTextures(*world);
+  m_drawer.initTextures(*m_world);
   if(container->getWorld()->getMirror() != nullptr)
-    mirrorPass = &SceneManager::mirrorRenderingPass;
+    m_mirrorPass = &SceneManager::mirrorRenderingPass;
   else
-    mirrorPass = &SceneManager::noMirrorRenderingPass;
+    m_mirrorPass = &SceneManager::noMirrorRenderingPass;
 }
 
 // -----------------------------------------------------------------------------
 SceneManager::~SceneManager() {
-  delete world;
-  delete camera;
+  delete m_world;
+  delete m_camera;
   glUseProgram(0);
-  SDL_DestroyMutex(positionMutex);
+  SDL_DestroyMutex(m_positionMutex);
 }
 
 // -----------------------------------------------------------------------------
 void SceneManager::drawScene() { 
 //  auto begin = std::chrono::system_clock::now();
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  mirrorPass(this);
+  m_mirrorPass(this);
   //shadowRenderingPass();
   screenRenderingPass();
   glFinish();
@@ -82,8 +81,8 @@ void SceneManager::drawScene() {
 
 // -----------------------------------------------------------------------------
 inline void SceneManager::screenRenderingPass() {
-  glm::mat4 modelView = camera->applyView();
-  drawWorld(modelView, glm::vec3(camera->getPosition()));
+  glm::mat4 modelView = m_camera->applyView();
+  drawWorld(modelView, glm::vec3(m_camera->getPosition()));
   drawText();
 }
 
@@ -97,15 +96,15 @@ void SceneManager::drawWorld(const glm::mat4 &modelView,
   glm::mat4 shadowProjection =
       glm::ortho<float>(-side, side, -5, side / 1.6, 0, 2.5 * side);
 
-  drawer.drawWorld(world, modelView, projection, shadowView, shadowProjection,
-                   lightMask, glm::vec4(cameraPosition, 1.f));
+  m_drawer.drawWorld(m_world, modelView, m_projection, shadowView, shadowProjection,
+                   m_lightMask, glm::vec4(cameraPosition, 1.f));
 }
 
 // -----------------------------------------------------------------------------
 void SceneManager::mirrorRenderingPass() {
   // Draw the scene on the mirror texture from the point of view of the mirror.
-  auto mirror = world->getMirror();
-  drawer.enableMirror();
+  auto mirror = m_world->getMirror();
+  m_drawer.enableMirror();
   glm::mat4 cameraView = mirror->computeMirrorView();
   auto tmp = mirror->getPosition();
   glm::vec3 mirrorPosition {tmp.x(), tmp.y(), tmp.z()};
@@ -115,10 +114,10 @@ void SceneManager::mirrorRenderingPass() {
   float side = 11;
   glm::mat4 shadowProjection =
       glm::ortho<float>(-side, side, -5, side / 1.6, 0, 2.5 * side);
-  drawer.drawWorldForMirror(world, cameraView, projection, shadowView,
-                            shadowProjection, lightMask,
+  m_drawer.drawWorldForMirror(m_world, cameraView, m_projection, shadowView,
+                            shadowProjection, m_lightMask,
                             glm::vec4(mirrorPosition, 1.f));
-  drawer.disableMirror();
+  m_drawer.disableMirror();
 }
 
 // -----------------------------------------------------------------------------
@@ -150,66 +149,66 @@ void SceneManager::drawShadowWorld(const glm::mat4 &modelView,
   glClear(GL_DEPTH_BUFFER_BIT);
   checkOpenGLError("drawShadowWorld: glClear");
 
-  std::for_each(constBeginObjects(*world), constEndObjects(*world),
+  std::for_each(constBeginObjects(*m_world), constEndObjects(*m_world),
                 [&](const Object *object) {
-    drawer.drawObjectForShadow(object, shader, modelView, projection);
+    m_drawer.drawObjectForShadow(object, shader, modelView, projection);
   });
 }
 
 // -----------------------------------------------------------------------------
 void SceneManager::drawText() {
   glDisable(GL_DEPTH_TEST);
-  textManager.addText("Frames per second: " + std::to_string(fps), { 0, 780 });
-  textManager.renderText();
+  m_textManager.addText("Frames per second: " + std::to_string(m_fps), { 0, 780 });
+  m_textManager.renderText();
   glEnable(GL_DEPTH_TEST);
 }
 
 // -----------------------------------------------------------------------------
-void SceneManager::setFps(int fps) { this->fps = fps; }
+void SceneManager::setFps(int fps) { m_fps = fps; }
 
 // -----------------------------------------------------------------------------
 void SceneManager::updateCameraPosition() {
-  SDL_LockMutex(positionMutex);
+  SDL_LockMutex(m_positionMutex);
 
-  camera->move(currentOffset);
-  camera->rotate({currentYRotation, -currentXRotation});
+  m_camera->move(m_currentOffset);
+  m_camera->rotate({m_currentYRotation, -m_currentXRotation});
 
-  currentOffset = 0.0f;
-  currentXRotation = 0.0f;
-  currentYRotation = 0.0f;
+  m_currentOffset = 0.0f;
+  m_currentXRotation = 0.0f;
+  m_currentYRotation = 0.0f;
 
-  SDL_UnlockMutex(positionMutex);
+  SDL_UnlockMutex(m_positionMutex);
 }
 
 // -----------------------------------------------------------------------------
 void SceneManager::updateCurrentCameraRotation(glm::vec2 diff) {
-  SDL_LockMutex(positionMutex);
-  currentXRotation += diff.x;
-  currentYRotation += diff.y;
-  SDL_UnlockMutex(positionMutex);
+  SDL_LockMutex(m_positionMutex);
+  m_currentXRotation += diff.x;
+  m_currentYRotation += diff.y;
+  SDL_UnlockMutex(m_positionMutex);
 }
 
 // -----------------------------------------------------------------------------
 void SceneManager::updateCurrentCameraPosition(unsigned char mask) {
-  SDL_LockMutex(positionMutex);
+  SDL_LockMutex(m_positionMutex);
   if (mask & 8)
-    currentOffset += Camera::STEP; 
+    m_currentOffset += Camera::STEP; 
   if (mask & 4)
-    currentOffset -= Camera::STEP; 
+    m_currentOffset -= Camera::STEP; 
   if (mask & 2)
-    currentXRotation -= Camera::FIXED_ROTATION_ANGLE * 1500;
+    m_currentXRotation -= Camera::FIXED_ROTATION_ANGLE * 1500;
   if (mask & 1)
-    currentXRotation += Camera::FIXED_ROTATION_ANGLE * 1500;
-  SDL_UnlockMutex(positionMutex);
+    m_currentXRotation += Camera::FIXED_ROTATION_ANGLE * 1500;
+  SDL_UnlockMutex(m_positionMutex);
 }
 
 // -----------------------------------------------------------------------------
-int SceneManager::getLightMask() const { return lightMask; }
+int SceneManager::getLightMask() const { return m_lightMask; }
 
 // -----------------------------------------------------------------------------
 void SceneManager::updateLightMask(int lightMask) {
-  this->lightMask = lightMask;
+  m_lightMask = lightMask;
 }
 
 // -----------------------------------------------------------------------------
-void SceneManager::stepSimulation() { world->stepSimulation(); }
+void SceneManager::stepSimulation() { m_world->stepSimulation(); }

@@ -31,7 +31,7 @@ void Box::setupFaces(const glm::vec3 &halfSides) {
   glm::vec3 backBottomLeft = glm::vec3(-1, -1, 1) * halfSides;
   glm::vec3 backBottomRight = glm::vec3(1, -1, 1) * halfSides;
 
-  points = { frontTopRight,    frontBottomRight,
+  m_points = { frontTopRight,    frontBottomRight,
              frontBottomLeft,  frontTopLeft, // Front.
              backTopRight,     backBottomRight,
              frontBottomRight, frontTopRight, // Right.
@@ -45,7 +45,7 @@ void Box::setupFaces(const glm::vec3 &halfSides) {
              frontBottomRight, backBottomRight // Bottom.
   };
 
-  textureCoos = { {1, 1}, {1, 0}, {0, 0}, {0, 1},
+  m_textureCoos = { {1, 1}, {1, 0}, {0, 0}, {0, 1},
                   {1, 1}, {1, 0}, {0, 0}, {0, 1},
                   {1, 1}, {1, 0}, {0, 0}, {0, 1},
                   {1, 1}, {1, 0}, {0, 0}, {0, 1},
@@ -53,7 +53,7 @@ void Box::setupFaces(const glm::vec3 &halfSides) {
                   {1, 1}, {1, 0}, {0, 0}, {0, 1}
   };
 
-  indices = { 0,  1,  2,  2,  3,  0,  // Front.
+  m_indices = { 0,  1,  2,  2,  3,  0,  // Front.
               4,  5,  6,  6,  7,  4,  // Right.
               8,  9,  10, 10, 11, 8,  // Back.
               12, 13, 14, 14, 15, 12, // Left.
@@ -74,7 +74,7 @@ void Box::setupFaces(const glm::vec3 &halfSides) {
   glm::vec3 bottomNormal =
       computeNormal(backBottomLeft, frontBottomLeft, frontBottomRight);
 
-  normals = { frontNormal,  frontNormal,  frontNormal,  frontNormal,
+  m_normals = { frontNormal,  frontNormal,  frontNormal,  frontNormal,
               rightNormal,  rightNormal,  rightNormal,  rightNormal,
               backNormal,   backNormal,   backNormal,   backNormal,
               leftNormal,   leftNormal,   leftNormal,   leftNormal,
@@ -97,14 +97,14 @@ void Box::setupFaces(const glm::vec3 &halfSides) {
 //    };
 
   // Compute the tangent vector for each triangle.
-  for (auto index = 0u; index < indices.size() / 3; ++index) {
-    auto point0 = points[indices[3 * index + 0]];
-    auto point1 = points[indices[3 * index + 1]]; 
-    auto point2 = points[indices[3 * index + 2]];
+  for (auto index = 0u; index < m_indices.size() / 3; ++index) {
+    auto point0 = m_points[m_indices[3 * index + 0]];
+    auto point1 = m_points[m_indices[3 * index + 1]]; 
+    auto point2 = m_points[m_indices[3 * index + 2]];
 
-    auto tex0 = textureCoos[indices[3 * index + 0]];
-    auto tex1 = textureCoos[indices[3 * index + 1]];
-    auto tex2 = textureCoos[indices[3 * index + 2]];
+    auto tex0 = m_textureCoos[m_indices[3 * index + 0]];
+    auto tex1 = m_textureCoos[m_indices[3 * index + 1]];
+    auto tex2 = m_textureCoos[m_indices[3 * index + 2]];
 
     auto edge1 = point1 - point0;
     auto edge2 = point2 - point0;
@@ -115,32 +115,32 @@ void Box::setupFaces(const glm::vec3 &halfSides) {
     glm::vec3 tangent = (edge1 * deltaTex2.y - edge2 * deltaTex1.y) /
                         (deltaTex1.x * deltaTex2.y - deltaTex1.y * deltaTex2.x);
 
-    tangents.insert(tangents.end(), {tangent, tangent}); 
+    m_tangents.insert(m_tangents.end(), {tangent, tangent}); 
   }
 }
 
 //------------------------------------------------------------------------------
 void Box::setupBulletShape(const btVector3 halfSides) {
-  collisionShape = new btBoxShape(halfSides);
-  collisionShape->calculateLocalInertia(mass, inertia);
-  motionState = new btDefaultMotionState(transform);
-  constructionInfo = new btRigidBody::btRigidBodyConstructionInfo(
-      mass, motionState, collisionShape, inertia);
-  rigidBody = new btRigidBody(*constructionInfo);
+  m_collisionShape = new btBoxShape(halfSides);
+  m_collisionShape->calculateLocalInertia(m_mass, m_inertia);
+  m_motionState = new btDefaultMotionState(m_transform);
+  m_constructionInfo = new btRigidBody::btRigidBodyConstructionInfo(
+      m_mass, m_motionState, m_collisionShape, m_inertia);
+  m_rigidBody = new btRigidBody(*m_constructionInfo);
 }
 
 //------------------------------------------------------------------------------
 BoxBuilder::BoxBuilder() : ObjectBuilder() {}
 
 BoxBuilder &BoxBuilder::setSides(const btVector3 &sidesLengths) {
-  this->sidesLengths = sidesLengths;
+  m_sidesLengths = sidesLengths;
   return *this;
 }
 
 Box *BoxBuilder::create() {
-  Box *box = new Box(transform, mass, inertia, sidesLengths);
+  Box *box = new Box(m_transform, m_mass, m_inertia, m_sidesLengths);
   ObjectBuilder::setColors(box);
-  box->textureFile = textureFile;
-  box->normalTextureFile = normalTextureFile;
+  box->m_textureFile = m_textureFile;
+  box->m_normalTextureFile = m_normalTextureFile;
   return box;
 }

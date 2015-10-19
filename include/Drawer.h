@@ -61,9 +61,9 @@ public:
                            const glm::mat4 &originalModelView,
                            const glm::mat4 &projection) const;
   inline void enableMirror() const {
-    glBindFramebuffer(GL_FRAMEBUFFER, mirrorFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_mirrorFBO);
     checkOpenGLError("Drawer: enableMirror-glBindFrameBuffer");
-    glViewport(0, 0, screenSize.x, screenSize.y);
+    glViewport(0, 0, m_screenSize.x, m_screenSize.y);
     checkOpenGLError("Drawer: enableMirror-glViewport");
   }
   void drawMirror(const glm::mat4 &originalModelView,
@@ -157,58 +157,56 @@ private:
   void drawFinalImage() const;
 
 private:
-  std::vector<const Object *> lightBulbs;
-  std::vector<const Object *> phongObjects;
-  std::vector<const Object *> phongNormalMappingObjects;
-  const Mirror *mirror = nullptr;
+  std::vector<const Object *> m_lightBulbs;
+  std::vector<const Object *> m_phongObjects;
+  std::vector<const Object *> m_phongNormalMappingObjects;
+  const Mirror *m_mirror = nullptr;
 
-  glm::ivec2 screenSize;
+  glm::ivec2 m_screenSize;
 
-  LightBulbShader lightBulbShader;
-  PhongShader phongShader;
-  PhongNormalMappingShader phongNormalShader; 
-  CanvasShader canvasShader;
-  BlurShader blurShader;
-  MirrorShader mirrorShader;
+  LightBulbShader m_lightBulbShader;
+  PhongShader m_phongShader;
+  PhongNormalMappingShader m_phongNormalShader; 
+  CanvasShader m_canvasShader;
+  BlurShader m_blurShader;
+  MirrorShader m_mirrorShader;
 
-  TextureManager textureManager;
+  TextureManager m_textureManager;
 
   // Mapping between shaders and world objects.
   // Mapping between world objects and VAOs.
-  std::unordered_map<const Object *, GLuint> vaoWorldMap;
+  std::unordered_map<const Object *, GLuint> m_vaoWorldMap;
   // Mapping between world objects shadows and VAOs.
-  std::unordered_map<const Object *, GLuint> vaoShadowMap;
+  std::unordered_map<const Object *, GLuint> m_vaoShadowMap;
   // Mapping between world objects and their vertex VBO.
-  std::unordered_map<const Object *, GLuint> vboWorldMap;
+  std::unordered_map<const Object *, GLuint> m_vboWorldMap;
   // Mapping between world objects and their texture objects.
-  std::unordered_map<const Object *, GLuint> textureMap;
+  std::unordered_map<const Object *, GLuint> m_textureMap;
   // Mapping between world objects and their normal texture objects.
-  std::unordered_map<const Object *, GLuint> normalTextureMap;
+  std::unordered_map<const Object *, GLuint> m_normalTextureMap;
 
   // Ids of VBOs associated with the VAOs. These are kept so I know what to
-  // delete
-  // to free the memory.
-  std::vector<GLuint> vboIds;
+  // delete to free the memory.
+  std::vector<GLuint> m_vboIds;
 
-  GLuint mirrorFBO = 0;
-  GLuint mirrorTexture = 0;
-  GLuint mirrorDBO = 0;
+  GLuint m_mirrorFBO = 0;
+  GLuint m_mirrorTexture = 0;
+  GLuint m_mirrorDBO = 0;
 
-  // Temporary stuff.
-  GLuint sceneFBOId;
-  GLuint sceneTexture;
+  GLuint m_sceneFBOId = 0;
+  GLuint m_sceneTexture = 0;
 
-  GLuint lightBulbFBOId;
-  GLuint lightBulbTexture;
+  GLuint m_lightBulbFBOId = 0;
+  GLuint m_lightBulbTexture = 0;
 
-  GLuint bulbFBOId;
-  GLuint bulbTexture;
+  GLuint m_bulbFBOId = 0;
+  GLuint m_bulbTexture = 0;
 
-  GLuint blurredBulbFBOId;
-  GLuint blurredBulbTexture;
+  GLuint m_blurredBulbFBOId = 0;
+  GLuint m_blurredBulbTexture = 0;
 
-  GLuint dboId;
+  GLuint m_dboId = 0;
 
-  GLuint canvasId;
-  GLuint stencilId;
+  GLuint m_canvasId = 0;
+  GLuint m_stencilId = 0;
 };

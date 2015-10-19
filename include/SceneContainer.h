@@ -19,50 +19,50 @@ class Object;
 
 class SceneContainer {
 public:
-  SceneContainer() : camera(new Camera()), world(new World()) {}
+  SceneContainer() : m_camera(new Camera()), m_world(new World()) {}
 
 public:
   // World setup.
   inline void addDirectionalLight(DirectionalLight *light) {
-    world->addDirectionalLight(light);
+    m_world->addDirectionalLight(light);
   }
 //  inline void addSpotLight(SpotLight *light) {
 //    world->addSpotLight(light);
 //  }
-  inline void addObject(Object *object) { world->addObject(object); }
-  inline void addLightBulb(LightBulb *bulb) { world->addLightBulb(bulb); }
+  inline void addObject(Object *object) { m_world->addObject(object); }
+  inline void addLightBulb(LightBulb *bulb) { m_world->addLightBulb(bulb); }
   inline void setMirror(Mirror *mirror) { 
-    world->setMirror(mirror); 
+    m_world->setMirror(mirror); 
     addObject(dynamic_cast<Object*>(mirror));
   } 
   inline void setGravity(const btVector3 &gravity) {
-    world->setGravity(gravity);
+    m_world->setGravity(gravity);
   }
 
   // Camera setup.
   inline void setCamera(const glm::vec4 position, const glm::vec2 orientation,
                         float viewAngle, float zNear, float zFar) {
-    camera->assign(position, orientation, viewAngle, zNear, zFar);
+    m_camera->assign(position, orientation, viewAngle, zNear, zFar);
   }
 
   inline void setBackgroundColor(const glm::vec4 backgroundColor) {
-    this->backgroundColor = backgroundColor;
+    m_backgroundColor = backgroundColor;
   }
 
   inline void addShader(const Object *object, const std::string shaderFile) {
-    shaderFileMap[shaderFile].push_back(object);
+    m_shaderFileMap[shaderFile].push_back(object);
   }
 
   // Getters.
   // FIXME use smart pointers.
-  inline World *getWorld() const { return world; }
-  inline Camera *getCamera() const { return camera; }
-  inline glm::vec4 getBackgroundColor() const { return backgroundColor; }
-  inline auto getShaderMap() const { return shaderFileMap; }
+  inline World *getWorld() const { return m_world; }
+  inline Camera *getCamera() const { return m_camera; }
+  inline glm::vec4 getBackgroundColor() const { return m_backgroundColor; }
+  inline auto getShaderMap() const { return m_shaderFileMap; }
 
 private:
-  Camera *camera;
-  World *world;
-  std::map<const std::string, std::vector<const Object*>> shaderFileMap;
-  glm::vec4 backgroundColor;
+  Camera *m_camera;
+  World *m_world;
+  std::map<const std::string, std::vector<const Object*>> m_shaderFileMap;
+  glm::vec4 m_backgroundColor;
 };

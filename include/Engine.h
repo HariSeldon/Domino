@@ -8,12 +8,12 @@ public:
   ~Engine();
 
 private:
-  btBroadphaseInterface *broadphase;
-  btDefaultCollisionConfiguration *collisionConfiguration;
-  btCollisionDispatcher *collisionDispatcher;
-  btSequentialImpulseConstraintSolver *constraintSolver;
-  btDiscreteDynamicsWorld *dynamicsWorld;
-  btVector3 gravity;
+  btBroadphaseInterface *m_broadphase = nullptr;
+  btDefaultCollisionConfiguration *m_collisionConfiguration = nullptr;
+  btCollisionDispatcher *m_collisionDispatcher = nullptr;
+  btSequentialImpulseConstraintSolver *m_constraintSolver = nullptr;
+  btDiscreteDynamicsWorld *m_dynamicsWorld = nullptr;
+  btVector3 m_gravity;
 
 public:
   btDiscreteDynamicsWorld *getDynamicsWorld() const;

@@ -16,7 +16,7 @@
 
 Mirror::Mirror(btTransform &transform, btScalar mass, btVector3 &inertia,
                const btVector3 &sides)
-    : Box(transform, mass, inertia, sides), sides{sides.x(), sides.y()} {}
+    : Box(transform, mass, inertia, sides), m_sides{sides.x(), sides.y()} {}
 
 //-----------------------------------------------------------------------------
 glm::vec3 Mirror::computeNormal() const {
@@ -55,12 +55,12 @@ glm::mat4 Mirror::computeMirrorView() const {
 MirrorBuilder::MirrorBuilder() : ObjectBuilder() {}
 
 MirrorBuilder &MirrorBuilder::setSides(const btVector3 &sides) {
-  this->sides = sides; 
+  m_sides = sides; 
   return *this;
 }
 
 Mirror *MirrorBuilder::create() {
-  Mirror *mirror = new Mirror(transform, mass, inertia, sides);
+  Mirror *mirror = new Mirror(m_transform, m_mass, m_inertia, m_sides);
   ObjectBuilder::setColors(mirror);
   return mirror;
 }

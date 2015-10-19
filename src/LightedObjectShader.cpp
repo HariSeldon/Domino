@@ -15,7 +15,7 @@ LightedObjectShader::LightedObjectShader(
     const std::string &vertexShaderFileName,
     const std::string &fragmentShaderFileName)
     : ShaderProgram(vertexShaderFileName, fragmentShaderFileName) {
-  uniformLightLocations = createLightUniformTable(uniformLightNames);
+  m_uniformLightLocations = createLightUniformTable(uniformLightNames);
 }
 
 // -----------------------------------------------------------------------------
@@ -30,7 +30,7 @@ std::vector<int> LightedObjectShader::createLightUniformTable(
       auto uniformName = "lights[" + std::to_string(lightNumber) + "]." +
                          uniformLightNames[index];
       GLint uniformLocation =
-          queryUniformLocation(programID, uniformName.c_str());
+          queryUniformLocation(m_programID, uniformName.c_str());
       uniformLocations[lightNumber * numberOfUniforms + index] =
           uniformLocation;
     }
@@ -40,33 +40,26 @@ std::vector<int> LightedObjectShader::createLightUniformTable(
 }
 
 // -----------------------------------------------------------------------------
-template void LightedObjectShader::setLightUniform(int lightIndex,
-                                                   int nameIndex,
-                                                   const float &value) const;
-template void LightedObjectShader::setLightUniform(int lightIndex,
-                                                   int nameIndex,
-                                                   const int &value) const;
-template void
-LightedObjectShader::setLightUniform(int lightIndex, int nameIndex,
-                                     const unsigned int &value) const;
-template void
-LightedObjectShader::setLightUniform(int lightIndex, int nameIndex,
-                                     const glm::vec4 &value) const;
-template void
-LightedObjectShader::setLightUniform(int lightIndex, int nameIndex,
-                                     const glm::vec3 &value) const;
-template void
-LightedObjectShader::setLightUniform(int lightIndex, int nameIndex,
-                                     const glm::mat4 &value) const;
-template void
-LightedObjectShader::setLightUniform(int lightIndex, int nameIndex,
-                                     const glm::mat3 &value) const;
+template void LightedObjectShader::setLightUniform(int, int,
+                                                   const float &) const;
+template void LightedObjectShader::setLightUniform(int, int, const int &) const;
+template void LightedObjectShader::setLightUniform(int, int,
+                                                   const unsigned int &) const;
+template void LightedObjectShader::setLightUniform(int, int,
+                                                   const glm::vec4 &) const;
+template void LightedObjectShader::setLightUniform(int, int,
+                                                   const glm::vec3 &) const;
+template void LightedObjectShader::setLightUniform(int, int,
+                                                   const glm::mat4 &) const;
+template void LightedObjectShader::setLightUniform(int, int,
+                                                   const glm::mat3 &) const;
 
 template <typename type>
 void LightedObjectShader::setLightUniform(int lightIndex, const int nameIndex,
                                           const type &value) const {
-  setUniformValue(uniformLightLocations[lightIndex *
-                                   LightedObjectShader::lightUniformNumber +
-                                   nameIndex],
-             value);
+  setUniformValue(
+      m_uniformLightLocations[lightIndex *
+                                  LightedObjectShader::lightUniformNumber +
+                              nameIndex],
+      value);
 }

@@ -18,7 +18,7 @@ PhongNormalMappingShader::PhongNormalMappingShader(
     const std::string &vertexShaderFileName,
     const std::string &fragmentShaderFileName)
     : LightedObjectShader(vertexShaderFileName, fragmentShaderFileName) {
-  uniformLocations = createUniformTable(uniformNames);
-  assert(uniformLocations.size() == uniformNames.size() &&
+  m_uniformLocations = createUniformTable(uniformNames);
+  assert(m_uniformLocations.size() == uniformNames.size() &&
          "Number of uniform locations does not match number of uniform names");
 }

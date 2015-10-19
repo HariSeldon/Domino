@@ -9,8 +9,8 @@
 class Camera {
 
 public:
-  static constexpr float STEP = 0.5f;
-  static constexpr float FIXED_ROTATION_ANGLE = 0.02f;
+  static const float STEP;
+  static const float FIXED_ROTATION_ANGLE;
   Camera();
   Camera(const glm::vec4 position, 
          const glm::vec2 rotation,
@@ -29,27 +29,27 @@ public:
   glm::mat4 applyView();
 
   inline const glm::vec4 &getPosition() const {
-    return position;
+    return m_position;
   }
 
   inline float getXOrientation() const {
-    return orientation.x;
+    return m_orientation.x;
   }
 
   inline float getYOrientation() const {
-    return orientation.y;
+    return m_orientation.y;
   }
   
   inline float getViewAngle() const {
-    return viewAngle;
+    return m_viewAngle;
   }
 
   inline float getZNear() const {
-    return zNear;
+    return m_zNear;
   }
 
   inline float getZFar() const {
-    return zFar;
+    return m_zFar;
   }
 
   void dump();
@@ -58,13 +58,13 @@ private:
   glm::mat4 buildTransform();
 
 private:
-  glm::vec4 position;
+  glm::vec4 m_position;
   // In radians.
-  glm::vec2 orientation;
+  glm::vec2 m_orientation;
   // In degrees.
-  float viewAngle;
-  float zNear;
-  float zFar;
+  float m_viewAngle = 0.f;
+  float m_zNear = 0.f;
+  float m_zFar = 0.f;
   glm::mat4 currentTransform;
 
   static const float ROTATION_FACTOR;

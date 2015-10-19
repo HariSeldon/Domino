@@ -17,7 +17,7 @@ private:
   void setupBulletShape();
 
 private:
-  int textureRepetitions; 
+  int m_textureRepetitions; 
 
   friend class PlaneBuilder;
 };
@@ -28,17 +28,17 @@ public:
   PlaneBuilder();
 
   inline PlaneBuilder &setSide(const btScalar side) {
-    this->side = side;
+    m_side = side;
     return *this;
   }
   inline PlaneBuilder &setTextureRepetitions(const int repetitions) {
-    this->textureRepetitions = repetitions;
+    m_textureRepetitions = repetitions;
     return *this;
   }
 
   Plane *create();
 
 private:
-  btScalar side;
-  int textureRepetitions;
+  btScalar m_side = 0.0f;
+  int m_textureRepetitions = 1;
 };

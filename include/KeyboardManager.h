@@ -19,12 +19,12 @@ public:
   void setLightMask(int lightMask);
 
 private:
-  Window *window;
+  Window *m_window = nullptr;
 
-  int lightMask;
+  int m_lightMask = 0;
 
-  bool leftDown;
-  bool rightDown;
-  bool forwardDown;
-  bool backwardDown;
+  bool m_leftDown = 0;
+  bool m_rightDown = 0;
+  bool m_forwardDown = 0; 
+  bool m_backwardDown = 0;
 };

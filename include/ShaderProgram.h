@@ -34,10 +34,10 @@ public:
 
 public:
   inline GLuint getProgramId() const {
-    return programID;
+    return m_programID;
   }
   inline void useProgram() const {
-    glUseProgram(programID);
+    glUseProgram(m_programID);
     checkOpenGLError("ShaderProgram: useProgram-glUseProgram");
   }
 
@@ -62,10 +62,10 @@ protected:
     void setUniformValue(GLint location, const type &value) const;
 
 protected:
-  std::vector<int> uniformLocations;
+  std::vector<int> m_uniformLocations;
 
-  GLuint programID;
-  VertexShader *vertexShader;
-  FragmentShader *fragmentShader;
+  GLuint m_programID = 0;
+  VertexShader *m_vertexShader = nullptr;
+  FragmentShader *m_fragmentShader = nullptr;
   std::unordered_map<std::string, int> attributeLocationsMap;
 };

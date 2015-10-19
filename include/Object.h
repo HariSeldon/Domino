@@ -24,7 +24,7 @@ public:
   static const glm::vec4 DEFAULT_AMBIENT_COLOR;
   static const glm::vec4 DEFAULT_DIFFUSE_COLOR;
   static const glm::vec4 DEFAULT_SPECULAR_COLOR;
-  static constexpr float DEFAULT_MASS = 0.f;
+  static const float DEFAULT_MASS;
 
 protected:
   Object(const btTransform &transform, btScalar mass, btVector3 &inertia);
@@ -34,29 +34,29 @@ public:
 
 protected:
   // Physical parameters.
-  btScalar mass;
-  btVector3 inertia;
-  btCollisionShape* collisionShape;
-  btRigidBody* rigidBody;
-  btDefaultMotionState* motionState;
-  btRigidBody::btRigidBodyConstructionInfo* constructionInfo;
+  btScalar m_mass;
+  btVector3 m_inertia;
+  btCollisionShape* m_collisionShape;
+  btRigidBody* m_rigidBody;
+  btDefaultMotionState* m_motionState;
+  btRigidBody::btRigidBodyConstructionInfo* m_constructionInfo;
 
   // Shape parameters.
-  std::vector<glm::vec3> points;
-  std::vector<glm::vec3> normals;
-  std::vector<unsigned int> indices;
-  std::vector<glm::vec2> textureCoos;
-  std::vector<glm::vec3> tangents;
+  std::vector<glm::vec3> m_points;
+  std::vector<glm::vec3> m_normals;
+  std::vector<unsigned int> m_indices;
+  std::vector<glm::vec2> m_textureCoos;
+  std::vector<glm::vec3> m_tangents;
 
   // Material colors.
-  glm::vec4 ambientColor;
-  glm::vec4 diffuseColor;
-  glm::vec4 specularColor;
-  float shininess;
-  std::string textureFile;
-  std::string normalTextureFile;
+  glm::vec4 m_ambientColor;
+  glm::vec4 m_diffuseColor;
+  glm::vec4 m_specularColor;
+  float m_shininess;
+  std::string m_textureFile;
+  std::string m_normalTextureFile;
 
-  std::string name;
+  std::string m_name;
 
 public:
   const float* getPoints() const;
@@ -70,43 +70,43 @@ public:
   const float* getTangents() const;
 
   inline int getTrigsNumber() const {
-    return indices.size() / 3;
+    return m_indices.size() / 3;
   }
   inline int getIndicesNumber() const {
-    return indices.size();
+    return m_indices.size();
   }
 
   inline const glm::vec4 &getAmbientColor() const {
-    return ambientColor;
+    return m_ambientColor;
   }
   void setAmbientColor(const glm::vec4 &ambientColor);
 
   inline const glm::vec4 &getDiffuseColor() const {
-    return diffuseColor;
+    return m_diffuseColor;
   }
   void setDiffuseColor(const glm::vec4 &color);
 
   inline const glm::vec4 &getSpecularColor() const {
-    return specularColor;
+    return m_specularColor;
   }
   void setSpecularColor(const glm::vec4 &color);
 
   inline float getShininess() const {
-    return shininess;
+    return m_shininess;
   }
   void setShininess(float shininess);
 
-  inline btScalar getMass() const { return mass; }
+  inline btScalar getMass() const { return m_mass; }
   void setMass(btScalar mass);
 
-  inline const btVector3& getInertia() const { return inertia; }
+  inline const btVector3& getInertia() const { return m_inertia; }
   void setInertia(const btVector3& inertia);
 
   btCollisionShape* getCollisionShape() const;
   void setCollisionShape(btCollisionShape* collisionShape);
 
   inline btRigidBody* getRigidBody() const {
-    return rigidBody;
+    return m_rigidBody;
   }
   void setRigidBody(btRigidBody* rigidBody);
 
@@ -119,15 +119,15 @@ public:
                            constructionInfo);
 
   inline void getOpenGLMatrix(btScalar* matrix) const {
-    transform.getOpenGLMatrix(matrix);
+    m_transform.getOpenGLMatrix(matrix);
   }
 
   inline const std::string &getTextureFile() const {
-    return textureFile;
+    return m_textureFile;
   }
 
   inline const std::string &getNormalTextureFile() const {
-    return normalTextureFile;
+    return m_normalTextureFile;
   }
 };
 
@@ -136,6 +136,7 @@ template <class Subtype>
 class ObjectBuilder {
 public:
   ObjectBuilder();
+  virtual ~ObjectBuilder();
 
 public:
   Subtype& setTransform(const btTransform& transform);
@@ -156,13 +157,13 @@ protected:
   void setColors(Object* object);
 
 protected:
-  btTransform transform;
-  btScalar mass;
-  btVector3 inertia;
-  glm::vec4 ambientColor;
-  glm::vec4 diffuseColor;
-  glm::vec4 specularColor;
-  float shininess;
-  std::string textureFile;
-  std::string normalTextureFile;
+  btTransform m_transform;
+  btScalar m_mass;
+  btVector3 m_inertia;
+  glm::vec4 m_ambientColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
+  glm::vec4 m_diffuseColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
+  glm::vec4 m_specularColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
+  float m_shininess = 0.f;
+  std::string m_textureFile;
+  std::string m_normalTextureFile;
 };

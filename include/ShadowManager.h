@@ -25,9 +25,9 @@ private:
   void attachTexture();
 
 private:
-  glm::ivec2 screenSize;
-  GLuint fboId;
-  GLuint shadowTexture;
+  glm::ivec2 m_screenSize;
+  GLuint m_fboId = 0;
+  GLuint m_shadowTexture = 0;
 //  ShaderProgram shadowShader;
   static const std::string SHADOW_VERTEX_SHADER;
   static const std::string SHADOW_FRAGMENT_SHADER;

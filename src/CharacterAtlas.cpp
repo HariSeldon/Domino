@@ -11,23 +11,22 @@ constexpr int FIRST_VISIBLE_CHAR = 32;
 constexpr int LAST_VISIBLE_CHAR = 128;
 
 CharacterAtlas::CharacterAtlas(const std::string &fontFileName, int fontHeight)
-    : textureId(0), width(0), height(0),
-      glyphs(LAST_VISIBLE_CHAR - FIRST_VISIBLE_CHAR, Glyph()) {
-  if (FT_Init_FreeType(&freeType)) {
+    : glyphs(LAST_VISIBLE_CHAR - FIRST_VISIBLE_CHAR, Glyph()) {
+  if (FT_Init_FreeType(&m_freeType)) {
     std::cerr << "Could not init freetype library\n";
     exit(1);
   }
 
-  if (FT_New_Face(freeType, fontFileName.data(), 0, &fontFace)) {
+  if (FT_New_Face(m_freeType, fontFileName.data(), 0, &m_fontFace)) {
     std::cerr << "Could not open font: " << fontFileName << "\n";
     exit(1);
   }
 
   // Set the size of the font.
-  FT_Set_Pixel_Sizes(fontFace, 0, fontHeight);
-  computeTextureSize(fontFace);
+  FT_Set_Pixel_Sizes(m_fontFace, 0, fontHeight);
+  computeTextureSize(m_fontFace);
   createTexture();
-  fillTexture(fontFace);
+  fillTexture(m_fontFace);
 }
 
 // -----------------------------------------------------------------------------
@@ -45,22 +44,22 @@ void CharacterAtlas::computeTextureSize(FT_Face fontFace) {
     }
 
     // Leave one pixel of horizonal space between letters.
-    width += glyph->bitmap.width + 1;
+    m_width += glyph->bitmap.width + 1;
     // The height of the texture is going to be the height of the tallest
     // character.
-    height = std::max(height, static_cast<int>(glyph->bitmap.rows));
+    m_height = std::max(m_height, static_cast<int>(glyph->bitmap.rows));
   }
 }
 
 // -----------------------------------------------------------------------------
 void CharacterAtlas::createTexture() {
   // Create a texture that will be used to hold all ASCII glyphs.
-  glGenTextures(1, &textureId);
+  glGenTextures(1, &m_textureId);
   checkOpenGLError("CharacterAtlas: glGenTextures");
-  glBindTexture(GL_TEXTURE_2D, textureId);
+  glBindTexture(GL_TEXTURE_2D, m_textureId);
   checkOpenGLError("CharacterAtlas: glBindTexture");
 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED,
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, m_width, m_height, 0, GL_RED,
                GL_UNSIGNED_BYTE, nullptr);
   checkOpenGLError("CharacterAtlas glTexImage2D");
 
@@ -87,7 +86,7 @@ void CharacterAtlas::createTexture() {
 // -----------------------------------------------------------------------------
 void CharacterAtlas::fillTexture(FT_Face fontFace) {
 
-  glBindTexture(GL_TEXTURE_2D, textureId);
+  glBindTexture(GL_TEXTURE_2D, m_textureId);
 
   FT_GlyphSlot glyph = fontFace->glyph;
 
@@ -132,13 +131,13 @@ void CharacterAtlas::fillTexture(FT_Face fontFace) {
     glyphs[character - FIRST_VISIBLE_CHAR].advanceY = glyph->advance.y >> 6;
 
     glyphs[character - FIRST_VISIBLE_CHAR].textureHorizontal0 =
-        static_cast<float>(offset) / static_cast<float>(width);
+        static_cast<float>(offset) / static_cast<float>(m_width);
     glyphs[character - FIRST_VISIBLE_CHAR].textureHorizontal1 =
         static_cast<float>(offset + glyph->bitmap.width) /
-        static_cast<float>(width);
+        static_cast<float>(m_width);
     glyphs[character - FIRST_VISIBLE_CHAR].textureVertical0 = 0.f;
     glyphs[character - FIRST_VISIBLE_CHAR].textureVertical1 =
-        static_cast<float>(glyph->bitmap.rows) / static_cast<float>(height);
+        static_cast<float>(glyph->bitmap.rows) / static_cast<float>(m_height);
 
     offset += glyph->bitmap.width + 1;
   }
@@ -146,13 +145,13 @@ void CharacterAtlas::fillTexture(FT_Face fontFace) {
 }
 
 // -----------------------------------------------------------------------------
-GLuint CharacterAtlas::getTextureId() const { return textureId; }
+GLuint CharacterAtlas::getTextureId() const { return m_textureId; }
 
 // -----------------------------------------------------------------------------
-int CharacterAtlas::getWidth() const { return width; }
+int CharacterAtlas::getWidth() const { return m_width; }
 
 // -----------------------------------------------------------------------------
-int CharacterAtlas::getHeight() const { return height; }
+int CharacterAtlas::getHeight() const { return m_height; }
 
 // -----------------------------------------------------------------------------
 const Glyph &CharacterAtlas::getGlyph(char character) const {
@@ -161,7 +160,7 @@ const Glyph &CharacterAtlas::getGlyph(char character) const {
 
 // -----------------------------------------------------------------------------
 CharacterAtlas::~CharacterAtlas() {
-  glDeleteTextures(1, &textureId);
-  FT_Done_Face(fontFace);
-  FT_Done_FreeType(freeType);
+  glDeleteTextures(1, &m_textureId);
+  FT_Done_Face(m_fontFace);
+  FT_Done_FreeType(m_freeType);
 }

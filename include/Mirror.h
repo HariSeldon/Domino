@@ -21,11 +21,11 @@ public:
   glm::mat4 computeMirrorView() const;
   glm::vec3 computeNormal() const;
   inline glm::vec2 getSize() const {
-    return sides;
+    return m_sides;
   }
 
 private:
-  const glm::vec2 sides;
+  const glm::vec2 m_sides;
     
   friend class MirrorBuilder;
 };
@@ -40,5 +40,5 @@ public:
   Mirror *create();
 
 private:
-  btVector3 sides;
+  btVector3 m_sides;
 };

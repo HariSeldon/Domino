@@ -4,50 +4,48 @@
 
 #include "Window.h"
 
-KeyboardManager::KeyboardManager(Window *window)
-    : window(window), lightMask(0), leftDown(false), rightDown(false), forwardDown(false),
-      backwardDown(false) {}
+KeyboardManager::KeyboardManager(Window *window) : m_window(window) {}
 
 bool KeyboardManager::keyPressed(long key) {
   switch (key) {
   case SDLK_ESCAPE: {
-    window->stopRendering();
+    m_window->stopRendering();
     return true;
   }
   case SDLK_d:
   case SDLK_RIGHT: {
-    rightDown = true;
+    m_rightDown = true;
     break;
   }
   case SDLK_a:
   case SDLK_LEFT: {
-    leftDown = true;
+    m_leftDown = true;
     break;
   }
   case SDLK_w:
   case SDLK_UP: {
-    forwardDown = true;
+    m_forwardDown = true;
     break;
   }
   case SDLK_s:
   case SDLK_DOWN: {
-    backwardDown = true;
+    m_backwardDown = true;
     break;
   }
   case SDLK_1: {
-    lightMask ^= 1;
+    m_lightMask ^= 1;
     break;
   }
   case SDLK_2: {
-    lightMask ^= 2;
+    m_lightMask ^= 2;
     break;
   }
   case SDLK_3: {
-    lightMask ^= 4;
+    m_lightMask ^= 4;
     break;
   }
   case SDLK_4: {
-    lightMask ^= 8;
+    m_lightMask ^= 8;
     break;
   }
   }
@@ -58,35 +56,35 @@ void KeyboardManager::keyReleased(long key) {
   switch (key) {
   case SDLK_d:
   case SDLK_RIGHT: {
-    rightDown = false;
+    m_rightDown = false;
     break;
   }
   case SDLK_a:
   case SDLK_LEFT: {
-    leftDown = false;
+    m_leftDown = false;
     break;
   }
   case SDLK_w:
   case SDLK_UP: {
-    forwardDown = false;
+    m_forwardDown = false;
     break;
   }
   case SDLK_s:
   case SDLK_DOWN: {
-    backwardDown = false;
+    m_backwardDown = false;
     break;
   }
   }
 }
 
-bool KeyboardManager::isLeftDown() const { return leftDown; }
+bool KeyboardManager::isLeftDown() const { return m_leftDown; }
 
-bool KeyboardManager::isRightDown() const { return rightDown; }
+bool KeyboardManager::isRightDown() const { return m_rightDown; }
 
-bool KeyboardManager::isForwardDown() const { return forwardDown; }
+bool KeyboardManager::isForwardDown() const { return m_forwardDown; }
 
-bool KeyboardManager::isBackwardDown() const { return backwardDown; }
+bool KeyboardManager::isBackwardDown() const { return m_backwardDown; }
 
-int KeyboardManager::getLightMask() const { return lightMask; }
+int KeyboardManager::getLightMask() const { return m_lightMask; }
 
-void KeyboardManager::setLightMask(int lightMask) { this->lightMask = lightMask; }
+void KeyboardManager::setLightMask(int lightMask) { m_lightMask = lightMask; }

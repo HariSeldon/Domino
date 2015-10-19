@@ -33,18 +33,18 @@ std::vector<std::string> split(const std::string &inputString, char delim) {
   std::stringstream ss(inputString);
   std::string item;
   std::vector<std::string> elems;
-  while (std::getline(ss, item, delim)) 
+  while (std::getline(ss, item, delim))
     elems.push_back(item);
   return elems;
 }
 
 //------------------------------------------------------------------------------
-ObjParser::ObjParser() : specularExponent(0.0) {}
+ObjParser::ObjParser() {}
 
 //------------------------------------------------------------------------------
 void ObjParser::parse(const std::string &meshFile) {
   parseObj(meshFile);
-  parseMtl(mtlFile);
+  parseMtl(m_mtlFile);
 }
 
 //------------------------------------------------------------------------------
@@ -52,14 +52,14 @@ void ObjParser::parseObj(const std::string &meshFile) {
   std::string file = getFileContent(meshFile.c_str());
 
   const auto lines = split(file, '\n');
-  for (const auto& line : lines) {
+  for (const auto &line : lines) {
     parseObjLine(line);
   }
 }
 
 //------------------------------------------------------------------------------
 void ObjParser::parseObjLine(const std::string &line) {
-  const auto words = split(line, ' '); 
+  const auto words = split(line, ' ');
 
   const std::string &firstWord = words[0];
 
@@ -77,25 +77,25 @@ void ObjParser::parseObjLine(const std::string &line) {
     parseTexture(std::vector<std::string>(words.begin() + 1, words.end()));
 
   if (firstWord == "mtllib")
-    mtlFile = words[1];
+    m_mtlFile = words[1];
 
   if (firstWord == "o")
-    objName = words[1];
+    m_objName = words[1];
 
   if (firstWord == "usemtl")
-    materialName = words[1];
+    m_materialName = words[1];
 }
 
 void ObjParser::parseNormal(const std::vector<std::string> &words) {
-  normals.emplace(normals.end(), floatTriple2vec3(words));
+  m_normals.emplace(m_normals.end(), floatTriple2vec3(words));
 }
 
 void ObjParser::parseVertex(const std::vector<std::string> &words) {
-  points.emplace(points.end(), floatTriple2vec3(words));
+  m_points.emplace(m_points.end(), floatTriple2vec3(words));
 }
 
 void ObjParser::parseTexture(const std::vector<std::string> &words) {
-  textureCoos.emplace(textureCoos.end(), floatCouple2vec2(words));
+  m_textureCoos.emplace(m_textureCoos.end(), floatCouple2vec2(words));
 }
 
 void ObjParser::parseFace(const std::vector<std::string> &words) {
@@ -109,7 +109,7 @@ void ObjParser::parseFace(const std::vector<std::string> &words) {
     if (!values[1].empty())
       textureIndex = stoi(values[1]);
 
-    indices.emplace_back(
+    m_indices.emplace_back(
         std::make_tuple(vertexIndex, textureIndex, normalIndex));
   }
 }
@@ -134,25 +134,25 @@ void ObjParser::parseMtlLine(const std::string &line) {
   const std::string &firstWord = words[0];
 
   if (firstWord == "newmtl")
-    materialName = words[1];
+    m_materialName = words[1];
   if (firstWord == "Ns")
-    specularExponent = stof(words[1]);
+    m_specularExponent = stof(words[1]);
 
   if (firstWord == "Ka")
-    ambientColor = glm::vec4(floatTriple2vec3(std::vector<std::string>(
-                                 words.begin() + 1, words.end())),
-                             1.f);
+    m_ambientColor = glm::vec4(floatTriple2vec3(std::vector<std::string>(
+                                   words.begin() + 1, words.end())),
+                               1.f);
 
   if (firstWord == "Kd")
-    diffuseColor = glm::vec4(floatTriple2vec3(std::vector<std::string>(
-                                 words.begin() + 1, words.end())),
-                             1.f);
+    m_diffuseColor = glm::vec4(floatTriple2vec3(std::vector<std::string>(
+                                   words.begin() + 1, words.end())),
+                               1.f);
 
   if (firstWord == "Ks")
-    specularColor = glm::vec4(floatTriple2vec3(std::vector<std::string>(
-                                  words.begin() + 1, words.end())),
-                              1.f);
+    m_specularColor = glm::vec4(floatTriple2vec3(std::vector<std::string>(
+                                    words.begin() + 1, words.end())),
+                                1.f);
 
   if (firstWord == "map_Kd")
-    texFile = words[1];
+    m_texFile = words[1];
 }

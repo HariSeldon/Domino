@@ -27,5 +27,5 @@ public:
   Mesh *create();
 
 private:
-  std::string meshFile;
+  std::string m_meshFile;
 };

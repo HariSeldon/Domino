@@ -35,6 +35,6 @@ protected:
   createLightUniformTable(std::vector<std::string> &uniformLightNames);
 
 protected:
-  std::vector<int> uniformLightLocations;
+  std::vector<int> m_uniformLightLocations;
   static std::vector<std::string> uniformLightNames;
 };

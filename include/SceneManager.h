@@ -60,23 +60,23 @@ private:
   void screenRenderingPass();
 
 private:
-  World* world;
-  Camera* camera;
+  World* m_world = nullptr;
+  Camera* m_camera = nullptr;
 
-  TextManager textManager;
-  Drawer drawer;
-  ShadowManager shadowManager;
+  TextManager m_textManager;
+  Drawer m_drawer;
+  ShadowManager m_shadowManager;
 
-  std::function<void(SceneManager*)> mirrorPass;
+  std::function<void(SceneManager*)> m_mirrorPass;
 
-  glm::mat4 projection;
+  glm::mat4 m_projection;
 
-  const glm::vec4 BACKGROUND_COLOR;
-  float currentYRotation;
-  float currentXRotation;
-  float currentOffset;
-  SDL_mutex *positionMutex;
+  const glm::vec4 m_BACKGROUND_COLOR;
+  float m_currentYRotation = 0.f;
+  float m_currentXRotation = 0.f;
+  float m_currentOffset = 0.f;
+  SDL_mutex *m_positionMutex = nullptr;
 
-  int fps;
-  int lightMask;
+  int m_fps = 0;
+  int m_lightMask = 0;
 };

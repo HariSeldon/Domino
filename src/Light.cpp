@@ -14,40 +14,44 @@ const glm::vec4 Light::DEFAULT_SPECULAR_COLOR = {0.f, 0.f, 0.f, 1.f};
 const glm::vec3 Light::DEFAULT_DIRECTION = {0.f, 0.f, -1.f};
 const glm::vec3 Light::DEFAULT_POSITION = {0.f, 0.f, 0.f};
 const float Light::DEFAULT_SPOT_CUTOFF = 180.0f;
+const float Light::DEFAULT_SPOT_EXPONENT = 0.0f;
+const float Light::DEFAULT_CONSTANT_ATTENUATION = 1.0f;
+const float Light::DEFAULT_LINEAR_ATTENUATION = 0.0f;
+const float Light::DEFAULT_QUADRATIC_ATTENUATION = 0.0f;
 
 // -----------------------------------------------------------------------------
-void Light::setAmbientColor(const glm::vec4 &color) { ambientColor = color; }
+void Light::setAmbientColor(const glm::vec4 &color) { m_ambientColor = color; }
 
-const glm::vec4 &Light::getAmbientColor() const { return ambientColor; }
+const glm::vec4 &Light::getAmbientColor() const { return m_ambientColor; }
 
-void Light::setDiffuseColor(const glm::vec4 &color) { diffuseColor = color; }
+void Light::setDiffuseColor(const glm::vec4 &color) { m_diffuseColor = color; }
 
-const glm::vec4 &Light::getDiffuseColor() const { return diffuseColor; }
+const glm::vec4 &Light::getDiffuseColor() const { return m_diffuseColor; }
 
-void Light::setSpecularColor(const glm::vec4 &color) { specularColor = color; }
+void Light::setSpecularColor(const glm::vec4 &color) { m_specularColor = color; }
 
-const glm::vec4 &Light::getSpecularColor() const { return specularColor; }
+const glm::vec4 &Light::getSpecularColor() const { return m_specularColor; }
 
 void Light::setUniforms(const LightedObjectShader &shader,
                         const glm::mat4 &) const {
-  shader.setLightUniform(number, LightedObjectShader::lightAmbient,
-                        ambientColor);
-  shader.setLightUniform(number, LightedObjectShader::lightDiffuse,
-                        diffuseColor);
-  shader.setLightUniform(number, LightedObjectShader::lightSpecular,
-                          specularColor);
+  shader.setLightUniform(m_number, LightedObjectShader::lightAmbient,
+                        m_ambientColor);
+  shader.setLightUniform(m_number, LightedObjectShader::lightDiffuse,
+                        m_diffuseColor);
+  shader.setLightUniform(m_number, LightedObjectShader::lightSpecular,
+                          m_specularColor);
 }
 
 // -----------------------------------------------------------------------------
 DirectionalLight::DirectionalLight(const glm::vec3 &direction) : Light() {
-  this->direction = glm::vec4(direction, 0.0f);
+  m_direction = glm::vec4(direction, 0.0f);
 }
 
 void DirectionalLight::setDirection(const glm::vec3 &direction) {
-  this->direction = glm::vec4(direction, 0.0f);
+  m_direction = glm::vec4(direction, 0.0f);
 }
 
-const glm::vec4 &DirectionalLight::getDirection() { return direction; }
+const glm::vec4 &DirectionalLight::getDirection() { return m_direction; }
 
 void DirectionalLight::setUniforms(const LightedObjectShader &shader,
                                    const glm::mat4 &modelView) const {
@@ -56,82 +60,82 @@ void DirectionalLight::setUniforms(const LightedObjectShader &shader,
   modelViewRotation[3][1] = 0.0f;
   modelViewRotation[3][2] = 0.0f;
 
-  glm::vec4 screenSpaceDirection = modelViewRotation * direction;
+  glm::vec4 screenSpaceDirection = modelViewRotation * m_direction;
   glm::normalize(screenSpaceDirection);
 
   Light::setUniforms(shader, modelView);
-  shader.setLightUniform(number, LightedObjectShader::lightPosition,
+  shader.setLightUniform(m_number, LightedObjectShader::lightPosition,
                           screenSpaceDirection);
 }
 
 // -----------------------------------------------------------------------------
 PositionalLight::PositionalLight(const glm::vec3 &position) : Light() {
-  this->position = glm::vec4(position, 1.0f);
+  m_position = glm::vec4(position, 1.0f);
 }
 
 void PositionalLight::setPosition(const glm::vec3 &position) {
-  this->position = glm::vec4(position, 1.0f);
+  m_position = glm::vec4(position, 1.0f);
 }
 
-const glm::vec4 &PositionalLight::getPosition() { return position; }
+const glm::vec4 &PositionalLight::getPosition() { return m_position; }
 
 void PositionalLight::setConstantAttenuation(float attenuation) {
-  this->constantAttenuation = attenuation;
+  m_constantAttenuation = attenuation;
 }
 
-float PositionalLight::getConstantAttenuation() { return constantAttenuation; }
+float PositionalLight::getConstantAttenuation() { return m_constantAttenuation; }
 
 void PositionalLight::setLinearAttenuation(float attenuation) {
-  this->linearAttenuation = attenuation;
+  m_linearAttenuation = attenuation;
 }
 
-float PositionalLight::getLinearAttenuation() { return linearAttenuation; }
+float PositionalLight::getLinearAttenuation() { return m_linearAttenuation; }
 
 void PositionalLight::setQuadraticAttenuation(float attenuation) {
-  this->quadraticAttenuation = attenuation;
+  m_quadraticAttenuation = attenuation;
 }
 
 float PositionalLight::getQuadraticAttenuation() {
-  return quadraticAttenuation;
+  return m_quadraticAttenuation;
 }
 
 void PositionalLight::setUniforms(const LightedObjectShader &shader,
                                   const glm::mat4 &modelView) const {
   Light::setUniforms(shader, modelView);
-  shader.setLightUniform(number, LightedObjectShader::lightConstantAttenuation,
-                        constantAttenuation);
-  shader.setLightUniform(number, LightedObjectShader::lightLinearAttenuation,
+  shader.setLightUniform(m_number, LightedObjectShader::lightConstantAttenuation,
+                        m_constantAttenuation);
+  shader.setLightUniform(m_number, LightedObjectShader::lightLinearAttenuation,
 
-                        linearAttenuation);
-  shader.setLightUniform(number,
+                        m_linearAttenuation);
+  shader.setLightUniform(m_number,
                         LightedObjectShader::lightQuadraticAttenuation,
-                        quadraticAttenuation);
-  shader.setLightUniform(number,
+                        m_quadraticAttenuation);
+  shader.setLightUniform(m_number,
                         LightedObjectShader::lightSpotCutOff,
                         Light::DEFAULT_SPOT_CUTOFF);
-  shader.setLightUniform(number, LightedObjectShader::lightPosition,
-                          modelView * position);
+  shader.setLightUniform(m_number, LightedObjectShader::lightPosition,
+                          modelView * m_position);
 }
 
 // -----------------------------------------------------------------------------
 SpotLight::SpotLight(const glm::vec3 &position, const glm::vec3 &direction)
     : PositionalLight(position) {
-  this->direction = glm::vec4(direction, 0.0f);
+  m_direction = glm::vec4(direction, 0.0f);
 }
 
 void SpotLight::setDirection(const glm::vec3 &direction) {
-  this->direction = glm::vec4(direction, 0.0f);
+  m_direction = glm::vec4(direction, 0.0f);
 }
 
-const glm::vec4 &SpotLight::getDirection() { return direction; }
+const glm::vec4 &SpotLight::getDirection() { return m_direction; }
 
-void SpotLight::setCutOff(float cutOff) { this->cutOff = cutOff; }
+void SpotLight::setCutOff(float cutOff) { m_cutOff = cutOff; }
 
-float SpotLight::getCutOff() { return cutOff; }
+float SpotLight::getCutOff() { return m_cutOff; }
 
-void SpotLight::setExponent(float exponent) { this->exponent = exponent; }
+void SpotLight::setExponent(float exponent) { m_exponent = exponent; }
 
-float SpotLight::getExponent() { return exponent; }
+float SpotLight::getExponent() { return m_exponent; }
 
 void SpotLight::setUniforms(const LightedObjectShader &shader,
                             const glm::mat4 &modelView) const {
@@ -140,121 +144,121 @@ void SpotLight::setUniforms(const LightedObjectShader &shader,
   modelViewRotation[3][1] = 0.0f;
   modelViewRotation[3][2] = 0.0f;
 
-  glm::vec4 screenSpaceDirection = modelViewRotation * direction;
+  glm::vec4 screenSpaceDirection = modelViewRotation * m_direction;
   glm::normalize(screenSpaceDirection);
 
   PositionalLight::setUniforms(shader, modelView);
-  shader.setLightUniform(number, LightedObjectShader::lightSpotCutOff, cutOff);
-  shader.setLightUniform(number, LightedObjectShader::lightSpotCosCutOff,
-                         glm::cos(glm::radians(cutOff)));
-  shader.setLightUniform(number, LightedObjectShader::lightSpotExponent,
-                         exponent);
-  shader.setLightUniform(number, LightedObjectShader::lightSpotDirection,
+  shader.setLightUniform(m_number, LightedObjectShader::lightSpotCutOff, m_cutOff);
+  shader.setLightUniform(m_number, LightedObjectShader::lightSpotCosCutOff,
+                         glm::cos(glm::radians(m_cutOff)));
+  shader.setLightUniform(m_number, LightedObjectShader::lightSpotExponent,
+                         m_exponent);
+  shader.setLightUniform(m_number, LightedObjectShader::lightSpotDirection,
                           glm::vec3(screenSpaceDirection));
 }
 
 // -----------------------------------------------------------------------------
-LightBuilder::LightBuilder() : counter(0) { setup(); }
+LightBuilder::LightBuilder() { setup(); }
 
 void LightBuilder::setup() {
-  ambientColor = Light::DEFAULT_AMBIENT_COLOR;
-  diffuseColor = Light::DEFAULT_DIFFUSE_COLOR;
-  specularColor = Light::DEFAULT_SPECULAR_COLOR;
+  m_ambientColor = Light::DEFAULT_AMBIENT_COLOR;
+  m_diffuseColor = Light::DEFAULT_DIFFUSE_COLOR;
+  m_specularColor = Light::DEFAULT_SPECULAR_COLOR;
 
-  direction = Light::DEFAULT_DIRECTION;
-  position = Light::DEFAULT_POSITION;
+  m_direction = Light::DEFAULT_DIRECTION;
+  m_position = Light::DEFAULT_POSITION;
 
-  constantAttenuation = Light::DEFAULT_CONSTANT_ATTENUATION;
-  linearAttenuation = Light::DEFAULT_LINEAR_ATTENUATION;
-  quadraticAttenuation = Light::DEFAULT_QUADRATIC_ATTENUATION;
+  m_constantAttenuation = Light::DEFAULT_CONSTANT_ATTENUATION;
+  m_linearAttenuation = Light::DEFAULT_LINEAR_ATTENUATION;
+  m_quadraticAttenuation = Light::DEFAULT_QUADRATIC_ATTENUATION;
 
-  cutOff = Light::DEFAULT_SPOT_CUTOFF;
-  spotExponent = Light::DEFAULT_SPOT_EXPONENT;
+  m_cutOff = Light::DEFAULT_SPOT_CUTOFF;
+  m_spotExponent = Light::DEFAULT_SPOT_EXPONENT;
 }
 
 LightBuilder &LightBuilder::setPosition(const glm::vec3 &position) {
-  this->position = position;
+  m_position = position;
   return *this;
 }
 
 LightBuilder &LightBuilder::setDirection(const glm::vec3 &direction) {
-  this->direction = direction;
+  m_direction = direction;
   return *this;
 }
 
 LightBuilder &LightBuilder::setAmbientColor(const glm::vec4 &color) {
-  ambientColor = color;
+  m_ambientColor = color;
   return *this;
 }
 
 LightBuilder &LightBuilder::setDiffuseColor(const glm::vec4 &color) {
-  diffuseColor = color;
+  m_diffuseColor = color;
   return *this;
 }
 
 LightBuilder &LightBuilder::setSpecularColor(const glm::vec4 &color) {
-  specularColor = color;
+  m_specularColor = color;
   return *this;
 }
 
 LightBuilder &LightBuilder::setCutOff(float cutOff) {
-  this->cutOff = cutOff;
+  m_cutOff = cutOff;
   return *this;
 }
 
 LightBuilder &LightBuilder::setSpotExponent(float spotExponent) {
-  this->spotExponent = spotExponent;
+  m_spotExponent = spotExponent;
   return *this;
 }
 
 LightBuilder &LightBuilder::setConstantAttenuation(float attenuation) {
-  constantAttenuation = attenuation;
+  m_constantAttenuation = attenuation;
   return *this;
 }
 
 LightBuilder &LightBuilder::setLinearAttenuation(float attenuation) {
-  linearAttenuation = attenuation;
+  m_linearAttenuation = attenuation;
   return *this;
 }
 
 LightBuilder &LightBuilder::setQuadraticAttenuation(float attenuation) {
-  quadraticAttenuation = attenuation;
+  m_quadraticAttenuation = attenuation;
   return *this;
 }
 
 void LightBuilder::createHelper(Light *light) {
-  light->number = counter;
-  ++counter;
-  light->setAmbientColor(ambientColor);
-  light->setDiffuseColor(diffuseColor);
-  light->setSpecularColor(specularColor);
+  light->m_number = m_counter;
+  ++m_counter;
+  light->setAmbientColor(m_ambientColor);
+  light->setDiffuseColor(m_diffuseColor);
+  light->setSpecularColor(m_specularColor);
 }
 
 DirectionalLight *LightBuilder::createDirectional() {
-  DirectionalLight *light = new DirectionalLight(direction);
+  DirectionalLight *light = new DirectionalLight(m_direction);
   createHelper(light);
   setup();
   return light;
 }
 
 PositionalLight *LightBuilder::createPositional() {
-  PositionalLight *light = new PositionalLight(position);
+  PositionalLight *light = new PositionalLight(m_position);
   createHelper(light);
-  light->setConstantAttenuation(constantAttenuation);
-  light->setLinearAttenuation(linearAttenuation);
-  light->setQuadraticAttenuation(quadraticAttenuation);
+  light->setConstantAttenuation(m_constantAttenuation);
+  light->setLinearAttenuation(m_linearAttenuation);
+  light->setQuadraticAttenuation(m_quadraticAttenuation);
   setup();
   return light;
 }
 
 SpotLight *LightBuilder::createSpot() {
-  SpotLight *light = new SpotLight(position, direction);
+  SpotLight *light = new SpotLight(m_position, m_direction);
   createHelper(light);
-  light->setCutOff(cutOff);
-  light->setExponent(spotExponent);
-  light->setConstantAttenuation(constantAttenuation);
-  light->setLinearAttenuation(linearAttenuation);
-  light->setQuadraticAttenuation(quadraticAttenuation);
+  light->setCutOff(m_cutOff);
+  light->setExponent(m_spotExponent);
+  light->setConstantAttenuation(m_constantAttenuation);
+  light->setLinearAttenuation(m_linearAttenuation);
+  light->setQuadraticAttenuation(m_quadraticAttenuation);
   setup();
   return light;
 }

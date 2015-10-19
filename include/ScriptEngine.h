@@ -43,7 +43,7 @@ public:
   void runScript(const std::string &scriptFile);
 
 private:
-  lua_State *luaState;
+  lua_State *m_luaState;
 };
 
 // ============================================================================= 
@@ -52,8 +52,8 @@ public:
   ScriptEngine(SceneContainer *container);
 
 public:
-  SceneContainer *container;
-  LightBuilder lightBuilder;
+  SceneContainer *m_container = nullptr;
+  LightBuilder m_lightBuilder;
 };
 
 void runScript(const std::string &scriptName);

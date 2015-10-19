@@ -22,12 +22,12 @@ public:
   ~World();
 
 private:
-  glm::vec4 ambientColor;
-  std::vector<Object*> objects;
-  std::vector<Light*> lights;
-  std::vector<LightBulb*> bulbs;
-  Mirror* mirror;
-  Engine engine;
+  glm::vec4 m_ambientColor;
+  std::vector<Object*> m_objects;
+  std::vector<Light*> m_lights;
+  std::vector<LightBulb*> m_bulbs;
+  Mirror* m_mirror = nullptr;
+  Engine m_engine;
   static const float DEFAULT_GRAVITY_X;
   static constexpr float STEPS_PER_SECOND = 70.0f;
   static constexpr int MAX_STEPS = 8;
@@ -46,17 +46,17 @@ public:
   void setAmbientColor(const glm::vec4 &color);
 
   inline int getLightsNumber() const {
-    return lights.size();
+    return m_lights.size();
   }
 
   inline void setMirror(Mirror *mirror) {
-    this->mirror = mirror;
+    m_mirror = mirror;
   } 
   inline Mirror *getMirror() {
-    return mirror;
+    return m_mirror;
   }
   inline const Mirror *getMirror() const {
-    return mirror;
+    return m_mirror;
   }
 
 private:
@@ -72,8 +72,8 @@ public:
     object_iterator(const object_iterator& original);
 
   private:
-    std::vector<Object*> objects;
-    size_t currentObject;
+    std::vector<Object*> m_objects;
+    size_t m_currentObject;
 
   public:
     // Pre-increment.
@@ -100,8 +100,8 @@ public:
     const_object_iterator(const const_object_iterator& original);
 
   private:
-    std::vector<Object*> objects;
-    size_t currentObject;
+    std::vector<Object*> m_objects;
+    size_t m_currentObject;
 
   public:
     // Pre-increment.
@@ -128,8 +128,8 @@ public:
     light_iterator(const light_iterator& original);
 
   private:
-    std::vector<Light*> lights;
-    size_t currentLight;
+    std::vector<Light*> m_lights;
+    size_t m_currentLight;
 
   public:
     // Pre-increment.
@@ -156,8 +156,8 @@ public:
     const_light_iterator(const const_light_iterator& original);
 
   private:
-    std::vector<Light*> lights;
-    size_t currentLight;
+    std::vector<Light*> m_lights;
+    size_t m_currentLight;
 
   public:
     // Pre-increment.

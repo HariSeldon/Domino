@@ -29,5 +29,5 @@ public:
   Box *create();
 
 private:
-  btVector3 sidesLengths;
+  btVector3 m_sidesLengths;
 };

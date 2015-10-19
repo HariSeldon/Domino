@@ -13,23 +13,23 @@
 void checkErrors(GLuint shaderId, const std::string &fileName);
 
 // -----------------------------------------------------------------------------
-Shader::Shader(const std::string &filePath, GLenum type) : type(type) {
-  fileName = filePath.substr(filePath.find_last_of('/') + 1);
-  shaderID = glCreateShader(type);
+Shader::Shader(const std::string &filePath, GLenum type) : m_type(type) {
+  m_fileName = filePath.substr(filePath.find_last_of('/') + 1);
+  m_shaderID = glCreateShader(type);
   std::string shaderSource = getFileContent(filePath.c_str());
   const GLchar *shaderContent = shaderSource.data();
-  glShaderSource(shaderID, 1, &shaderContent, nullptr);
-  glCompileShader(shaderID);
-  checkErrors(shaderID, fileName);
+  glShaderSource(m_shaderID, 1, &shaderContent, nullptr);
+  glCompileShader(m_shaderID);
+  checkErrors(m_shaderID, m_fileName);
 }
 
-Shader::~Shader() { glDeleteShader(shaderID); }
+Shader::~Shader() { glDeleteShader(m_shaderID); }
 
-GLenum Shader::getType() const { return type; }
+GLenum Shader::getType() const { return m_type; }
 
-const std::string &Shader::getFileName() const { return fileName; }
+const std::string &Shader::getFileName() const { return m_fileName; }
 
-GLuint Shader::getID() const { return shaderID; }
+GLuint Shader::getID() const { return m_shaderID; }
 
 // -----------------------------------------------------------------------------
 VertexShader::VertexShader(const std::string &filePath)

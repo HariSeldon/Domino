@@ -179,7 +179,7 @@ createUnifiedBuffer(const std::vector<SDL_Surface *> &texSurfaces) {
                      texSurfaces[0]->format->BytesPerPixel;
   auto totalSize = texSurfaces.size() * surfaceSize;
   auto buffer = new unsigned char[totalSize];
-  for (auto index = 0; index < texSurfaces.size(); ++index) {
+  for (auto index = 0u; index < texSurfaces.size(); ++index) {
     std::memcpy(buffer + index * surfaceSize, texSurfaces[index]->pixels,
                 surfaceSize);
   }

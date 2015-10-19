@@ -15,9 +15,9 @@ public:
   GLuint getID() const;
 
 private:
-  GLint shaderID;
-  GLenum type;
-  std::string fileName;
+  GLint m_shaderID = 0;
+  GLenum m_type = 0;
+  std::string m_fileName;
 };
 
 class VertexShader : public Shader {

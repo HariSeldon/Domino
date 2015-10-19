@@ -10,22 +10,24 @@
 #include <iostream>
 
 const float Camera::ROTATION_FACTOR = 0.0004f;
+const float Camera::STEP = 0.5f;
+const float Camera::FIXED_ROTATION_ANGLE = 0.02f;
 
 Camera::Camera() {}
 
 Camera::Camera(const glm::vec4 position, const glm::vec2 orientation,
                float viewAngle, float zNear, float zFar)
-    : position(position), orientation(orientation), viewAngle(viewAngle),
-      zNear(zNear), zFar(zFar), currentTransform(buildTransform()) {}
+    : m_position(position), m_orientation(orientation), m_viewAngle(viewAngle),
+      m_zNear(zNear), m_zFar(zFar), currentTransform(buildTransform()) {}
 
 // -----------------------------------------------------------------------------
 void Camera::assign(const glm::vec4 position, const glm::vec2 orientation,
                     float viewAngle, float zNear, float zFar) {
-  this->position = position;
-  this->orientation = orientation;
-  this->viewAngle = viewAngle;
-  this->zNear = zNear;
-  this->zFar = zFar;
+  m_position = position;
+  m_orientation = orientation;
+  m_viewAngle = viewAngle;
+  m_zNear = zNear;
+  m_zFar = zFar;
 }
 
 // -----------------------------------------------------------------------------
@@ -38,21 +40,21 @@ void Camera::move(float step) {
   currentTransform = buildTransform();
   // Translate in the new coordinate system.
   currentTransform = glm::translate(currentTransform, glm::vec3(0, 0, step));
-  position = currentTransform[3];
+  m_position = currentTransform[3];
 }
 
 // -----------------------------------------------------------------------------
 // Change the current orientation angles.
 void Camera::rotate(const glm::vec2 offset) {
-  orientation +=
+  m_orientation +=
       glm::vec2(Camera::ROTATION_FACTOR, Camera::ROTATION_FACTOR) * offset;
 }
 
 // -----------------------------------------------------------------------------
-void Camera::rotateLeft() { orientation.y += Camera::FIXED_ROTATION_ANGLE; }
+void Camera::rotateLeft() { m_orientation.y += Camera::FIXED_ROTATION_ANGLE; }
 
 // -----------------------------------------------------------------------------
-void Camera::rotateRight() { orientation.y -= Camera::FIXED_ROTATION_ANGLE; }
+void Camera::rotateRight() { m_orientation.y -= Camera::FIXED_ROTATION_ANGLE; }
 
 // -----------------------------------------------------------------------------
 glm::mat4 Camera::applyView() {
@@ -63,19 +65,19 @@ glm::mat4 Camera::applyView() {
   glm::vec4 center = centerMatrix[3];
   // The second column of the center matrix contains the up vector.
   glm::vec4 up = centerMatrix[1];
-  return glm::lookAt(glm::vec3(position), glm::vec3(center), glm::vec3(up));
+  return glm::lookAt(glm::vec3(m_position), glm::vec3(center), glm::vec3(up));
 }
 
 // -----------------------------------------------------------------------------
 void Camera::dump() {
-  std::cout << glm::to_string(position) << " " << glm::to_string(orientation)
+  std::cout << glm::to_string(m_position) << " " << glm::to_string(m_orientation)
             << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 glm::mat4 Camera::buildTransform() {
-  glm::vec2 sine = glm::sin(orientation);
-  glm::vec2 cosine = glm::cos(orientation);
+  glm::vec2 sine = glm::sin(m_orientation);
+  glm::vec2 cosine = glm::cos(m_orientation);
 
   float cy = cosine.y;
   float sy = sine.y;
@@ -83,5 +85,5 @@ glm::mat4 Camera::buildTransform() {
   float sx = sine.x;
 
   return {cy,      0,   -sy,     0, sx * sy,    cx,         sx * cy,    0,
-          cx * sy, -sx, cx * cy, 0, position.x, position.y, position.z, 1};
+          cx * sy, -sx, cx * cy, 0, m_position.x, m_position.y, m_position.z, 1};
 }

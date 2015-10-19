@@ -16,18 +16,18 @@ public:
 public:
   void parse(const std::string &objFile);
 
-  inline const std::vector<glm::vec3> &getPoints() const { return points; }
-  inline const std::vector<glm::vec3> &getNormals() const { return normals; }
+  inline const std::vector<glm::vec3> &getPoints() const { return m_points; }
+  inline const std::vector<glm::vec3> &getNormals() const { return m_normals; }
   inline const std::vector<glm::vec2> &getTextureCoos() const {
-    return textureCoos;
+    return m_textureCoos;
   }
-  inline const std::vector<FaceIndices> &getIndices() const { return indices; }
-  inline const glm::vec4 getAmbientColor() const { return ambientColor; }
-  inline const glm::vec4 getDiffuseColor() const { return diffuseColor; }
-  inline const glm::vec4 getSpecularColor() const { return specularColor; }
-  inline float getSpecularExponent() const { return specularExponent; }
+  inline const std::vector<FaceIndices> &getIndices() const { return m_indices; }
+  inline const glm::vec4 getAmbientColor() const { return m_ambientColor; }
+  inline const glm::vec4 getDiffuseColor() const { return m_diffuseColor; }
+  inline const glm::vec4 getSpecularColor() const { return m_specularColor; }
+  inline float getSpecularExponent() const { return m_specularExponent; }
 
-  inline std::string getTexFile() const { return texFile; }
+  inline std::string getTexFile() const { return m_texFile; }
 
 private:
   void parseObj(const std::string &file); 
@@ -41,21 +41,21 @@ private:
   void parseMtlLine(const std::string &line);
 
 private:
-  std::string objName;
+  std::string m_objName;
 
   // Shape.
-  std::vector<glm::vec3> points;
-  std::vector<glm::vec3> normals;
-  std::vector<glm::vec2> textureCoos;
-  std::vector<glm::vec3> tangents;
-  std::vector<FaceIndices> indices;
+  std::vector<glm::vec3> m_points;
+  std::vector<glm::vec3> m_normals;
+  std::vector<glm::vec2> m_textureCoos;
+  std::vector<glm::vec3> m_tangents;
+  std::vector<FaceIndices> m_indices;
 
   // Material.
-  std::string materialName;
-  std::string mtlFile;
-  float specularExponent;
-  glm::vec4 ambientColor;
-  glm::vec4 diffuseColor;
-  glm::vec4 specularColor;
-  std::string texFile;
+  std::string m_materialName;
+  std::string m_mtlFile;
+  float m_specularExponent = 0.f;
+  glm::vec4 m_ambientColor;
+  glm::vec4 m_diffuseColor;
+  glm::vec4 m_specularColor;
+  std::string m_texFile;
 };

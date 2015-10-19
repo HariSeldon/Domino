@@ -10,7 +10,6 @@
 #include <glm/ext.hpp>
 
 #include <algorithm>
-#include <iostream>
 #include <map>
 
 template class ObjectBuilder<MeshBuilder>;
@@ -27,13 +26,13 @@ Mesh::Mesh(const btTransform &transform, const btScalar mass,
 
 //------------------------------------------------------------------------------
 void Mesh::setupBulletShape() {
-  collisionShape =
+  m_collisionShape =
       new btConvexHullShape(getPoints(), getPointsNumber(), sizeof(glm::vec3));
-  collisionShape->calculateLocalInertia(mass, inertia);
-  motionState = new btDefaultMotionState(transform);
-  constructionInfo = new btRigidBody::btRigidBodyConstructionInfo(
-      mass, motionState, collisionShape, inertia);
-  rigidBody = new btRigidBody(*constructionInfo);
+  m_collisionShape->calculateLocalInertia(m_mass, m_inertia);
+  m_motionState = new btDefaultMotionState(m_transform);
+  m_constructionInfo = new btRigidBody::btRigidBodyConstructionInfo(
+      m_mass, m_motionState, m_collisionShape, m_inertia);
+  m_rigidBody = new btRigidBody(*m_constructionInfo);
 }
 
 //------------------------------------------------------------------------------
@@ -47,10 +46,10 @@ void Mesh::fillMesh(const ObjParser &parser) {
   // new index.
   std::map<ObjParser::FaceIndices, int> indexMap;
 
-  indices.reserve(parserIndices.size());
-  points.reserve(parserIndices.size() / 2);
-  normals.reserve(parserIndices.size() / 2);
-  textureCoos.reserve(parserIndices.size() / 2);
+  m_indices.reserve(parserIndices.size());
+  m_points.reserve(parserIndices.size() / 2);
+  m_normals.reserve(parserIndices.size() / 2);
+  m_textureCoos.reserve(parserIndices.size() / 2);
 
   int counter = 0;
 
@@ -60,47 +59,47 @@ void Mesh::fillMesh(const ObjParser &parser) {
     auto iterator = indexMap.find(faceIndices);
     // If yes the index of the touple to the output index buffer.     
     if (iterator != indexMap.end()) {
-      indices.push_back(iterator->second);
+      m_indices.push_back(iterator->second);
     } 
     // If not create a new instance.
     else {
       // Get the current point. 
       glm::vec3 vertex = parserPoints[std::get<0>(faceIndices) - 1];
-      points.push_back(vertex);
+      m_points.push_back(vertex);
 
       // If there is a texture coordinate add it.
       if(std::get<1>(faceIndices) != -1) {
         glm::vec2 textureCoo = parserTextureCoos[std::get<1>(faceIndices) - 1];
-        textureCoos.push_back(textureCoo);
+        m_textureCoos.push_back(textureCoo);
       }
 
       // Add normal.
       glm::vec3 normal = parserNormals[std::get<2>(faceIndices) - 1];
-      normals.push_back(normal);
+      m_normals.push_back(normal);
 
       // Create a new counter.
-      indices.push_back(counter);
+      m_indices.push_back(counter);
       indexMap[faceIndices] = counter;
       counter++;
     }
   }
 
-  textureFile = parser.getTexFile();
-  ambientColor = parser.getAmbientColor();
-  diffuseColor = parser.getDiffuseColor();
-  specularColor = parser.getSpecularColor();
-  shininess = parser.getSpecularExponent();
+  m_textureFile = parser.getTexFile();
+  m_ambientColor = parser.getAmbientColor();
+  m_diffuseColor = parser.getDiffuseColor();
+  m_specularColor = parser.getSpecularColor();
+  m_shininess = parser.getSpecularExponent();
 }
 
 //------------------------------------------------------------------------------
 MeshBuilder::MeshBuilder() : ObjectBuilder() {}
 
 MeshBuilder &MeshBuilder::setMeshFile(const std::string &meshFile) {
-  this->meshFile = MESH_PATH + meshFile;
+  m_meshFile = MESH_PATH + meshFile;
   return *this;
 }
 
 Mesh *MeshBuilder::create() {
-  Mesh *mesh = new Mesh(transform, mass, inertia, meshFile);
+  Mesh *mesh = new Mesh(m_transform, m_mass, m_inertia, m_meshFile);
   return mesh;
 }

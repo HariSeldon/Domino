@@ -39,10 +39,10 @@ private:
   void fillTexture(FT_Face fontFace);
 
 private:
-  FT_Face fontFace;
-  FT_Library freeType;
-  GLuint textureId;
-  int width;
-  int height;
+  FT_Face m_fontFace;
+  FT_Library m_freeType;
+  GLuint m_textureId = 0;
+  int m_width = 0;
+  int m_height = 0;
   std::vector<Glyph> glyphs;
 };

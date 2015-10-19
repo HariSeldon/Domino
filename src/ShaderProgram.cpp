@@ -29,18 +29,18 @@ void checkErrors(GLuint programID);
 // -----------------------------------------------------------------------------
 ShaderProgram::ShaderProgram(const std::string &vertexShaderFileName,
                              const std::string &fragmentShaderFileName)
-    : vertexShader(new VertexShader(SHADER_PATH + vertexShaderFileName)),
-      fragmentShader(new FragmentShader(SHADER_PATH + fragmentShaderFileName)) {
+    : m_vertexShader(new VertexShader(SHADER_PATH + vertexShaderFileName)),
+      m_fragmentShader(new FragmentShader(SHADER_PATH + fragmentShaderFileName)) {
 
-  programID = glCreateProgram();
-  glAttachShader(programID, vertexShader->getID());
-  glAttachShader(programID, fragmentShader->getID());
-  glLinkProgram(programID);
+  m_programID = glCreateProgram();
+  glAttachShader(m_programID, m_vertexShader->getID());
+  glAttachShader(m_programID, m_fragmentShader->getID());
+  glLinkProgram(m_programID);
 
-  checkErrors(programID);
+  checkErrors(m_programID);
 
   GLint output;
-  glGetProgramiv(programID, GL_LINK_STATUS, &output);
+  glGetProgramiv(m_programID, GL_LINK_STATUS, &output);
   assert(output == GL_TRUE);
 
   fillAttributeMap();
@@ -49,9 +49,9 @@ ShaderProgram::ShaderProgram(const std::string &vertexShaderFileName,
 // -----------------------------------------------------------------------------
 ShaderProgram::~ShaderProgram() {
   glUseProgram(0);
-  delete vertexShader;
-  delete fragmentShader;
-  glDeleteProgram(programID);
+  delete m_vertexShader;
+  delete m_fragmentShader;
+  glDeleteProgram(m_programID);
 }
 
 // #############################################################################
@@ -84,7 +84,7 @@ template void ShaderProgram::setUniform(int nameIndex,
 
 template <typename type>
 void ShaderProgram::setUniform(int nameIndex, const type &value) const {
-  setUniformValue<type>(uniformLocations[nameIndex], value);
+  setUniformValue<type>(m_uniformLocations[nameIndex], value);
 }
 
 template <typename type>
@@ -154,7 +154,7 @@ std::vector<int> ShaderProgram::createUniformTable(
   std::vector<int> uniformLocations(numberOfUniforms);
   for (int index = 0; index < numberOfUniforms; ++index) {
     GLint uniformLocation =
-        queryUniformLocation(programID, uniformNames[index].c_str());
+        queryUniformLocation(m_programID, uniformNames[index].c_str());
     uniformLocations[index] = uniformLocation;
   }
 
@@ -210,13 +210,13 @@ void ShaderProgram::fillAttributeMap() {
   std::vector<GLchar> nameRawData(ATTRIBUTE_NAME_MAX_SIZE);
   GLint arraySize = 0;
   GLenum type = 0;
-  auto attributesNumber = queryAttributesNumber(programID);
+  auto attributesNumber = queryAttributesNumber(m_programID);
   for (auto index = 0; index < attributesNumber; ++index) {
     GLsizei actualSize = 0;
-    glGetActiveAttrib(programID, index, nameRawData.size(), &actualSize,
+    glGetActiveAttrib(m_programID, index, nameRawData.size(), &actualSize,
                       &arraySize, &type, &nameRawData[0]);
     std::string name(nameRawData.data(), actualSize);
-    auto location = queryAttributeLocation(programID, name.c_str());
+    auto location = queryAttributeLocation(m_programID, name.c_str());
     attributeLocationsMap[name] = location;
   }
 }

@@ -13,7 +13,7 @@ template class ObjectBuilder<PlaneBuilder>;
 //-----------------------------------------------------------------------------
 Plane::Plane(const btTransform &transform, const btScalar mass, btVector3 &inertia,
              const btScalar side, const int textureRepetitions)
-    : Object(transform, mass, inertia), textureRepetitions(textureRepetitions) {
+    : Object(transform, mass, inertia), m_textureRepetitions(textureRepetitions) {
   computePoints(side);
   setupBulletShape();
 }
@@ -27,43 +27,41 @@ void Plane::computePoints(const btScalar side) {
   glm::vec3 third(halfSide, 0.f, -1.f * halfSide);
   glm::vec3 fourth(-1.f * halfSide, 0.f, -1.f * halfSide);
 
-  points = { first, second, third, fourth };
+  m_points = { first, second, third, fourth };
 
-  indices = { 0, 1, 2, 2, 3, 0 };
+  m_indices = { 0, 1, 2, 2, 3, 0 };
 
-  textureCoos = {{0, textureRepetitions},
-                 {textureRepetitions, textureRepetitions},
-                 {textureRepetitions, 0},
+  m_textureCoos = {{0, m_textureRepetitions},
+                 {m_textureRepetitions, m_textureRepetitions},
+                 {m_textureRepetitions, 0},
                  {0, 0}};
 
   glm::vec3 normal = computeNormal(first, second, third);
 
-  normals = { normal, normal, normal, normal }; 
+  m_normals = { normal, normal, normal, normal }; 
 
-  tangents.assign(4, {1, 0, 0});
+  m_tangents.assign(4, {1, 0, 0});
 }
 
 //-----------------------------------------------------------------------------
 void Plane::setupBulletShape() {
-  collisionShape =
+  m_collisionShape =
       new btConvexHullShape(getPoints(), getPointsNumber(), sizeof(glm::vec3));
-//  collisionShape = new btStaticPlaneShape(
-//      btVector3(normals[0].x, normals[0].y, normals[0].z), btScalar(0));
-  collisionShape->calculateLocalInertia(mass, inertia);
-  motionState = new btDefaultMotionState(transform);
-  constructionInfo = new btRigidBody::btRigidBodyConstructionInfo(
-      mass, motionState, collisionShape, inertia);
-  rigidBody = new btRigidBody(*constructionInfo);
+  m_collisionShape->calculateLocalInertia(m_mass, m_inertia);
+  m_motionState = new btDefaultMotionState(m_transform);
+  m_constructionInfo = new btRigidBody::btRigidBodyConstructionInfo(
+      m_mass, m_motionState, m_collisionShape, m_inertia);
+  m_rigidBody = new btRigidBody(*m_constructionInfo);
 }
 
 //-----------------------------------------------------------------------------
 PlaneBuilder::PlaneBuilder()
-    : ObjectBuilder(), side(btScalar(0.0f)), textureRepetitions(1) {}
+    : ObjectBuilder() {}
 
 Plane *PlaneBuilder::create() {
-  Plane *plane = new Plane(transform, mass, inertia, side, textureRepetitions);
+  Plane *plane = new Plane(m_transform, m_mass, m_inertia, m_side, m_textureRepetitions);
   ObjectBuilder::setColors(plane);
-  plane->textureFile = textureFile;
-  plane->normalTextureFile = normalTextureFile;
+  plane->m_textureFile = m_textureFile;
+  plane->m_normalTextureFile = m_normalTextureFile;
   return plane;
 }

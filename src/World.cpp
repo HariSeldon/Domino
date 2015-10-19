@@ -15,17 +15,17 @@
 #include <LinearMath/btVector3.h>
 
 // -----------------------------------------------------------------------------
-World::World() : mirror(nullptr) {
-  ambientColor = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
+World::World() { 
+  m_ambientColor = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
 }
 
 // -----------------------------------------------------------------------------
 World::~World() {
   // Here I delete objects but not their rigid body.
-  for (auto object : objects)
+  for (auto object : m_objects)
     delete object;
 
-  for (auto light : lights)
+  for (auto light : m_lights)
     delete light;
 
   // Rigid bodies are deleted by engine.
@@ -35,39 +35,39 @@ World::~World() {
 
 // -----------------------------------------------------------------------------
 void World::addObject(Object *object) {
-  objects.push_back(object);
-  engine.addRigidBody(object->getRigidBody());
+  m_objects.push_back(object);
+  m_engine.addRigidBody(object->getRigidBody());
 }
 
 // -----------------------------------------------------------------------------
 void World::addLightBulb(LightBulb *lightBulb) {
-  objects.push_back(lightBulb);
-  engine.addRigidBody(lightBulb->getRigidBody());
-  bulbs.push_back(lightBulb);
-  lights.push_back(lightBulb->getLight());
+  m_objects.push_back(lightBulb);
+  m_engine.addRigidBody(lightBulb->getRigidBody());
+  m_bulbs.push_back(lightBulb);
+  m_lights.push_back(lightBulb->getLight());
 }
 
 // -----------------------------------------------------------------------------
 void World::addDirectionalLight(DirectionalLight *light) {
-  lights.push_back(light);
+  m_lights.push_back(light);
 }
 
 // -----------------------------------------------------------------------------
 void World::stepSimulation() {
-  int steps = engine.getDynamicsWorld()->stepSimulation(
+  int steps = m_engine.getDynamicsWorld()->stepSimulation(
       1 / World::STEPS_PER_SECOND, World::MAX_STEPS);
 
   if (steps == 0)
     return;
 
-  std::for_each(begin(objects), end(objects), [](Object *object) {
+  std::for_each(begin(m_objects), end(m_objects), [](Object *object) {
     btTransform transform;
     object->getRigidBody()->getMotionState()->getWorldTransform(transform);
     object->setTransform(transform);
   });
 
   // Traverse over the light bulbs.
-  std::for_each(begin(bulbs), end(bulbs), [](LightBulb *bulb) {
+  std::for_each(begin(m_bulbs), end(m_bulbs), [](LightBulb *bulb) {
     btTransform transform;
     bulb->getRigidBody()->getMotionState()->getWorldTransform(transform);
     btVector3 position = transform.getOrigin();
@@ -76,12 +76,12 @@ void World::stepSimulation() {
 }
 
 // -----------------------------------------------------------------------------
-const btVector3 &World::getGravity() const { return engine.getGravity(); }
-void World::setGravity(const btVector3 &gravity) { engine.setGravity(gravity); }
+const btVector3 &World::getGravity() const { return m_engine.getGravity(); }
+void World::setGravity(const btVector3 &gravity) { m_engine.setGravity(gravity); }
 
 // -----------------------------------------------------------------------------
-const glm::vec4 &World::getAmbientColor() const { return ambientColor; }
-void World::setAmbientColor(const glm::vec4 &color) { ambientColor = color; }
+const glm::vec4 &World::getAmbientColor() const { return m_ambientColor; }
+void World::setAmbientColor(const glm::vec4 &color) { m_ambientColor = color; }
 
 // -----------------------------------------------------------------------------
 void traceDominoLine(const btVector3 &origin, const btVector3 &destination,
@@ -133,14 +133,14 @@ void traceDominoLine(const btVector3 &origin, const btVector3 &destination,
 }
 
 //-----------------------------------------------------------------------------
-World::object_iterator::object_iterator() { currentObject = 0; }
+World::object_iterator::object_iterator() { m_currentObject = 0; }
 World::object_iterator::object_iterator(const World &world) {
-  objects = world.objects;
-  currentObject = (objects.size() == 0) ? -1 : 0;
+  m_objects = world.m_objects;
+  m_currentObject = (m_objects.size() == 0) ? -1 : 0;
 }
 World::object_iterator::object_iterator(const object_iterator &original) {
-  this->objects = original.objects;
-  this->currentObject = original.currentObject;
+  m_objects = original.m_objects;
+  m_currentObject = original.m_currentObject;
 }
 
 // Pre-increment.
@@ -156,34 +156,34 @@ World::object_iterator World::object_iterator::operator++(int) {
 }
 
 Object *World::object_iterator::operator*() const {
-  return objects.at(currentObject);
+  return m_objects.at(m_currentObject);
 }
 bool World::object_iterator::operator!=(const object_iterator &iter) const {
-  return iter.currentObject != this->currentObject;
+  return iter.m_currentObject != m_currentObject;
 }
 
 void World::object_iterator::toNext() {
-  ++currentObject;
-  if (currentObject == objects.size())
-    currentObject = -1;
+  ++m_currentObject;
+  if (m_currentObject == m_objects.size())
+    m_currentObject = -1;
 }
 
 World::object_iterator World::object_iterator::end() {
   object_iterator endIterator;
-  endIterator.currentObject = -1;
+  endIterator.m_currentObject = -1;
   return endIterator;
 }
 
 //-----------------------------------------------------------------------------
-World::const_object_iterator::const_object_iterator() { currentObject = 0; }
+World::const_object_iterator::const_object_iterator() { m_currentObject = 0; }
 World::const_object_iterator::const_object_iterator(const World &world) {
-  objects = world.objects;
-  currentObject = (objects.size() == 0) ? -1 : 0;
+  m_objects = world.m_objects;
+  m_currentObject = (m_objects.size() == 0) ? -1 : 0;
 }
 World::const_object_iterator::const_object_iterator(
     const const_object_iterator &original) {
-  this->objects = original.objects;
-  this->currentObject = original.currentObject;
+  m_objects = original.m_objects;
+  m_currentObject = original.m_currentObject;
 }
 
 // Pre-increment.
@@ -199,34 +199,34 @@ World::const_object_iterator World::const_object_iterator::operator++(int) {
 }
 
 const Object *World::const_object_iterator::operator*() const {
-  return objects.at(currentObject);
+  return m_objects.at(m_currentObject);
 }
 bool World::const_object_iterator::
 operator!=(const const_object_iterator &iter) const {
-  return iter.currentObject != this->currentObject;
+  return iter.m_currentObject != m_currentObject;
 }
 
 void World::const_object_iterator::toNext() {
-  ++currentObject;
-  if (currentObject == objects.size())
-    currentObject = -1;
+  ++m_currentObject;
+  if (m_currentObject == m_objects.size())
+    m_currentObject = -1;
 }
 
 World::const_object_iterator World::const_object_iterator::end() {
   const_object_iterator endIterator;
-  endIterator.currentObject = -1;
+  endIterator.m_currentObject = -1;
   return endIterator;
 }
 
 //-----------------------------------------------------------------------------
-World::light_iterator::light_iterator() { currentLight = 0; }
+World::light_iterator::light_iterator() { m_currentLight = 0; }
 World::light_iterator::light_iterator(const World &world) {
-  lights = world.lights;
-  currentLight = (lights.size() == 0) ? -1 : 0;
+  m_lights = world.m_lights;
+  m_currentLight = (m_lights.size() == 0) ? -1 : 0;
 }
 World::light_iterator::light_iterator(const light_iterator &original) {
-  lights = original.lights;
-  currentLight = original.currentLight;
+  m_lights = original.m_lights;
+  m_currentLight = original.m_currentLight;
 }
 
 // Pre-increment.
@@ -242,34 +242,34 @@ World::light_iterator World::light_iterator::operator++(int) {
 }
 
 Light *World::light_iterator::operator*() const {
-  return lights.at(currentLight);
+  return m_lights.at(m_currentLight);
 }
 bool World::light_iterator::operator!=(const light_iterator &iter) const {
-  return iter.currentLight != this->currentLight;
+  return iter.m_currentLight != m_currentLight;
 }
 
 void World::light_iterator::toNext() {
-  ++currentLight;
-  if (currentLight == lights.size())
-    currentLight = -1;
+  ++m_currentLight;
+  if (m_currentLight == m_lights.size())
+    m_currentLight = -1;
 }
 
 World::light_iterator World::light_iterator::end() {
   light_iterator endIterator;
-  endIterator.currentLight = -1;
+  endIterator.m_currentLight = -1;
   return endIterator;
 }
 
 //-----------------------------------------------------------------------------
-World::const_light_iterator::const_light_iterator() { currentLight = 0; }
+World::const_light_iterator::const_light_iterator() { m_currentLight = 0; }
 World::const_light_iterator::const_light_iterator(const World &world) {
-  lights = world.lights;
-  currentLight = (lights.size() == 0) ? -1 : 0;
+  m_lights = world.m_lights;
+  m_currentLight = (m_lights.size() == 0) ? -1 : 0;
 }
 World::const_light_iterator::const_light_iterator(
     const const_light_iterator &original) {
-  lights = original.lights;
-  currentLight = original.currentLight;
+  m_lights = original.m_lights;
+  m_currentLight = original.m_currentLight;
 }
 
 // Pre-increment.
@@ -285,22 +285,22 @@ World::const_light_iterator World::const_light_iterator::operator++(int) {
 }
 
 const Light *World::const_light_iterator::operator*() const {
-  return lights.at(currentLight);
+  return m_lights.at(m_currentLight);
 }
 bool World::const_light_iterator::
 operator!=(const const_light_iterator &iter) const {
-  return iter.currentLight != this->currentLight;
+  return iter.m_currentLight != m_currentLight;
 }
 
 void World::const_light_iterator::toNext() {
-  ++currentLight;
-  if (currentLight == lights.size())
-    currentLight = -1;
+  ++m_currentLight;
+  if (m_currentLight == m_lights.size())
+    m_currentLight = -1;
 }
 
 World::const_light_iterator World::const_light_iterator::end() {
   const_light_iterator endIterator;
-  endIterator.currentLight = -1;
+  endIterator.m_currentLight = -1;
   return endIterator;
 }
 
