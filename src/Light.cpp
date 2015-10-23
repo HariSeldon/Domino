@@ -102,19 +102,18 @@ float PositionalLight::getQuadraticAttenuation() {
 void PositionalLight::setUniforms(const LightedObjectShader &shader,
                                   const glm::mat4 &modelView) const {
   Light::setUniforms(shader, modelView);
-  shader.setLightUniform(m_number, LightedObjectShader::lightConstantAttenuation,
-                        m_constantAttenuation);
+  shader.setLightUniform(m_number,
+                         LightedObjectShader::lightConstantAttenuation,
+                         m_constantAttenuation);
   shader.setLightUniform(m_number, LightedObjectShader::lightLinearAttenuation,
-
-                        m_linearAttenuation);
+                         m_linearAttenuation);
   shader.setLightUniform(m_number,
-                        LightedObjectShader::lightQuadraticAttenuation,
-                        m_quadraticAttenuation);
-  shader.setLightUniform(m_number,
-                        LightedObjectShader::lightSpotCutOff,
-                        Light::DEFAULT_SPOT_CUTOFF);
+                         LightedObjectShader::lightQuadraticAttenuation,
+                         m_quadraticAttenuation);
+  shader.setLightUniform(m_number, LightedObjectShader::lightSpotCutOff,
+                         Light::DEFAULT_SPOT_CUTOFF);
   shader.setLightUniform(m_number, LightedObjectShader::lightPosition,
-                          modelView * m_position);
+                         modelView * m_position);
 }
 
 // -----------------------------------------------------------------------------

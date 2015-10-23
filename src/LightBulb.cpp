@@ -12,6 +12,8 @@
 
 template class ObjectBuilder<LightBulbBuilder>;
 
+const float LightBulb::m_ANGLE = 2 * M_PI / m_POINTS_NUMBER;
+
 LightBulb::LightBulb(const btTransform &transform, const btScalar mass,
                      btVector3 &inertia, float radius)
     : Object(transform, mass, inertia), m_radius(radius) {

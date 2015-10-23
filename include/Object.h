@@ -24,7 +24,6 @@ public:
   static const glm::vec4 DEFAULT_AMBIENT_COLOR;
   static const glm::vec4 DEFAULT_DIFFUSE_COLOR;
   static const glm::vec4 DEFAULT_SPECULAR_COLOR;
-  static const float DEFAULT_MASS;
 
 protected:
   Object(const btTransform &transform, btScalar mass, btVector3 &inertia);
@@ -34,12 +33,12 @@ public:
 
 protected:
   // Physical parameters.
-  btScalar m_mass;
+  btScalar m_mass = 0;
   btVector3 m_inertia;
-  btCollisionShape* m_collisionShape;
-  btRigidBody* m_rigidBody;
-  btDefaultMotionState* m_motionState;
-  btRigidBody::btRigidBodyConstructionInfo* m_constructionInfo;
+  btCollisionShape* m_collisionShape = nullptr;
+  btRigidBody* m_rigidBody = nullptr;
+  btDefaultMotionState* m_motionState = nullptr;
+  btRigidBody::btRigidBodyConstructionInfo* m_constructionInfo = nullptr;
 
   // Shape parameters.
   std::vector<glm::vec3> m_points;
@@ -52,7 +51,7 @@ protected:
   glm::vec4 m_ambientColor;
   glm::vec4 m_diffuseColor;
   glm::vec4 m_specularColor;
-  float m_shininess;
+  float m_shininess = 0.f;
   std::string m_textureFile;
   std::string m_normalTextureFile;
 
@@ -158,7 +157,7 @@ protected:
 
 protected:
   btTransform m_transform;
-  btScalar m_mass;
+  btScalar m_mass = 0;
   btVector3 m_inertia;
   glm::vec4 m_ambientColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
   glm::vec4 m_diffuseColor = glm::vec4(0.f, 0.f, 0.f, 1.f);

@@ -25,10 +25,10 @@ private:
   void setupBulletShape();
  
 private:
-  PositionalLight *m_light;
-  float m_radius;
-  static constexpr auto m_POINTS_NUMBER = 30;
-  static constexpr auto m_ANGLE = 2 * M_PI / m_POINTS_NUMBER;
+  PositionalLight *m_light = nullptr;
+  float m_radius = 0.f;
+  static const int m_POINTS_NUMBER = 30;
+  static const float m_ANGLE;
 
   friend class LightBulbBuilder;
 };
@@ -43,6 +43,6 @@ public:
   LightBulb *create();
 
 private:
-  PositionalLight *m_light;
-  float m_radius;
+  PositionalLight *m_light = nullptr;
+  float m_radius = 0.f;
 };

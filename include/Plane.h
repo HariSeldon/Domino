@@ -17,7 +17,7 @@ private:
   void setupBulletShape();
 
 private:
-  int m_textureRepetitions; 
+  int m_textureRepetitions = 0; 
 
   friend class PlaneBuilder;
 };

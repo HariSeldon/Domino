@@ -237,13 +237,14 @@ void Drawer::createPhongNormalMappingObjectGPUBuffers(const Object *object) {
   GLuint indexVBOId = setupIndexVBO(object);
   GLuint normalVBOId = setupNormalVBO(object, m_phongNormalShader);
   GLuint textureVBOId = setupTextureVBO(object, m_phongNormalShader);
+  GLuint tangentVBOId = setupTextureVBO(object, m_phongNormalShader);
 
   // Unbind.
   glBindVertexArray(0);
 
   m_vaoWorldMap.insert(std::pair<const Object *, GLuint>(object, vaoId));
-  m_vboIds.insert(m_vboIds.end(),
-                  {vertexVBOId, indexVBOId, normalVBOId, textureVBOId});
+  m_vboIds.insert(m_vboIds.end(), {vertexVBOId, indexVBOId, normalVBOId,
+                                   textureVBOId, tangentVBOId});
 }
 
 //-----------------------------------------------------------------------------
@@ -511,13 +512,13 @@ void Drawer::drawMirror(const glm::mat4 &originalModelView,
   m_mirror->getOpenGLMatrix(transform);
   glm::mat4 mirrorModelView = glm::make_mat4x4(transform);
   auto modelView = originalModelView * mirrorModelView;
-  auto normalMatrix = glm::inverseTranspose(glm::mat3(mirrorModelView));
 
   m_mirrorShader.setUniform(MirrorShader::mvpMatrix, projection * modelView);
   m_mirrorShader.setUniform(MirrorShader::mirrorSize, m_mirror->getSize());
   m_mirrorShader.setUniform(MirrorShader::mirrorNormal,
                           m_mirror->computeNormal());
-  m_mirrorShader.setUniform(MirrorShader::normalMatrix, normalMatrix);
+  m_mirrorShader.setUniform(MirrorShader::normalMatrix,
+                            glm::inverseTranspose(glm::mat3(mirrorModelView)));
 
   // Set color and normal texture.
   glBindTexture(GL_TEXTURE_2D, m_mirrorTexture);
