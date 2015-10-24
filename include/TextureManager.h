@@ -12,6 +12,6 @@ public:
   GLuint createTextureArray(const std::vector<std::string> &fileNames);
 
 private:
-  std::map<const std::string, GLuint> fileTextureMap;
-  std::map<const std::string, GLuint> fileTextureArrayMap;
+  std::map<const std::string, GLuint> m_fileTextureMap;
+  std::map<const std::string, GLuint> m_fileTextureArrayMap;
 };

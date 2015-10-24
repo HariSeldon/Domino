@@ -19,12 +19,12 @@ createUnifiedBuffer(const std::vector<SDL_Surface *> &texSurfaces);
 
 //------------------------------------------------------------------------------
 GLuint TextureManager::createTexture(const std::string &fileName) {
-  auto textureIter = fileTextureMap.find(fileName);
-  if (textureIter != fileTextureMap.end()) {
+  auto textureIter = m_fileTextureMap.find(fileName);
+  if (textureIter != m_fileTextureMap.end()) {
     return textureIter->second;
   }
   auto textureId = createTextureFromFile(fileName);
-  fileTextureMap[fileName] = textureId;
+  m_fileTextureMap[fileName] = textureId;
   return textureId;
 }
 
@@ -36,12 +36,12 @@ TextureManager::createTextureArray(const std::vector<std::string> &fileNames) {
     concatenation += fileName; 
   }
 
-  auto textureIter = fileTextureArrayMap.find(concatenation);
-  if (textureIter != fileTextureArrayMap.end()) {
+  auto textureIter = m_fileTextureArrayMap.find(concatenation);
+  if (textureIter != m_fileTextureArrayMap.end()) {
     return textureIter->second;
   }
   auto textureId = createTextureArrayFromFiles(fileNames);
-  fileTextureArrayMap[concatenation] = textureId;
+  m_fileTextureArrayMap[concatenation] = textureId;
   return textureId;
 }
 
