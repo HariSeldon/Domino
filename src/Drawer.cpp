@@ -237,7 +237,7 @@ void Drawer::createPhongNormalMappingObjectGPUBuffers(const Object *object) {
   GLuint indexVBOId = setupIndexVBO(object);
   GLuint normalVBOId = setupNormalVBO(object, m_phongNormalShader);
   GLuint textureVBOId = setupTextureVBO(object, m_phongNormalShader);
-  GLuint tangentVBOId = setupTextureVBO(object, m_phongNormalShader);
+  GLuint tangentVBOId = setupTangentVBO(object, m_phongNormalShader);
 
   // Unbind.
   glBindVertexArray(0);
