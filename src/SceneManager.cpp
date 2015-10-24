@@ -24,7 +24,9 @@ const std::string SceneManager::FONT_FILE = "VeraMono.ttf";
 SceneManager::SceneManager(const glm::ivec2 screenSize,
                            SceneContainer *container)
     : m_world(container->getWorld()), m_camera(container->getCamera()),
+      #ifndef WINDOWS
       m_textManager(TextManager(FONT_PATH + FONT_FILE, FONT_HEIGHT, screenSize)),
+      #endif
       m_drawer(screenSize),
       m_shadowManager(screenSize),
       m_BACKGROUND_COLOR(container->getBackgroundColor()),
@@ -157,10 +159,12 @@ void SceneManager::drawShadowWorld(const glm::mat4 &modelView,
 
 // -----------------------------------------------------------------------------
 void SceneManager::drawText() {
+  #ifndef WINDOWS
   glDisable(GL_DEPTH_TEST);
   m_textManager.addText("Frames per second: " + std::to_string(m_fps), { 0, 780 });
   m_textManager.renderText();
   glEnable(GL_DEPTH_TEST);
+  #endif
 }
 
 // -----------------------------------------------------------------------------

@@ -63,7 +63,9 @@ private:
   World* m_world = nullptr;
   Camera* m_camera = nullptr;
 
+  #ifndef WINDOWS
   TextManager m_textManager;
+  #endif
   Drawer m_drawer;
   ShadowManager m_shadowManager;
 

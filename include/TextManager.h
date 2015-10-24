@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef WINDOWS
+
 #include "CharacterAtlas.h"
 #include "TextShader.h"
 
@@ -45,3 +47,5 @@ private:
   std::vector<glm::vec2> textureCoos;
   std::vector<unsigned int> indices;
 };
+
+#endif

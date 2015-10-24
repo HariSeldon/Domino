@@ -1,5 +1,7 @@
 #include "CharacterAtlas.h"
 
+#ifndef WINDOWS
+
 #include "SysUtils.h"
 
 #include <cassert>
@@ -164,3 +166,5 @@ CharacterAtlas::~CharacterAtlas() {
   FT_Done_Face(m_fontFace);
   FT_Done_FreeType(m_freeType);
 }
+
+#endif // WINDOWS

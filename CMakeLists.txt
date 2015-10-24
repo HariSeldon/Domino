@@ -66,20 +66,27 @@ endif("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 message(STATUS "CMake build type: " ${CMAKE_BUILD_TYPE})
 
 # Set compilation options.
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -finline-functions")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -std=c++14 -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wold-style-cast -Wcast-align -Wunused -Woverloaded-virtual -pedantic")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -std=c++14")
+if (UNIX)
+  add_definitions("-DUNIX")
 
-add_definitions("-g")
+  if( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+    add_definitions("-g")  
+  endif("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -finline-functions")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -std=c++14 -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wold-style-cast -Wcast-align -Wunused -Woverloaded-virtual -pedantic")
+elseif (WIN32)
+  add_definitions("-DWINDOWS")
+else(UNIX)
+  message(FATAL "Unsupported OS")
+endif(UNIX)
+
 # This is to remove GLM warning.
 add_definitions("-DGLM_FORCE_RADIANS")
 
 # Add sources to executable.
 add_executable(${EXE_NAME} ${SRC_FILES_LIST})
-
-# Add install command.
-install_targets("/${BIN_DIR}/" ${EXE_NAME})
 
 # ------------------------------------------------------------------------------
 find_library(SDL2_IMAGE_LIB_PATH SDL2_image

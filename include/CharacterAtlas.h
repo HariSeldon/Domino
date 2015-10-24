@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef WINDOWS
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
@@ -46,3 +48,5 @@ private:
   int m_height = 0;
   std::vector<Glyph> glyphs;
 };
+
+#endif // WINDOWS

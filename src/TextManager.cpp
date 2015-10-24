@@ -1,5 +1,7 @@
 #include "TextManager.h"
 
+#ifndef WINDOWS
+
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
 
@@ -127,3 +129,5 @@ void TextManager::setupIndexVBO() {
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
                indices.data(), GL_STATIC_DRAW);
 }
+
+#endif // WINDOWS
