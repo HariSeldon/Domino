@@ -14,6 +14,8 @@
 
 #include <LinearMath/btVector3.h>
 
+const float World::STEPS_PER_SECOND = 70.0f;
+
 // -----------------------------------------------------------------------------
 World::World() { 
   m_ambientColor = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);

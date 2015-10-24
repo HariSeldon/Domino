@@ -9,8 +9,8 @@
 #include <cstring>
 #include <iostream>
 
-constexpr int FIRST_VISIBLE_CHAR = 32;
-constexpr int LAST_VISIBLE_CHAR = 128;
+const int FIRST_VISIBLE_CHAR = 32;
+const int LAST_VISIBLE_CHAR = 128;
 
 CharacterAtlas::CharacterAtlas(const std::string &fontFileName, int fontHeight)
     : glyphs(LAST_VISIBLE_CHAR - FIRST_VISIBLE_CHAR, Glyph()) {

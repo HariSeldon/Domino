@@ -18,9 +18,9 @@
 
 class Window {
 public:
-  static constexpr int EVENT_FREQUENCY = 20;
-  static constexpr int FPS_FREQUENCY = 1000;
-  static constexpr int DISPLAY_DELAY = 15;
+  static const int EVENT_FREQUENCY = 20;
+  static const int FPS_FREQUENCY = 1000;
+  static const int DISPLAY_DELAY = 15;
 
 public:
   Window();

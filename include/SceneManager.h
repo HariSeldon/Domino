@@ -23,8 +23,8 @@ class ShadowManager;
 
 class SceneManager {
 public:
-  static constexpr int FONT_HEIGHT = 20;
-  static constexpr int MAX_LIGHTS_NUMBER = 4;
+  static const int FONT_HEIGHT = 20;
+  static const int MAX_LIGHTS_NUMBER = 4;
   static const std::string FONT_FILE;
 
 public:

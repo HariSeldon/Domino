@@ -22,15 +22,14 @@ public:
   ~World();
 
 private:
-  glm::vec4 m_ambientColor;
+  glm::vec4 m_ambientColor {0.f, 0.f, 0.f, 1.f};
   std::vector<Object*> m_objects;
   std::vector<Light*> m_lights;
   std::vector<LightBulb*> m_bulbs;
   Mirror* m_mirror = nullptr;
   Engine m_engine;
-  static const float DEFAULT_GRAVITY_X;
-  static constexpr float STEPS_PER_SECOND = 70.0f;
-  static constexpr int MAX_STEPS = 8;
+  static const float STEPS_PER_SECOND;
+  static const int MAX_STEPS = 8;
 
 public:
   void addObject(Object *object);
